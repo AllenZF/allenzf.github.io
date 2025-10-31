@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="baidu-site-verification" content="093lY4ziMu" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="记录点滴">
+    <meta name="keyword"  content="加油, 个人博客">
+    <link rel="shortcut icon" href="/img/ironman-draw.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <!--<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
+    <title>
+        
+          Devicetree - Sven-Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://allenzf.github.io/2024/06/03/Devicetree/">
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+
+    <!-- Custom CSS --> 
+    
+        
+<link rel="stylesheet" href="/css/dusign-light.css">
+
+        
+<link rel="stylesheet" href="/css/dusign-common-light.css">
+
+        
+<link rel="stylesheet" href="/css/font-awesome.css">
+
+        
+<link rel="stylesheet" href="/css/toc.css">
+
+        <!-- background effects end -->
+    
+    
+    <!-- Pygments Highlight CSS -->
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+
+    
+<link rel="stylesheet" href="/css/widget.css">
+
+
+    
+<link rel="stylesheet" href="/css/rocket.css">
+
+
+    
+<link rel="stylesheet" href="/css/signature.css">
+
+
+    
+<link rel="stylesheet" href="/css/fonts.googleapis.css">
+
+
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+    <!-- photography -->
+    
+<link rel="stylesheet" href="/css/photography.css">
+
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+<meta name="generator" content="Hexo 8.1.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- background effects start -->
+    
+    <!-- background effects end -->
+
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            
+                background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('../../../../img/header_img/Iron-Man-3.jpg')
+                /*post*/
+            
+        
+    }
+    
+    #signature{
+        background-image: url('/img/signature/Just-do-it-white.png');
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#FDT" title="FDT">FDT</a>
+                            
+                        </div>
+                        <h1>Devicetree</h1>
+                        <h2 class="subheading">Devicetree specification and example</h2>
+                        <span class="meta">
+                            Posted by 周郎借风 on
+                            2024-06-03
+                        </span>
+
+                        
+                            <div class="blank_box"></div>
+                            <span class="meta">
+                                Words <span class="post-count">1.1k</span> and
+                                Reading Time <span class="post-count">4</span> Minutes
+                            </span>
+                            <div class="blank_box"></div>
+                            <!-- 不蒜子统计 start -->
+                            <span class="meta">
+                                Viewed <span id="busuanzi_value_page_pv"><i class="fa fa-spinner fa-spin"></i></span> Times
+                            </span>
+                            <!-- 不蒜子统计 end -->
+                        
+
+                    </div>
+                
+
+                </div>
+            </div>
+        </div>      
+    </div>
+
+    
+    <div class="waveWrapper">
+        <div class="wave wave_before" style="background-image: url('/img/wave-light.png')"></div>
+        <div class="wave wave_after" style="background-image: url('/img/wave-light.png')"></div>
+    </div>
+    
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">周郎借风</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">主页</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">归档</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">关于</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/categories/">分类</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/photography/">摄影</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">标签</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+                    
+                    
+                    <li>
+                        <a href="https://allenzf.github.io" target="_blank">中文博客</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><p><a href="https://www.devicetree.org/specifications">Devicetree specification</a><br><a href="https://github.com/Sunrisepeak/devicetree-specification-chinese">devicetree-specification-chinese
+</a>  </p>
+<p>以下分2步学习设备树：</p>
+<ol>
+<li>学习基本语法，主要以阅读spec为主，结合dts文件进行学习；</li>
+<li>解析dtb文件，结合spec分析dtb文件；</li>
+<li>最后以raspi4b.dts文件的阅读检验学习成果，分析开发板的硬件结构；</li>
+</ol>
+<h1 id="获取dts文件"><a href="#获取dts文件" class="headerlink" title="获取dts文件"></a>获取dts文件</h1><p>直接从linux kernel获取dts文件<code>arch/arm/boot/dts/broadcom/bcm2711-rpi-4-b.dts</code>获取。注意这种方式获取的文件比较零散，不容易看到全茂。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">生成dtb，dts</span></span><br><span class="line">qemu-system-riscv64 -machine virt,dumpdtb=virt.dtb</span><br><span class="line">dtc -I dtb -O dts -o virt.dts virt.dtb</span><br></pre></td></tr></table></figure>
+<h1 id="基本语法学习"><a href="#基本语法学习" class="headerlink" title="基本语法学习"></a>基本语法学习</h1><p>直接学习spec</p>
+<h1 id="dtb解析"><a href="#dtb解析" class="headerlink" title="dtb解析"></a>dtb解析</h1><p>相关知识参考spec第5章。<br>设备树按8字节对齐，非对齐填0.<br>opensbi fw_platform_init 是对dtb关于platform解析的代码，可调试学习。<br><img src="/devicetree_dtb1.jpg"><br>按照spec第5章的定义，可以对dtb数据进行解析，第一部分是header，如绿色部分；第二部分为memory reservation, 从地址0x28到0x37;第三部分从0x38开始，到下一张图的0x14B3;第四部分为strings block, 从0x14B4到结束。<br><img src="/devicetree_dtb2.jpg">  </p>
+<h2 id="Header"><a href="#Header" class="headerlink" title="Header"></a>Header</h2><p>将上图中的header数据按大端格式与结构体一一对应就能得到每个成员的值，如下，</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">fdt_header</span> &#123;</span></span><br><span class="line">    <span class="type">uint32_t</span> magic;                 <span class="comment">// 0xD00DFEED</span></span><br><span class="line">    <span class="type">uint32_t</span> totalsize;             <span class="comment">// 0x00001666</span></span><br><span class="line">    <span class="type">uint32_t</span> off_dt_struct;         <span class="comment">// 0x00000038</span></span><br><span class="line">    <span class="type">uint32_t</span> off_dt_strings;        <span class="comment">// 0x000014B4</span></span><br><span class="line">    <span class="type">uint32_t</span> off_mem_rsvmap;        <span class="comment">// 0x00000028</span></span><br><span class="line">    <span class="type">uint32_t</span> version;               <span class="comment">// 0x00000011</span></span><br><span class="line">    <span class="type">uint32_t</span> last_comp_version;     <span class="comment">// 0x00000010</span></span><br><span class="line">    <span class="type">uint32_t</span> boot_cpuid_phys;       <span class="comment">// 0x00000000</span></span><br><span class="line">    <span class="type">uint32_t</span> size_dt_strings;       <span class="comment">// 0x000001B2</span></span><br><span class="line">    <span class="type">uint32_t</span> size_dt_struct;        <span class="comment">// 0x0000147C</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h2 id="Memory-Reservation-Block"><a href="#Memory-Reservation-Block" class="headerlink" title="Memory Reservation Block"></a>Memory Reservation Block</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// align 8</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">fdt_reserve_entry</span> &#123;</span></span><br><span class="line">    <span class="type">uint64_t</span> address;               <span class="comment">// 0x00000000</span></span><br><span class="line">    <span class="type">uint64_t</span> size;                  <span class="comment">// 0x00000000</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h2 id="Structure-Block"><a href="#Structure-Block" class="headerlink" title="Structure Block"></a>Structure Block</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// node start</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> FDT_BEGIN_NODE  0x00000001</span></span><br><span class="line"><span class="comment">// node end</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> FDT_END_NODE    0x00000002</span></span><br><span class="line"><span class="comment">// beginning of one property in the devicetree,</span></span><br><span class="line"><span class="comment">// it shall be followed by extra data describing</span></span><br><span class="line"><span class="comment">// the property</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> FDT_PROP        0x00000003</span></span><br><span class="line"><span class="comment">// the extra data strcuture</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    <span class="type">uint32_t</span> len;</span><br><span class="line">    <span class="type">uint32_t</span> nameoff;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 在opensbi中，上述结构体定义实际包含了FDT_XXX宏定义</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    <span class="type">uint32_t</span> tag;</span><br><span class="line">    <span class="type">uint32_t</span> len;</span><br><span class="line">    <span class="type">uint32_t</span> nameoff;</span><br><span class="line">    <span class="type">char</span> data[<span class="number">0</span>];   <span class="comment">// 此处为变长数组定义，不占内存空间，sizeof = 12</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// ignored by any program</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> FDT_NOP         0x00000004</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> FDT_END         0x00000009</span></span><br></pre></td></tr></table></figure>
+<p>如图中红色部分，0x38地址出现<code>FDT_BEGIN_NODE</code>,随后由于8字节对齐，填充了4字节0. <code>FDT_PROP</code>开始后紧接<code>len</code>和<code>nameoff</code>,<code>len</code>表示属性的值使用多少个字节表示，<code>nameoff</code>则表示属性名称在strings block中的偏移位置，如此处<code>nameoff=0x0000001D</code>,则属性名称开始位置<code>nameoff + off_dt_strings = 0x0000001D + 0x000014b4 = 0x000014D1</code>,从图上找到该处<code>#address-cells</code>,结合<code>len</code>指定的值<code>0x00000002</code>就可以得到该属性。（由于<code>FDT_BEGIN_NODE</code>后没有节点名，可以认为是根节点？因为其他节点都有名称。）</p>
+<h2 id="Strings-Block"><a href="#Strings-Block" class="headerlink" title="Strings Block"></a>Strings Block</h2><p>该Block全由属性名组成，不同节点相同的属性名只出现一次。属性名以’\0’结尾。</p>
+<h1 id="dts解析"><a href="#dts解析" class="headerlink" title="dts解析"></a>dts解析</h1><p><code>bcm2711-rpi-4-b.dts</code>引用<code>bcm2711.dtsi</code>，后者引用<code>bcm283x.dtsi</code></p>
+<p>以下解析dts的部分内容，效果并不是很好，后续补上virt.dts的，尽量将整个SOC结构画出来。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">/* 定义根节点 */</span></span><br><span class="line">/ &#123;</span><br><span class="line">	compatible = <span class="string">&quot;brcm,bcm2835&quot;</span>;	<span class="comment">/* 节点的名称，推荐制造商+型号 */</span></span><br><span class="line">	model = <span class="string">&quot;BCM2835&quot;</span>;				<span class="comment">/* 设备型号，推荐制造商+型号 */</span></span><br><span class="line">	<span class="meta">#address-cells = <span class="string">&lt;1&gt;</span>;			<span class="comment">/* 节点中reg地址需要多少个u32表示，这里为1个u32 */</span></span></span><br><span class="line">	<span class="meta">#size-cells = <span class="string">&lt;1&gt;</span>;				<span class="comment">/* 节点中reg的值需要多少个u32表示 */</span></span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 定义别名 */</span></span><br><span class="line">	aliases &#123;</span><br><span class="line">		serial0 = &amp;uart0;			<span class="comment">/* uart0别名为serial0 */</span></span><br><span class="line">		serial1 = &amp;uart1;</span><br><span class="line">	&#125;;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 定义chosen节点，用于传递输入参数 */</span></span><br><span class="line">	chosen &#123;</span><br><span class="line">		<span class="built_in">stdout</span>-path = <span class="string">&quot;serial0:115200n8&quot;</span>;	<span class="comment">/* 指定控制台输入输出设备，输入设备省略时，表示输入输出都是此设备 */</span></span><br><span class="line">	&#125;;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 定义reserved-memory节点 */</span></span><br><span class="line">	rmem: reserved-memory &#123;</span><br><span class="line">		<span class="meta">#address-cells = <span class="string">&lt;1&gt;</span>;</span></span><br><span class="line">		<span class="meta">#size-cells = <span class="string">&lt;1&gt;</span>;</span></span><br><span class="line">		ranges;								<span class="comment">/* 子节点地址空间和父地址空间映射方式，为空表示直接映射 */</span></span><br><span class="line"></span><br><span class="line">		cma: linux,cma &#123;</span><br><span class="line">			compatible = <span class="string">&quot;shared-dma-pool&quot;</span>;	<span class="comment">/* 当驱动程序需要申请DMA空间时，可以从这里申请 */</span></span><br><span class="line">			size = &lt;<span class="number">0x4000000</span>&gt;; <span class="comment">/* 64MB */</span></span><br><span class="line">			reusable;						<span class="comment">/* 当驱动程序不使用这段内存时，OS可以使用 */</span></span><br><span class="line">			linux,cma-<span class="keyword">default</span>;				<span class="comment">/* 该段保留空间是默认的CMA内存池 */</span></span><br><span class="line">		&#125;;</span><br><span class="line">	&#125;;</span><br><span class="line"></span><br><span class="line">	thermal-zones &#123;</span><br><span class="line">		cpu_thermal: cpu-thermal &#123;</span><br><span class="line">			polling-delay-passive = &lt;<span class="number">0</span>&gt;;</span><br><span class="line">			polling-delay = &lt;<span class="number">1000</span>&gt;;</span><br><span class="line"></span><br><span class="line">			trips &#123;</span><br><span class="line">				cpu-crit &#123;</span><br><span class="line">					temperature = &lt;<span class="number">90000</span>&gt;;</span><br><span class="line">					hysteresis = &lt;<span class="number">0</span>&gt;;</span><br><span class="line">					type = <span class="string">&quot;critical&quot;</span>;</span><br><span class="line">				&#125;;</span><br><span class="line">			&#125;;</span><br><span class="line"></span><br><span class="line">			cooling-maps &#123;</span><br><span class="line">			&#125;;</span><br><span class="line">		&#125;;</span><br><span class="line">	&#125;;</span><br><span class="line"></span><br><span class="line">	soc &#123;</span><br><span class="line">		compatible = <span class="string">&quot;simple-bus&quot;</span>;</span><br><span class="line">		<span class="meta">#address-cells = <span class="string">&lt;1&gt;</span>;</span></span><br><span class="line">		<span class="meta">#size-cells = <span class="string">&lt;1&gt;</span>;</span></span><br><span class="line"></span><br><span class="line">		<span class="comment">/* 系统时钟节点，reg在地址0x7e00_3000处 */</span></span><br><span class="line">		system_timer: timer@<span class="number">7e003000</span> &#123;</span><br><span class="line">			compatible = <span class="string">&quot;brcm,bcm2835-system-timer&quot;</span>;</span><br><span class="line">			reg = &lt;<span class="number">0x7e003000</span> <span class="number">0x1000</span>&gt;;					<span class="comment">/* u32表示，offset，size */</span></span><br><span class="line">			interrupts = &lt;<span class="number">1</span> <span class="number">0</span>&gt;, &lt;<span class="number">1</span> <span class="number">1</span>&gt;, &lt;<span class="number">1</span> <span class="number">2</span>&gt;, &lt;<span class="number">1</span> <span class="number">3</span>&gt;;	<span class="comment">/* 在父级中偏移为1，触发方式0，1,2,3 */</span></span><br><span class="line">			<span class="comment">/* This could be a reference to BCM2835_CLOCK_TIMER,</span></span><br><span class="line"><span class="comment">			 * but we don&#x27;t have the driver using the common clock</span></span><br><span class="line"><span class="comment">			 * support yet.</span></span><br><span class="line"><span class="comment">			 */</span></span><br><span class="line">			clock-frequency = &lt;<span class="number">1000000</span>&gt;;				<span class="comment">/* 1MHz clock */</span></span><br><span class="line">		&#125;;</span><br><span class="line">    &#125;;</span><br><span class="line">    ...</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+
+                
+                <hr>
+                <!-- Pager -->
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2024/06/11/opensbi启动分析/" data-toggle="tooltip" data-placement="top" title="opensbi启动分析">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2023/01/19/Hexo常用命令/" data-toggle="tooltip" data-placement="top" title="Hexo常用命令">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- tip start -->
+                
+
+                
+                <div class="comment_notes">
+                    <p>
+                        This is copyright.
+                    </p>
+                </div>
+                
+                <!-- tip end -->
+
+                <!-- Music start-->
+                
+                
+<link rel="stylesheet" href="/css/music-player/fonts/iconfont.css">
+
+
+<link rel="stylesheet" href="/css/music-player/css/reset.css">
+
+
+<link rel="stylesheet" href="/css/music-player/css/player.css">
+
+
+<div class="music-player">
+    <audio class="music-player__audio" ></audio>
+    <div class="music-player__main">
+        <div class="music-player__blur"></div>
+        <div class="music-player__disc">
+            <div class="music-player__image">
+                <img width="100%" src="" alt="">
+            </div>
+            <div class="music-player__pointer"><img width="100%" src="/img/cd_tou.png" alt=""></div>
+        </div>
+        <div class="music-player__controls">
+            <div class="music__info">
+                <h3 class="music__info--title">...</h3>
+                <p class="music__info--singer">...</p>
+            </div>
+            <div class="player-control">
+                <div class="player-control__content">
+                    <div class="player-control__btns">
+                        <div class="player-control__btn player-control__btn--prev"><i class="iconfont icon-prev"></i></div>
+                        <div class="player-control__btn player-control__btn--play"><i class="iconfont icon-play"></i></div>
+                        <div class="player-control__btn player-control__btn--next"><i class="iconfont icon-next"></i></div>
+                        <div class="player-control__btn player-control__btn--mode"><i class="iconfont icon-loop"></i></div>
+                    </div>
+                    <div class="player-control__volume">
+                        <div class="control__volume--icon player-control__btn"><i class="iconfont icon-volume"></i></div>
+                        <div class="control__volume--progress player_progress"></div>
+                    </div>
+                </div>
+                <div class="player-control__content">
+                    <div class="player__song--progress player_progress"></div>
+                    <div class="player__song--timeProgess nowTime">00:00</div>
+                    <div class="player__song--timeProgess totalTime">00:00</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="/js/music-player/utill.js"></script>
+
+
+<script src="/js/music-player/jquery.min.js"></script>
+
+<!-- netease; qqkg -->
+<!--
+<script src="/js/music-player/player.js?library=config.music.library.js"></script>
+-->
+<script src="../../../../js/music-player/player.js?library=netease&music=https://kg.qq.com/node/play?s=7deFpz7Z26Jmv7di&g_f=share_html"></script>
+                
+                <!-- Music end -->
+
+                <!-- Sharing -->
+                
+                <div class="social-share"  data-wechat-qrcode-helper="" align="center"></div>
+                <!--  css & js -->
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/social-share.js/1.0.16/css/share.min.css">
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/social-share.js/1.0.16/js/social-share.min.js"></script>
+                
+                <!-- Sharing -->
+
+                <!-- gitment start -->
+                
+                <hr>
+                <div id="blog_comments"></div>
+
+<!--
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+-->
+<!--
+<link rel="stylesheet" href="/css/gitment.css">
+<script type="text/javascript" src="/js/gitment.js"></script>
+-->
+
+<script src="https://cdn.jsdelivr.net/gh/theme-next/theme-next-gitment@1/gitment.browser.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/theme-next/theme-next-gitment@1/default.css"/>
+
+<!--
+<link rel="stylesheet" href="https://billts.site/extra_css/gitment.css">
+<script src="https://billts.site/js/gitment.js"></script>
+-->
+
+<script>
+const myTheme = {
+  render(state, instance) {
+    const container = document.createElement('div')
+    container.lang = "en-US"
+    container.className = 'gitment-container gitment-root-container'
+    
+     // your custom component
+    container.appendChild(instance.renderSomething(state, instance))
+    
+    container.appendChild(instance.renderHeader(state, instance))
+    container.appendChild(instance.renderComments(state, instance))
+    container.appendChild(instance.renderEditor(state, instance))
+    //container.appendChild(instance.renderFooter(state, instance))
+    return container
+  },
+  renderSomething(state, instance) {
+    const container = document.createElement('div')
+    container.lang = "en-US"
+    container.className = 'hello_visitor'
+    if (state.user.login) {
+      container.innerText = `Hello ${state.user.login}, Welcome to comment system`
+    }
+    return container
+  }
+}
+
+
+const gitment = new Gitment({
+    id: 'Mon Jun 03 2024 21:57:52 GMT+0800', // optional
+    owner: "",
+    repo: "",
+    oauth: {
+      client_id: "",
+      client_secret: "",
+    },
+    theme: myTheme,
+    // ...
+    // For more available options, check out the documentation below
+  })
+  
+  gitment.render('blog_comments')
+  // or
+  // gitment.render(document.getElementById('comments'))
+  // or
+  // document.body.appendChild(gitment.render())
+</script>
+                
+                <!-- gitment end -->
+
+                <!-- 来必力City版安装代码 -->
+                
+                <!-- City版安装代码已完成 -->
+
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+    
+      
+        <aside id="sidebar">
+          <div id="toc" class="toc-article">
+          <strong class="toc-title">Contents</strong>
+          
+            
+              <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#Reference"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">Reference</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E8%8E%B7%E5%8F%96dts%E6%96%87%E4%BB%B6"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">获取dts文件</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0"><span class="toc-nav-number">3.</span> <span class="toc-nav-text">基本语法学习</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#dtb%E8%A7%A3%E6%9E%90"><span class="toc-nav-number">4.</span> <span class="toc-nav-text">dtb解析</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Header"><span class="toc-nav-number">4.1.</span> <span class="toc-nav-text">Header</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Memory-Reservation-Block"><span class="toc-nav-number">4.2.</span> <span class="toc-nav-text">Memory Reservation Block</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Structure-Block"><span class="toc-nav-number">4.3.</span> <span class="toc-nav-text">Structure Block</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Strings-Block"><span class="toc-nav-number">4.4.</span> <span class="toc-nav-text">Strings Block</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#dts%E8%A7%A3%E6%9E%90"><span class="toc-nav-number">5.</span> <span class="toc-nav-text">dts解析</span></a></li></ol>
+            
+          
+          </div>
+        </aside>
+      
+    
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#FDT" title="FDT">FDT</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="https://allenzf.github.io" target="_blank">Sven&#39;s Blog</a></li>
+                    
+                        <li><a href="https://gitee.com/svenzou" target="_blank">Sven&#39;s Gitee</a></li>
+                    
+                        <li><a href="https://github.com/AllenZF" target="_blank">Sven&#39;s Github</a></li>
+                    
+                        <li><a href="#" target="_blank">Other</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: 'ℬ'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+
+
+<style  type="text/css">
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/AllenZF">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://gitee.com/Sven">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-stack-1x fa-inverse">码</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/people/zhou-lang-jie-feng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; 周郎借风 2025 
+                    <br>
+                    Powered by 
+                    <a href="https://github.com/dusign/hexo-theme-snail">
+                        <i>hexo-theme-snail</i>
+                    </a> | 
+                    <iframe name="star" style="margin-left: 2px; margin-bottom:-5px;" frameborder="0" scrolling="0"
+                        width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=dusign&repo=hexo-theme-snail&type=star&count=true">
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+
+</footer>
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- Search -->
+
+<script src="/js/search.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://allenzf.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-XXXXXXXX-X';
+    var _gaDomain = 'yoursite';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+<!-- Search -->
+
+    <script type="text/javascript">      
+        var search_path = "search.xml";
+        if (search_path.length == 0) {
+            search_path = "search.xml";
+        }
+    var path = "/" + search_path;
+    searchFunc(path, 'local-search-input', 'local-search-result');
+    </script>
+
+
+<!-- busuanzi -->
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+
+    
+        <!-- background effects line -->
+        
+
+        
+            <script type="text/javascript" src="/js/mouse-click.js" content='[&quot;🌱&quot;,&quot;just do it&quot;,&quot;🍀&quot;]' color='[&quot;rgb(121,93,179)&quot; ,&quot;rgb(76,180,231)&quot; ,&quot;rgb(184,90,154)&quot;]'></script>
+        
+
+        <!-- background effects end -->
+    
+
+    <!--<script size="50" alpha='0.3' zIndex="-999" src="/js/ribbonStatic.js"></script>-->
+    
+        <script src="/js/ribbonDynamic.js"></script>
+    
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+
+</html>

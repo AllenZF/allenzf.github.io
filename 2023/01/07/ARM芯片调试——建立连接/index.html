@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="baidu-site-verification" content="093lY4ziMu" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="记录点滴">
+    <meta name="keyword"  content="加油, 个人博客">
+    <link rel="shortcut icon" href="/img/ironman-draw.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <!--<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
+    <title>
+        
+          ARM芯片调试——建立连接 - Sven-Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://allenzf.github.io/2023/01/07/ARM芯片调试——建立连接/">
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+
+    <!-- Custom CSS --> 
+    
+        
+<link rel="stylesheet" href="/css/dusign-light.css">
+
+        
+<link rel="stylesheet" href="/css/dusign-common-light.css">
+
+        
+<link rel="stylesheet" href="/css/font-awesome.css">
+
+        
+<link rel="stylesheet" href="/css/toc.css">
+
+        <!-- background effects end -->
+    
+    
+    <!-- Pygments Highlight CSS -->
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+
+    
+<link rel="stylesheet" href="/css/widget.css">
+
+
+    
+<link rel="stylesheet" href="/css/rocket.css">
+
+
+    
+<link rel="stylesheet" href="/css/signature.css">
+
+
+    
+<link rel="stylesheet" href="/css/fonts.googleapis.css">
+
+
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+    <!-- photography -->
+    
+<link rel="stylesheet" href="/css/photography.css">
+
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+<meta name="generator" content="Hexo 8.1.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- background effects start -->
+    
+    <!-- background effects end -->
+
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            
+                background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('../../../../img/header_img/Iron-Man-3.jpg')
+                /*post*/
+            
+        
+    }
+    
+    #signature{
+        background-image: url('/img/signature/Just-do-it-white.png');
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#ARM" title="ARM">ARM</a>
+                            
+                              <a class="tag" href="/tags/#JTAG" title="JTAG">JTAG</a>
+                            
+                              <a class="tag" href="/tags/#DAP" title="DAP">DAP</a>
+                            
+                              <a class="tag" href="/tags/#SWJ-DP" title="SWJ-DP">SWJ-DP</a>
+                            
+                              <a class="tag" href="/tags/#DP" title="DP">DP</a>
+                            
+                              <a class="tag" href="/tags/#AP" title="AP">AP</a>
+                            
+                              <a class="tag" href="/tags/#ROM Table" title="ROM Table">ROM Table</a>
+                            
+                        </div>
+                        <h1>ARM芯片调试——建立连接</h1>
+                        <h2 class="subheading"></h2>
+                        <span class="meta">
+                            Posted by 周郎借风 on
+                            2023-01-07
+                        </span>
+
+                        
+                            <div class="blank_box"></div>
+                            <span class="meta">
+                                Words <span class="post-count">1.9k</span> and
+                                Reading Time <span class="post-count">7</span> Minutes
+                            </span>
+                            <div class="blank_box"></div>
+                            <!-- 不蒜子统计 start -->
+                            <span class="meta">
+                                Viewed <span id="busuanzi_value_page_pv"><i class="fa fa-spinner fa-spin"></i></span> Times
+                            </span>
+                            <!-- 不蒜子统计 end -->
+                        
+
+                    </div>
+                
+
+                </div>
+            </div>
+        </div>      
+    </div>
+
+    
+    <div class="waveWrapper">
+        <div class="wave wave_before" style="background-image: url('/img/wave-light.png')"></div>
+        <div class="wave wave_after" style="background-image: url('/img/wave-light.png')"></div>
+    </div>
+    
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">周郎借风</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">主页</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">归档</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">关于</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/categories/">分类</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/photography/">摄影</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">标签</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+                    
+                    
+                    <li>
+                        <a href="https://allenzf.github.io" target="_blank">中文博客</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><p>&emsp;&emsp;Arm® Debug Interface Architecture Specification ADIv5.0 to ADIv5.2, Seventh issue<br>&emsp;&emsp;Cortex™-M1 Technical Reference Manual Revision: r0p1  </p>
+<h1 id="调试访问接口DAP"><a href="#调试访问接口DAP" class="headerlink" title="调试访问接口DAP"></a>调试访问接口DAP</h1><p><img src="/ComplexArmDebugInterface.png" alt="Debug Interface"></p>
+<p>通常一颗SOC只有一个DAP(Debug Access port)。每个DAP包含一个DP（用于连接外部的调试器，如Jlink, Ulink, St-link)和多个AP。AP可以访问系统寄存器、外部IP寄存器，ROM, RAM等。图中DAP包含了2类AP，通常SOC中使用MEM-AP类型。DP的作用是将Debugger中的命令转换成AP能识别的命令，而AP则是通过memory map方式去直接访问内存。  </p>
+<h2 id="JTAG-DP"><a href="#JTAG-DP" class="headerlink" title="JTAG-DP"></a>JTAG-DP</h2><p>JTAG-DP的物理连接和数据链路如下。</p>
+<p>![JTAG-DP Scan Chain](JTAG-DP scan chain.png)  </p>
+<h3 id="物理链路"><a href="#物理链路" class="headerlink" title="物理链路"></a>物理链路</h3><p>物理链上包括5个针脚，输入：TDI, TMS, TCK, TRSTn, 输出：TDO.</p>
+<h3 id="数据链路"><a href="#数据链路" class="headerlink" title="数据链路"></a>数据链路</h3><p>数据链路包括1条响应链路——Result，3条DP链路，1条AP链路。整个DAP包含了4条指令，APACC, DPACC, IDCODE, ABORT. 通过这4条指令来选择当前DAP走的是哪一条链路。  </p>
+<h4 id="指令介绍"><a href="#指令介绍" class="headerlink" title="指令介绍"></a>指令介绍</h4><p><img src="/Instructions.png" alt="指令">  </p>
+<ul>
+<li>IDCODE指令是DAP复位时执行的指令，每个DP都有一个ID号，每个AP也有一个ID号，IDCODE指令就是在TDO输出 DP ID 号的指令，ID号保存在 DP ID register中。</li>
+<li>DPACC表示接下来的指令是去访问DP寄存器的。</li>
+<li>APACC表示接下来的指令是去访问AP寄存器的。</li>
+<li>ABORT无效指令。</li>
+</ul>
+<p>指令有2种形式，4bits和8bits. 后文中的指令都是4bits.</p>
+<p>DP中有2条链（DR Chain和IR Chain，实际是2个状态机）来管理这4条指。</p>
+<h4 id="IR-Chain-指令链-的输入输出形式"><a href="#IR-Chain-指令链-的输入输出形式" class="headerlink" title="IR Chain(指令链)的输入输出形式"></a>IR Chain(指令链)的输入输出形式</h4><p><img src="/instruction_shift.png"></p>
+<p>指令从TDI输入。当输入指令时，TDO固定输出0b0001. 整个过程在IR Chain中完成。当指令输入完成后，后续会根据指令进入对应的数据链路。</p>
+<h4 id="DR-IR-Chain"><a href="#DR-IR-Chain" class="headerlink" title="DR IR Chain"></a>DR IR Chain</h4><p><img src="/DR-IR-Chain.png" alt="DR-IR-Chain">  </p>
+<p>如图，TMS每一个TCK都会导致IR Chain的状态更新或保持。指令更新是由TMS驱动的。而指令的输入是由TDI输入的。调试器（openocd）会将指令发送到TDI针脚，IR Chain采集这条指令。指令的采集生效等动作都是IR Chain完成的，IR Chain完成一个动作都会通过Result链路，通过TDO反馈执行效果。DR Chain是用来完成数据传输的，主要执行DPACC和APACC指令下的数据传输。<br>比如TDI输入APACC(0xB)指令，在Capture-IR状态时，二进制0b0001被导入到指令移位区，TMS输入0，IR Chain进入Shift-IR状态，此时IR Chain的指令移位区被选定为TDI到TDO的数据通路。TMS继续输入0，保持Shift-IR状态，并且随着TCK驱动，TDI低比特先输入到移位区，同时将DATA(此时已经是0b0001)底比特0b1输出到TDO. 4个TCK之后，指令输入完成。到Update-IR状态，DATA区的指令APACC会更新成为DAP当前的指令，并且选中对应数据链路。</p>
+<p>当DAP复位时处于 Test-Logic-Reset 状态，此时默认选中IDCODE指令对应的数据链路。</p>
+<h4 id="指令实例分析"><a href="#指令实例分析" class="headerlink" title="指令实例分析"></a>指令实例分析</h4><p><img src="/TMS-TDI.png" alt="指令更新">   </p>
+<p>TMS输入1，DAP从Select DR Scan状态转移到Select IR Scan。TMS输入0，DAP状态进入Capture-IR, 此时 0b0001 被导入到DATA中，TMS继续输入0，DAP进入Shift-IR状态。TDI输入指令APACC(0xB), TDO输出0b0001。</p>
+<h4 id="DR-Chain-数据链-的输入输出"><a href="#DR-Chain-数据链-的输入输出" class="headerlink" title="DR Chain(数据链)的输入输出"></a>DR Chain(数据链)的输入输出</h4><p>IR Chain的作用就是选择TDI到TDO之前的数据通路。当DAP进入Update-IR链之后，会根据指令选中对应的链路，比如APACC就选中通向AP的链路，后续所有操作都针对AP进行。</p>
+<ul>
+<li>DPACC&#x2F;APACC数据链路<br><img src="/DPACC_APACC_DATAPATH.png"><br>图中数据链路为读取数据的示意图，链路的移位寄存器长度为35 bits，高32 bits为输入数据DATAIN，A[3:2]为DP或者AP的寄存器地址，RnW表示访问的方向，读（1）或写（0）。ReadResult是读取结果。ACK有2种值，0b010表示OK&#x2F;FAULT，0b001表示WAIT。</li>
+<li>ABORT数据链路<br><img src="/ABORT_DATAPATH.png"><br>ABORT指令链路时，TDI输入数据为UNKNOWN，输出数据为[ABORT[31:0], A[3:2], 0]</li>
+</ul>
+<h4 id="数据传输实例分析"><a href="#数据传输实例分析" class="headerlink" title="数据传输实例分析"></a>数据传输实例分析</h4><p><a href="instructions_example.png">数据传输</a><br><img src="/instructions_example.png" alt="数据传输">  </p>
+<p>如图，0xB为APACC指令，表示后面的指令是要访问AP寄存器的。0xA为DPACC指令，表示后面的指令是要访问DP寄存器的。0x000000784&#x3D;[0x000000f0,0b10,0b0], 0b0表示写，0b10表示寄存器地址，结合前面指令0xA, 就表示向DP的0b10地址（Select寄存器）中写0x000000f0。通过DP Select寄存器可以选择AP编号，设置AP寄存器bank编号。所以0x00000f0,表示设置AP SEL为第一个AP，选中AP bank为0xF bank。0x6F56DF77F&#x3D;[0xdeadbeef,0b11,0b1]表示读AP的0b11寄存器, 再加上前一条指令就是读 AP 0 的 0xF bank 的 0x11地址，实际上就是AP ID register。0x000000007表示读（0b1）取DP的buffer(地址0b11), buffer里面是刚才读到的AP ID. 0x2A3B80012 &#x3D;&gt; [0x54770002,0b010], 其中0x54770002是ID，0b010表示OK&#x2F;FAULT。</p>
+<h2 id="DP-register"><a href="#DP-register" class="headerlink" title="DP register"></a>DP register</h2><p><img src="/DP_register.png"><br>DP&#x2F;AP的寄存器地址有4bit，但是固定A[1:0]为0b00, 所以从TDI传入的地址只有2bits A[3:2]. 所以DP&#x2F;AP的寄存器地址都是以4为偏移增量的。在数据传输实例中的0x000000784&#x3D;[0x000000f0,0b10,0b0]就表示A[3:2]&#x3D;0b10，及地址0b1000, 也就是Select寄存器。<br><img src="/select.png" alt="Select Register"><br>这个寄存器是需要配置的，特别是APSEL和APBANKSEL字段。DP上挂了多个AP，这个时候就需要APSEL来决定选择哪一个。APBANKSEL字段是选择AP bank的。AP的寄存器有很多，但A[3:2]只能访问4个寄存器，此时就需要APBANKSEL字段来决定哪个Bank生效（BanK是互斥的，因此切换bank就需要配置该字段）。</p>
+<h2 id="AP-register"><a href="#AP-register" class="headerlink" title="AP register"></a>AP register</h2><p><img src="/AHB-AP-register.png" alt="AHB-AP Register"><br>AP寄存器地址的底4bit表示寄存器在bank中的地址，高4bit表示bank号。表中0xFC偏移量就表示0xF bank, 0xC(A[3”2]&#x3D;0b11)地址，即AP ID 寄存器IDR。0xF8偏移表示0xF,0x8（A[3:2]&#x3D;0b10）地址，即ROM table的基地址。0x0 bank中的0x4（A[3:2]&#x3D;0b01）寄存器是AP访问中存放访问地址的寄存器，0x0 bank中0xC地址是AP访问中存放数据的寄存器。比如要枚举ROM table, 则先读取0xF8, ROM table地址。然后将ROM table地址通过TDI输入，传到AP 0x04 Transfer Address寄存器，之后就可以去0x0C Data Read&#x2F;Write 寄存器读取ROM table地址的数据。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><img src="/DAP-STRUCTURE.png" alt="对AP的访问"></p>
+<p>上图中展示了4条数据链，分别是DPACC, IDCODE, ABORT, APACC. 数据链的两端分别是TDI和TDO. 链路的选择即是指令的选择，这由Debug TAP State Machine(DBGTAGSM)来管理更新。当想要读取AP 0的IDR时，首先要通过DPACC指令来配置DP的select寄存器，A[7:4]即时APBANKSEL字段，选择bank，APSEL字段选择AP. 然后切换到APACC指令，通过Rnw和A[3:2]来指定访问方向和地址，从而读出IDR值。</p>
+<p><img src="/MEM-AP-connecting-the-DP-to-debug-components.png" alt="对MEM-AP访问"></p>
+<p>从上图中可以看到ROM table中Processor和ETM模块，其模块基地址分别在ROM table的0x000，0x004偏移地址存储。如果需要访ETM的Register 2, 则主要流程如下：</p>
+<ol>
+<li>配置select寄存器，选择AP和bank;</li>
+<li>读取AP 0xF8地址，获取ROM table的基地址；</li>
+<li>向AP 0x04地址写ROM table地址；（注意，对AP 0xF4进行配置，可自动修改地址进行连续读取）。</li>
+<li>读取AP 0x0C地址读出ROM table地址的0x000偏移的数据。</li>
+<li>当ROM table数据被读取完后就得到了ETM基地址；</li>
+<li>计算ETM Register 2地址，向AP 0x04写该地址；</li>
+<li>读取AP 0x0C地址的数据；<br>最终将得到ETM Register 2的数据。</li>
+</ol>
+
+                
+                <hr>
+                <!-- Pager -->
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2023/01/07/ARM芯片调试——Openocd/" data-toggle="tooltip" data-placement="top" title="ARM芯片调试——Openocd">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2023/01/07/ARM芯片调试——简介/" data-toggle="tooltip" data-placement="top" title="ARM芯片调试——简介">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- tip start -->
+                
+
+                
+                <div class="comment_notes">
+                    <p>
+                        This is copyright.
+                    </p>
+                </div>
+                
+                <!-- tip end -->
+
+                <!-- Music start-->
+                
+                
+<link rel="stylesheet" href="/css/music-player/fonts/iconfont.css">
+
+
+<link rel="stylesheet" href="/css/music-player/css/reset.css">
+
+
+<link rel="stylesheet" href="/css/music-player/css/player.css">
+
+
+<div class="music-player">
+    <audio class="music-player__audio" ></audio>
+    <div class="music-player__main">
+        <div class="music-player__blur"></div>
+        <div class="music-player__disc">
+            <div class="music-player__image">
+                <img width="100%" src="" alt="">
+            </div>
+            <div class="music-player__pointer"><img width="100%" src="/img/cd_tou.png" alt=""></div>
+        </div>
+        <div class="music-player__controls">
+            <div class="music__info">
+                <h3 class="music__info--title">...</h3>
+                <p class="music__info--singer">...</p>
+            </div>
+            <div class="player-control">
+                <div class="player-control__content">
+                    <div class="player-control__btns">
+                        <div class="player-control__btn player-control__btn--prev"><i class="iconfont icon-prev"></i></div>
+                        <div class="player-control__btn player-control__btn--play"><i class="iconfont icon-play"></i></div>
+                        <div class="player-control__btn player-control__btn--next"><i class="iconfont icon-next"></i></div>
+                        <div class="player-control__btn player-control__btn--mode"><i class="iconfont icon-loop"></i></div>
+                    </div>
+                    <div class="player-control__volume">
+                        <div class="control__volume--icon player-control__btn"><i class="iconfont icon-volume"></i></div>
+                        <div class="control__volume--progress player_progress"></div>
+                    </div>
+                </div>
+                <div class="player-control__content">
+                    <div class="player__song--progress player_progress"></div>
+                    <div class="player__song--timeProgess nowTime">00:00</div>
+                    <div class="player__song--timeProgess totalTime">00:00</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="/js/music-player/utill.js"></script>
+
+
+<script src="/js/music-player/jquery.min.js"></script>
+
+<!-- netease; qqkg -->
+<!--
+<script src="/js/music-player/player.js?library=config.music.library.js"></script>
+-->
+<script src="../../../../js/music-player/player.js?library=netease&music=https://kg.qq.com/node/play?s=7deFpz7Z26Jmv7di&g_f=share_html"></script>
+                
+                <!-- Music end -->
+
+                <!-- Sharing -->
+                
+                <div class="social-share"  data-wechat-qrcode-helper="" align="center"></div>
+                <!--  css & js -->
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/social-share.js/1.0.16/css/share.min.css">
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/social-share.js/1.0.16/js/social-share.min.js"></script>
+                
+                <!-- Sharing -->
+
+                <!-- gitment start -->
+                
+                <hr>
+                <div id="blog_comments"></div>
+
+<!--
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+-->
+<!--
+<link rel="stylesheet" href="/css/gitment.css">
+<script type="text/javascript" src="/js/gitment.js"></script>
+-->
+
+<script src="https://cdn.jsdelivr.net/gh/theme-next/theme-next-gitment@1/gitment.browser.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/theme-next/theme-next-gitment@1/default.css"/>
+
+<!--
+<link rel="stylesheet" href="https://billts.site/extra_css/gitment.css">
+<script src="https://billts.site/js/gitment.js"></script>
+-->
+
+<script>
+const myTheme = {
+  render(state, instance) {
+    const container = document.createElement('div')
+    container.lang = "en-US"
+    container.className = 'gitment-container gitment-root-container'
+    
+     // your custom component
+    container.appendChild(instance.renderSomething(state, instance))
+    
+    container.appendChild(instance.renderHeader(state, instance))
+    container.appendChild(instance.renderComments(state, instance))
+    container.appendChild(instance.renderEditor(state, instance))
+    //container.appendChild(instance.renderFooter(state, instance))
+    return container
+  },
+  renderSomething(state, instance) {
+    const container = document.createElement('div')
+    container.lang = "en-US"
+    container.className = 'hello_visitor'
+    if (state.user.login) {
+      container.innerText = `Hello ${state.user.login}, Welcome to comment system`
+    }
+    return container
+  }
+}
+
+
+const gitment = new Gitment({
+    id: 'Sat Jan 07 2023 22:39:09 GMT+0800', // optional
+    owner: "",
+    repo: "",
+    oauth: {
+      client_id: "",
+      client_secret: "",
+    },
+    theme: myTheme,
+    // ...
+    // For more available options, check out the documentation below
+  })
+  
+  gitment.render('blog_comments')
+  // or
+  // gitment.render(document.getElementById('comments'))
+  // or
+  // document.body.appendChild(gitment.render())
+</script>
+                
+                <!-- gitment end -->
+
+                <!-- 来必力City版安装代码 -->
+                
+                <!-- City版安装代码已完成 -->
+
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+    
+      
+        <aside id="sidebar">
+          <div id="toc" class="toc-article">
+          <strong class="toc-title">Contents</strong>
+          
+            
+              <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">参考文献</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E8%B0%83%E8%AF%95%E8%AE%BF%E9%97%AE%E6%8E%A5%E5%8F%A3DAP"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">调试访问接口DAP</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#JTAG-DP"><span class="toc-nav-number">2.1.</span> <span class="toc-nav-text">JTAG-DP</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E7%89%A9%E7%90%86%E9%93%BE%E8%B7%AF"><span class="toc-nav-number">2.1.1.</span> <span class="toc-nav-text">物理链路</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF"><span class="toc-nav-number">2.1.2.</span> <span class="toc-nav-text">数据链路</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E6%8C%87%E4%BB%A4%E4%BB%8B%E7%BB%8D"><span class="toc-nav-number">2.1.2.1.</span> <span class="toc-nav-text">指令介绍</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#IR-Chain-%E6%8C%87%E4%BB%A4%E9%93%BE-%E7%9A%84%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E5%BD%A2%E5%BC%8F"><span class="toc-nav-number">2.1.2.2.</span> <span class="toc-nav-text">IR Chain(指令链)的输入输出形式</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#DR-IR-Chain"><span class="toc-nav-number">2.1.2.3.</span> <span class="toc-nav-text">DR IR Chain</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E6%8C%87%E4%BB%A4%E5%AE%9E%E4%BE%8B%E5%88%86%E6%9E%90"><span class="toc-nav-number">2.1.2.4.</span> <span class="toc-nav-text">指令实例分析</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#DR-Chain-%E6%95%B0%E6%8D%AE%E9%93%BE-%E7%9A%84%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA"><span class="toc-nav-number">2.1.2.5.</span> <span class="toc-nav-text">DR Chain(数据链)的输入输出</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E6%95%B0%E6%8D%AE%E4%BC%A0%E8%BE%93%E5%AE%9E%E4%BE%8B%E5%88%86%E6%9E%90"><span class="toc-nav-number">2.1.2.6.</span> <span class="toc-nav-text">数据传输实例分析</span></a></li></ol></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#DP-register"><span class="toc-nav-number">2.2.</span> <span class="toc-nav-text">DP register</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#AP-register"><span class="toc-nav-number">2.3.</span> <span class="toc-nav-text">AP register</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-nav-number">2.4.</span> <span class="toc-nav-text">总结</span></a></li></ol></li></ol>
+            
+          
+          </div>
+        </aside>
+      
+    
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#ARM" title="ARM">ARM</a>
+                        
+                          <a class="tag" href="/tags/#JTAG" title="JTAG">JTAG</a>
+                        
+                          <a class="tag" href="/tags/#DAP" title="DAP">DAP</a>
+                        
+                          <a class="tag" href="/tags/#SWJ-DP" title="SWJ-DP">SWJ-DP</a>
+                        
+                          <a class="tag" href="/tags/#DP" title="DP">DP</a>
+                        
+                          <a class="tag" href="/tags/#AP" title="AP">AP</a>
+                        
+                          <a class="tag" href="/tags/#ROM Table" title="ROM Table">ROM Table</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="https://allenzf.github.io" target="_blank">Sven&#39;s Blog</a></li>
+                    
+                        <li><a href="https://gitee.com/svenzou" target="_blank">Sven&#39;s Gitee</a></li>
+                    
+                        <li><a href="https://github.com/AllenZF" target="_blank">Sven&#39;s Github</a></li>
+                    
+                        <li><a href="#" target="_blank">Other</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: 'ℬ'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+
+
+<style  type="text/css">
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/AllenZF">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://gitee.com/Sven">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-stack-1x fa-inverse">码</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/people/zhou-lang-jie-feng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; 周郎借风 2025 
+                    <br>
+                    Powered by 
+                    <a href="https://github.com/dusign/hexo-theme-snail">
+                        <i>hexo-theme-snail</i>
+                    </a> | 
+                    <iframe name="star" style="margin-left: 2px; margin-bottom:-5px;" frameborder="0" scrolling="0"
+                        width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=dusign&repo=hexo-theme-snail&type=star&count=true">
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+
+</footer>
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- Search -->
+
+<script src="/js/search.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://allenzf.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-XXXXXXXX-X';
+    var _gaDomain = 'yoursite';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+<!-- Search -->
+
+    <script type="text/javascript">      
+        var search_path = "search.xml";
+        if (search_path.length == 0) {
+            search_path = "search.xml";
+        }
+    var path = "/" + search_path;
+    searchFunc(path, 'local-search-input', 'local-search-result');
+    </script>
+
+
+<!-- busuanzi -->
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+
+    
+        <!-- background effects line -->
+        
+
+        
+            <script type="text/javascript" src="/js/mouse-click.js" content='[&quot;🌱&quot;,&quot;just do it&quot;,&quot;🍀&quot;]' color='[&quot;rgb(121,93,179)&quot; ,&quot;rgb(76,180,231)&quot; ,&quot;rgb(184,90,154)&quot;]'></script>
+        
+
+        <!-- background effects end -->
+    
+
+    <!--<script size="50" alpha='0.3' zIndex="-999" src="/js/ribbonStatic.js"></script>-->
+    
+        <script src="/js/ribbonDynamic.js"></script>
+    
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+
+</html>

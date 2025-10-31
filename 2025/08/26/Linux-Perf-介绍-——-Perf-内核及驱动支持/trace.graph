@@ -1,0 +1,68 @@
+# tracer: function_graph
+#
+# CPU  DURATION                  FUNCTION CALLS
+# |     |   |                     |   |   |   |
+ 0)               |  riscv_pmu_event_init() {
+ 0) + 55.000 us   |    pmu_sbi_event_map();
+ 0)   4.200 us    |    pmu_sbi_event_init();
+ 0)   3.300 us    |    pmu_sbi_ctr_get_width();
+ 0) ! 469.500 us  |  }
+ 0)               |  riscv_pmu_event_init() {
+ 0)   6.300 us    |    pmu_sbi_event_map();
+ 0)   5.300 us    |    pmu_sbi_event_init();
+ 0)   4.500 us    |    pmu_sbi_ctr_get_width();
+ 0) + 54.600 us   |  }
+ 1)               |  riscv_pmu_add() {
+ 1) + 37.400 us   |    pmu_sbi_ctr_get_idx();
+ 1)               |    riscv_pmu_start() {
+ 1)   2.600 us    |      pmu_sbi_ctr_get_width();
+ 1)               |      riscv_pmu_event_set_period() {
+ 1)   2.300 us    |        pmu_sbi_ctr_get_width();
+ 1)   3.000 us    |        perf_event_update_userpage();
+ 1) + 14.100 us   |      }
+ 1) + 17.500 us   |      pmu_sbi_ctr_start();
+ 1)   2.300 us    |      perf_event_update_userpage();
+ 1) + 51.600 us   |    }
+ 1)   2.400 us    |    perf_event_update_userpage();
+ 1) ! 117.900 us  |  }
+ 1)               |  riscv_pmu_add() {
+ 1) + 14.300 us   |    pmu_sbi_ctr_get_idx();
+ 1)               |    riscv_pmu_start() {
+ 1)   2.300 us    |      pmu_sbi_ctr_get_width();
+ 1)               |      riscv_pmu_event_set_period() {
+ 1)   2.200 us    |        pmu_sbi_ctr_get_width();
+ 1)   2.300 us    |        perf_event_update_userpage();
+ 1) + 11.700 us   |      }
+ 1)   6.800 us    |      pmu_sbi_ctr_start();
+ 1)   2.300 us    |      perf_event_update_userpage();
+ 1) + 35.500 us   |    }
+ 1)   2.300 us    |    perf_event_update_userpage();
+ 1) + 62.200 us   |  }
+ 1)               |  riscv_pmu_del() {
+ 1)               |    riscv_pmu_stop() {
+ 1) + 17.800 us   |      pmu_sbi_ctr_stop();
+ 1)               |      riscv_pmu_event_update() {
+ 1)   3.600 us    |        pmu_sbi_ctr_get_width();
+ 1)               |        pmu_sbi_ctr_read() {
+ 1)   7.000 us    |          riscv_pmu_ctr_read_csr();
+ 1) + 47.400 us   |        }
+ 1) + 60.900 us   |      }
+ 1) + 90.000 us   |    }
+ 1)   9.400 us    |    pmu_sbi_ctr_stop();
+ 1)   3.100 us    |    pmu_sbi_ctr_clear_idx();
+ 1)   2.900 us    |    perf_event_update_userpage();
+ 1) ! 130.400 us  |  }
+ 1)               |  riscv_pmu_del() {
+ 1)               |    riscv_pmu_stop() {
+ 1)   5.000 us    |      pmu_sbi_ctr_stop();
+ 1)               |      riscv_pmu_event_update() {
+ 1)   2.200 us    |        pmu_sbi_ctr_get_width();
+ 1)               |        pmu_sbi_ctr_read() {
+ 1)   2.900 us    |          riscv_pmu_ctr_read_csr();
+ 1)   7.700 us    |        }
+ 1) + 17.500 us   |      }
+ 1) + 29.800 us   |    }
+ 1)   4.900 us    |    pmu_sbi_ctr_stop();
+ 1)   2.300 us    |    pmu_sbi_ctr_clear_idx();
+ 1)   2.200 us    |    perf_event_update_userpage();
+ 1) + 51.600 us   |  }

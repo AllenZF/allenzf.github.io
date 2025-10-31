@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="baidu-site-verification" content="093lY4ziMu" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="记录点滴">
+    <meta name="keyword"  content="加油, 个人博客">
+    <link rel="shortcut icon" href="/img/ironman-draw.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <!--<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
+    <title>
+        
+          RISC-V time/cycle/instret/hpm - Sven-Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://allenzf.github.io/2025/04/24/RISC-V-time-cycle-instret-hpm/">
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+
+    <!-- Custom CSS --> 
+    
+        
+<link rel="stylesheet" href="/css/dusign-light.css">
+
+        
+<link rel="stylesheet" href="/css/dusign-common-light.css">
+
+        
+<link rel="stylesheet" href="/css/font-awesome.css">
+
+        
+<link rel="stylesheet" href="/css/toc.css">
+
+        <!-- background effects end -->
+    
+    
+    <!-- Pygments Highlight CSS -->
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+
+    
+<link rel="stylesheet" href="/css/widget.css">
+
+
+    
+<link rel="stylesheet" href="/css/rocket.css">
+
+
+    
+<link rel="stylesheet" href="/css/signature.css">
+
+
+    
+<link rel="stylesheet" href="/css/fonts.googleapis.css">
+
+
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+    <!-- photography -->
+    
+<link rel="stylesheet" href="/css/photography.css">
+
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+<meta name="generator" content="Hexo 8.1.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- background effects start -->
+    
+    <!-- background effects end -->
+
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            
+                background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('../../../../img/header_img/Iron-Man-3.jpg')
+                /*post*/
+            
+        
+    }
+    
+    #signature{
+        background-image: url('/img/signature/Just-do-it-white.png');
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#RISC-V" title="RISC-V">RISC-V</a>
+                            
+                              <a class="tag" href="/tags/#counter" title="counter">counter</a>
+                            
+                        </div>
+                        <h1>RISC-V time/cycle/instret/hpm</h1>
+                        <h2 class="subheading">RISC-V counter 学习笔记</h2>
+                        <span class="meta">
+                            Posted by 周郎借风 on
+                            2025-04-24
+                        </span>
+
+                        
+                            <div class="blank_box"></div>
+                            <span class="meta">
+                                Words <span class="post-count">1.4k</span> and
+                                Reading Time <span class="post-count">5</span> Minutes
+                            </span>
+                            <div class="blank_box"></div>
+                            <!-- 不蒜子统计 start -->
+                            <span class="meta">
+                                Viewed <span id="busuanzi_value_page_pv"><i class="fa fa-spinner fa-spin"></i></span> Times
+                            </span>
+                            <!-- 不蒜子统计 end -->
+                        
+
+                    </div>
+                
+
+                </div>
+            </div>
+        </div>      
+    </div>
+
+    
+    <div class="waveWrapper">
+        <div class="wave wave_before" style="background-image: url('/img/wave-light.png')"></div>
+        <div class="wave wave_after" style="background-image: url('/img/wave-light.png')"></div>
+    </div>
+    
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">周郎借风</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">主页</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">归档</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">关于</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/categories/">分类</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/photography/">摄影</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">标签</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+                    
+                    
+                    <li>
+                        <a href="https://allenzf.github.io" target="_blank">中文博客</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="寄存器汇总"><a href="#寄存器汇总" class="headerlink" title="寄存器汇总"></a>寄存器汇总</h1><p><img src="/ucounters.png" alt="alt text"></p>
+<p>U-mode 下只有计数的counter,没有管理counter的寄存器。</p>
+<p><img src="/mcounters.png" alt="alt text"></p>
+<p>M-mode 下除了计数的counter外，还有管理counter的寄存器。除上述寄存器，还有mtime&#x2F;mtimecmp寄存器，这2个是 <strong>mem mapped</strong> 寄存器，由SOC提供，关于这2个寄存器的详细介绍，可以参考<strong>RISC-V Privileged Specification</strong>的<strong>Machine Timer Registers</strong>章节。</p>
+<p>想要在低权限模式使用counters, 需要mcounteren&#x2F;scounteren寄存器授权，也需要mcountinhibit&#x2F;scountinhibit寄存器使能计数器增长。</p>
+<p>另外，Sstc提供了stimecmp寄存器服务于S&#x2F;HS&#x2F;VS模式来提供timer中断。</p>
+<hr>
+<h1 id="Zicntr扩展"><a href="#Zicntr扩展" class="headerlink" title="Zicntr扩展"></a>Zicntr扩展</h1><p>Zicntr扩展定义了cycle, time, instret 共3个只读CSRs，和对应的Read指令。U&#x2F;S&#x2F;M都具有访问权限。counter为64bits。这3个counter是mcycle, mtime, minstret的影子寄存器。</p>
+<hr>
+<h1 id="zihpm扩展"><a href="#zihpm扩展" class="headerlink" title="zihpm扩展"></a>zihpm扩展</h1><p>Zihpm扩展定义了29个counters，hpmcounter3-31。U&#x2F;S&#x2F;M都具有访问权限。counter为64bits。这29个counter是mhpmcounter3~31的影子寄存器。</p>
+<hr>
+<h1 id="Machine-Level-ISA"><a href="#Machine-Level-ISA" class="headerlink" title="Machine-Level ISA"></a>Machine-Level ISA</h1><h2 id="硬件性能监视器-Hardware-Performance-Monitor"><a href="#硬件性能监视器-Hardware-Performance-Monitor" class="headerlink" title="硬件性能监视器 Hardware Performance Monitor"></a>硬件性能监视器 Hardware Performance Monitor</h2><p>Machine-Level ISA 定义了一组64bits的性能监视器，包括<strong>mcycle</strong>, <strong>minstret</strong>, <strong>mhpmcounter3~31</strong>, <strong>mhpmevent3~31</strong>.</p>
+<p>mcycle用于记录处理器<strong>启动</strong>以来经过的<strong>时钟周期数</strong>，同一个core中的harts共享一个mcycle计数器。</p>
+<h2 id="mtime-mtimecmp"><a href="#mtime-mtimecmp" class="headerlink" title="mtime&#x2F;mtimecmp"></a>mtime&#x2F;mtimecmp</h2><p>Machine-Level ISA 定义了<strong>mtime</strong>和<strong>mtimecmp</strong>来作为系统时间。mtime&#x2F;mtimecmp都是memory mapped寄存器，如在sifive中，由clint提供。mtime由所有harts共享，mtimecmp由hart独有。自系统启动后mtime就开始按固定频率递增。</p>
+<h2 id="mcounteren-scounteren"><a href="#mcounteren-scounteren" class="headerlink" title="mcounteren&#x2F;scounteren"></a>mcounteren&#x2F;scounteren</h2><p>Machine-Level ISA 定义了mcounteren寄存器，用于控制<strong>S&#x2F;U</strong>模式下cycle, time, instret, hpmcounter3<del>31的访问权限，这些寄存器是M模式下的计数器的影子寄存器。<br>Machine-Level ISA 定义了scounteren寄存器，用于控制<strong>U</strong>模式下cycle, time, instret, hpmcounter3</del>31的访问权限，这些寄存器是M模式下的计数器的影子寄存器。</p>
+<h2 id="mcountinhibit"><a href="#mcountinhibit" class="headerlink" title="mcountinhibit"></a>mcountinhibit</h2><p>Machine-Level ISA 定义了mcountinhibit寄存器，用于控制S&#x2F;U模式下cycle, instret, hpmcounter3~31的计数器增长。注意，time由于在多核（core）下共享，所以不能被inhibit。cycle由于可能在同一个core中不同的harts共享，所以mcountinhibit.CY是该core内所有harts同时可观测的。</p>
+<hr>
+<h1 id="Smcntrpmf扩展"><a href="#Smcntrpmf扩展" class="headerlink" title="Smcntrpmf扩展"></a>Smcntrpmf扩展</h1><p>Smcntrpmf扩展定义了<strong>mcyclecfg</strong>和<strong>minstretcfg</strong>，分别用来禁用不同特权等级下计数器的增长。比如，在计数时出现中断或异常导致计数不准确。这2个寄存器可以屏蔽这种影响。</p>
+<h2 id="cycle-instret计数器行为"><a href="#cycle-instret计数器行为" class="headerlink" title="cycle&#x2F;instret计数器行为"></a>cycle&#x2F;instret计数器行为</h2><p>模式转换（trap 或 trap returns）会消耗多个clock cycles. 特权模式的更改可能报告为发生在这些cycles中的任何一个cycle中.</p>
+<p>有两种类型的指令可能会影响特权模式更改：导致同步异常到更高特权模式的指令，以及返回较低特权模式的 xRET 指令。前者不被视为 retire，因此不会导致 instret 递增。后者会 retire，并且仅在未禁止(通过minstretcfg)原始权限模式时才应递增 instret 。</p>
+<hr>
+<h1 id="Smcdeleg-Ssccfg扩展"><a href="#Smcdeleg-Ssccfg扩展" class="headerlink" title="Smcdeleg&#x2F;Ssccfg扩展"></a>Smcdeleg&#x2F;Ssccfg扩展</h1><h2 id="Smcdeleg扩展"><a href="#Smcdeleg扩展" class="headerlink" title="Smcdeleg扩展&lt;计数器委托&gt;"></a>Smcdeleg扩展&lt;计数器委托&gt;</h2><p>mcounteren允许M模式下放对计数器的读权限到S&#x2F;U模式，而此扩展将硬件性能计数器（如 hpmcounter、cycle 等）的<strong>写</strong>权限委托给 Supervisor 模式（S-mode），无需 M-mode 直接干预。通过menvcfg.CDE&#x3D;1 启用委托功能。</p>
+<p>这里的hpmcounter, cycle, hpmevent是特权模式下计数器的子集，而非影子寄存器。</p>
+<h2 id="Ssccfg扩展"><a href="#Ssccfg扩展" class="headerlink" title="Ssccfg扩展"></a>Ssccfg扩展</h2><p>为 S-mode 提供<strong>计数器配置与管理的直接接口</strong>，包括启用&#x2F;禁用计数器、设置事件触发条件等。当委托生效时，扩展允许 <strong>S</strong> 模式通过 <strong>sireg*</strong> 寄存器来<strong>读写</strong> cycle, instret, hpmcounter3<del>31, hpmevent3</del>31, cyclecfg, instretcfg 寄存器。</p>
+<p>注，sireg&#x2F;siselect 由Sscsrind&#x2F;Ssaia定义。</p>
+<hr>
+<p>Smcdeleg&#x2F;Ssccfg扩展最大的贡献是将counter的控制权限交给了S模式，于是可以在S模式处理counter的中断和异常。扩展不涉及 time CSR 的相关功能（time永远以固定频率递增的，不能禁止）。</p>
+<p>Smcdeleg&#x2F;Ssccfg扩展还定义了<strong>scountinhibit</strong>, 作为<strong>mcountinhibit</strong>的<strong>Masked别名</strong>。对于委托给S模式的counter, 可通过scountinhibit访问(读写)关联的mcountinhibit的位域，对于未委托给S模式的counter, scountinhibit中对应的位域为只读零。</p>
+<hr>
+<h1 id="Sscofpmf扩展"><a href="#Sscofpmf扩展" class="headerlink" title="Sscofpmf扩展"></a>Sscofpmf扩展</h1><p>Sscntrpmf提供了cycle和instret计算器在不同权限模式下的被禁止计数的能力。而此扩展则针对HPM计数器提供了相同的能力，且提供了溢出中断相关规定。这些位域被定义在mhpmevent寄存器中。OF写0时表示溢出中断被使能，OF写1时表示溢出中断被禁止。当写0时，HPMcounter的计数器溢出，会触发一个中断，同时OF被硬件写1。中断触发后，中断处理程序需要先对<strong>LCOFIP</strong>进行清理再处理溢出。通过向hpmcounter写0来清理计数器。hpmevent中关于不同权限禁止计数器增加的定义和Sscntrpmf中的定义一致。</p>
+<p>扩展还提供了 <strong>scountovf</strong> CSR拉记录具体是哪个HPM溢出。在M模式下，scountovf始终是可读的，在S模式下，如果mcounteren对应的bit为1，sccountovf也是可读的，否则只读为0.</p>
+<hr>
+<h1 id="Sstc扩展"><a href="#Sstc扩展" class="headerlink" title="Sstc扩展"></a>Sstc扩展</h1><p>该扩展向S模式提供了一个CSR <strong>stimecmp</strong>, 用于S模式下的timer中断。该CSR和mtimecmp不同，mtime&#x2F;mtimecmp是memory mapped的。</p>
+<p>当Sstc被实现：</p>
+<blockquote>
+<p>mip.STIP为只读位，反映stimecmp生成的中断，中断是否响应取决于使能和委托。<br>sip.STIP为只读位，反映stimecmp生成的中断，中断是否响应取决于使能和委托。</p>
+</blockquote>
+<p>向stimecmp写入大于time的值可清理中断（STIP位）。</p>
+<p>mcounteren.TM被设置，允许S模式访问stimecmp，否则将引发非法指令异常。</p>
+<p>menvcfg.STCE未设置，则类似于Sstc未被实现。</p>
+
+                
+                <hr>
+                <!-- Pager -->
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2025/05/15/将本地网页翻译成双语PDF/" data-toggle="tooltip" data-placement="top" title="将本地网页翻译成双语PDF">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2025/04/08/RISC-V-Svnapot/" data-toggle="tooltip" data-placement="top" title="RISC-V Svnapot">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- tip start -->
+                
+
+                
+                <div class="comment_notes">
+                    <p>
+                        This is copyright.
+                    </p>
+                </div>
+                
+                <!-- tip end -->
+
+                <!-- Music start-->
+                
+                
+<link rel="stylesheet" href="/css/music-player/fonts/iconfont.css">
+
+
+<link rel="stylesheet" href="/css/music-player/css/reset.css">
+
+
+<link rel="stylesheet" href="/css/music-player/css/player.css">
+
+
+<div class="music-player">
+    <audio class="music-player__audio" ></audio>
+    <div class="music-player__main">
+        <div class="music-player__blur"></div>
+        <div class="music-player__disc">
+            <div class="music-player__image">
+                <img width="100%" src="" alt="">
+            </div>
+            <div class="music-player__pointer"><img width="100%" src="/img/cd_tou.png" alt=""></div>
+        </div>
+        <div class="music-player__controls">
+            <div class="music__info">
+                <h3 class="music__info--title">...</h3>
+                <p class="music__info--singer">...</p>
+            </div>
+            <div class="player-control">
+                <div class="player-control__content">
+                    <div class="player-control__btns">
+                        <div class="player-control__btn player-control__btn--prev"><i class="iconfont icon-prev"></i></div>
+                        <div class="player-control__btn player-control__btn--play"><i class="iconfont icon-play"></i></div>
+                        <div class="player-control__btn player-control__btn--next"><i class="iconfont icon-next"></i></div>
+                        <div class="player-control__btn player-control__btn--mode"><i class="iconfont icon-loop"></i></div>
+                    </div>
+                    <div class="player-control__volume">
+                        <div class="control__volume--icon player-control__btn"><i class="iconfont icon-volume"></i></div>
+                        <div class="control__volume--progress player_progress"></div>
+                    </div>
+                </div>
+                <div class="player-control__content">
+                    <div class="player__song--progress player_progress"></div>
+                    <div class="player__song--timeProgess nowTime">00:00</div>
+                    <div class="player__song--timeProgess totalTime">00:00</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="/js/music-player/utill.js"></script>
+
+
+<script src="/js/music-player/jquery.min.js"></script>
+
+<!-- netease; qqkg -->
+<!--
+<script src="/js/music-player/player.js?library=config.music.library.js"></script>
+-->
+<script src="../../../../js/music-player/player.js?library=netease&music=https://kg.qq.com/node/play?s=7deFpz7Z26Jmv7di&g_f=share_html"></script>
+                
+                <!-- Music end -->
+
+                <!-- Sharing -->
+                
+                <div class="social-share"  data-wechat-qrcode-helper="" align="center"></div>
+                <!--  css & js -->
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/social-share.js/1.0.16/css/share.min.css">
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/social-share.js/1.0.16/js/social-share.min.js"></script>
+                
+                <!-- Sharing -->
+
+                <!-- gitment start -->
+                
+                <hr>
+                <div id="blog_comments"></div>
+
+<!--
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+-->
+<!--
+<link rel="stylesheet" href="/css/gitment.css">
+<script type="text/javascript" src="/js/gitment.js"></script>
+-->
+
+<script src="https://cdn.jsdelivr.net/gh/theme-next/theme-next-gitment@1/gitment.browser.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/theme-next/theme-next-gitment@1/default.css"/>
+
+<!--
+<link rel="stylesheet" href="https://billts.site/extra_css/gitment.css">
+<script src="https://billts.site/js/gitment.js"></script>
+-->
+
+<script>
+const myTheme = {
+  render(state, instance) {
+    const container = document.createElement('div')
+    container.lang = "en-US"
+    container.className = 'gitment-container gitment-root-container'
+    
+     // your custom component
+    container.appendChild(instance.renderSomething(state, instance))
+    
+    container.appendChild(instance.renderHeader(state, instance))
+    container.appendChild(instance.renderComments(state, instance))
+    container.appendChild(instance.renderEditor(state, instance))
+    //container.appendChild(instance.renderFooter(state, instance))
+    return container
+  },
+  renderSomething(state, instance) {
+    const container = document.createElement('div')
+    container.lang = "en-US"
+    container.className = 'hello_visitor'
+    if (state.user.login) {
+      container.innerText = `Hello ${state.user.login}, Welcome to comment system`
+    }
+    return container
+  }
+}
+
+
+const gitment = new Gitment({
+    id: 'Thu Apr 24 2025 10:23:04 GMT+0800', // optional
+    owner: "",
+    repo: "",
+    oauth: {
+      client_id: "",
+      client_secret: "",
+    },
+    theme: myTheme,
+    // ...
+    // For more available options, check out the documentation below
+  })
+  
+  gitment.render('blog_comments')
+  // or
+  // gitment.render(document.getElementById('comments'))
+  // or
+  // document.body.appendChild(gitment.render())
+</script>
+                
+                <!-- gitment end -->
+
+                <!-- 来必力City版安装代码 -->
+                
+                <!-- City版安装代码已完成 -->
+
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+    
+      
+        <aside id="sidebar">
+          <div id="toc" class="toc-article">
+          <strong class="toc-title">Contents</strong>
+          
+            
+              <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E5%AF%84%E5%AD%98%E5%99%A8%E6%B1%87%E6%80%BB"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">寄存器汇总</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#Zicntr%E6%89%A9%E5%B1%95"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">Zicntr扩展</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#zihpm%E6%89%A9%E5%B1%95"><span class="toc-nav-number">3.</span> <span class="toc-nav-text">zihpm扩展</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#Machine-Level-ISA"><span class="toc-nav-number">4.</span> <span class="toc-nav-text">Machine-Level ISA</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E7%A1%AC%E4%BB%B6%E6%80%A7%E8%83%BD%E7%9B%91%E8%A7%86%E5%99%A8-Hardware-Performance-Monitor"><span class="toc-nav-number">4.1.</span> <span class="toc-nav-text">硬件性能监视器 Hardware Performance Monitor</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#mtime-mtimecmp"><span class="toc-nav-number">4.2.</span> <span class="toc-nav-text">mtime&#x2F;mtimecmp</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#mcounteren-scounteren"><span class="toc-nav-number">4.3.</span> <span class="toc-nav-text">mcounteren&#x2F;scounteren</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#mcountinhibit"><span class="toc-nav-number">4.4.</span> <span class="toc-nav-text">mcountinhibit</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#Smcntrpmf%E6%89%A9%E5%B1%95"><span class="toc-nav-number">5.</span> <span class="toc-nav-text">Smcntrpmf扩展</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#cycle-instret%E8%AE%A1%E6%95%B0%E5%99%A8%E8%A1%8C%E4%B8%BA"><span class="toc-nav-number">5.1.</span> <span class="toc-nav-text">cycle&#x2F;instret计数器行为</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#Smcdeleg-Ssccfg%E6%89%A9%E5%B1%95"><span class="toc-nav-number">6.</span> <span class="toc-nav-text">Smcdeleg&#x2F;Ssccfg扩展</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Smcdeleg%E6%89%A9%E5%B1%95"><span class="toc-nav-number">6.1.</span> <span class="toc-nav-text">Smcdeleg扩展&lt;计数器委托&gt;</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Ssccfg%E6%89%A9%E5%B1%95"><span class="toc-nav-number">6.2.</span> <span class="toc-nav-text">Ssccfg扩展</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#Sscofpmf%E6%89%A9%E5%B1%95"><span class="toc-nav-number">7.</span> <span class="toc-nav-text">Sscofpmf扩展</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#Sstc%E6%89%A9%E5%B1%95"><span class="toc-nav-number">8.</span> <span class="toc-nav-text">Sstc扩展</span></a></li></ol>
+            
+          
+          </div>
+        </aside>
+      
+    
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#RISC-V" title="RISC-V">RISC-V</a>
+                        
+                          <a class="tag" href="/tags/#counter" title="counter">counter</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+
+                    
+                        <li><a href="https://allenzf.github.io" target="_blank">Sven&#39;s Blog</a></li>
+                    
+                        <li><a href="https://gitee.com/svenzou" target="_blank">Sven&#39;s Gitee</a></li>
+                    
+                        <li><a href="https://github.com/AllenZF" target="_blank">Sven&#39;s Github</a></li>
+                    
+                        <li><a href="#" target="_blank">Other</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: 'ℬ'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+
+
+<style  type="text/css">
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/AllenZF">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://gitee.com/Sven">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-stack-1x fa-inverse">码</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/people/zhou-lang-jie-feng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; 周郎借风 2025 
+                    <br>
+                    Powered by 
+                    <a href="https://github.com/dusign/hexo-theme-snail">
+                        <i>hexo-theme-snail</i>
+                    </a> | 
+                    <iframe name="star" style="margin-left: 2px; margin-bottom:-5px;" frameborder="0" scrolling="0"
+                        width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=dusign&repo=hexo-theme-snail&type=star&count=true">
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+
+</footer>
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- Search -->
+
+<script src="/js/search.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://allenzf.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-XXXXXXXX-X';
+    var _gaDomain = 'yoursite';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+<!-- Search -->
+
+    <script type="text/javascript">      
+        var search_path = "search.xml";
+        if (search_path.length == 0) {
+            search_path = "search.xml";
+        }
+    var path = "/" + search_path;
+    searchFunc(path, 'local-search-input', 'local-search-result');
+    </script>
+
+
+<!-- busuanzi -->
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+
+    
+        <!-- background effects line -->
+        
+
+        
+            <script type="text/javascript" src="/js/mouse-click.js" content='[&quot;🌱&quot;,&quot;just do it&quot;,&quot;🍀&quot;]' color='[&quot;rgb(121,93,179)&quot; ,&quot;rgb(76,180,231)&quot; ,&quot;rgb(184,90,154)&quot;]'></script>
+        
+
+        <!-- background effects end -->
+    
+
+    <!--<script size="50" alpha='0.3' zIndex="-999" src="/js/ribbonStatic.js"></script>-->
+    
+        <script src="/js/ribbonDynamic.js"></script>
+    
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+
+</html>
