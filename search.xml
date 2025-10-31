@@ -138,6 +138,8 @@
             
             <tag> uprobe </tag>
             
+            <tag> perf </tag>
+            
         </tags>
       
     </entry>
