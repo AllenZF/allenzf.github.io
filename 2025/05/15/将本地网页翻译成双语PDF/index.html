@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="baidu-site-verification" content="093lY4ziMu" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="记录点滴">
+    <meta name="keyword"  content="加油, 个人博客">
+    <link rel="shortcut icon" href="/img/ironman-draw.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <!--<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
+    <title>
+        
+          将本地网页翻译成双语PDF - Sven-Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://allenzf.github.io/2025/05/15/将本地网页翻译成双语PDF/">
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+
+    <!-- Custom CSS --> 
+    
+        
+<link rel="stylesheet" href="/css/dusign-light.css">
+
+        
+<link rel="stylesheet" href="/css/dusign-common-light.css">
+
+        
+<link rel="stylesheet" href="/css/font-awesome.css">
+
+        
+<link rel="stylesheet" href="/css/toc.css">
+
+        <!-- background effects end -->
+    
+    
+    <!-- Pygments Highlight CSS -->
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+
+    
+<link rel="stylesheet" href="/css/widget.css">
+
+
+    
+<link rel="stylesheet" href="/css/rocket.css">
+
+
+    
+<link rel="stylesheet" href="/css/signature.css">
+
+
+    
+<link rel="stylesheet" href="/css/fonts.googleapis.css">
+
+
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+    <!-- photography -->
+    
+<link rel="stylesheet" href="/css/photography.css">
+
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+<meta name="generator" content="Hexo 8.1.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- background effects start -->
+    
+    <!-- background effects end -->
+
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            
+                background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('../../../../img/header_img/Iron-Man-3.jpg')
+                /*post*/
+            
+        
+    }
+    
+    #signature{
+        background-image: url('/img/signature/Just-do-it-white.png');
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#翻译" title="翻译">翻译</a>
+                            
+                              <a class="tag" href="/tags/#PDF" title="PDF">PDF</a>
+                            
+                              <a class="tag" href="/tags/#html" title="html">html</a>
+                            
+                        </div>
+                        <h1>将本地网页翻译成双语PDF</h1>
+                        <h2 class="subheading">本地网页托管，翻译，导出到PDF</h2>
+                        <span class="meta">
+                            Posted by 周郎借风 on
+                            2025-05-15
+                        </span>
+
+                        
+                            <div class="blank_box"></div>
+                            <span class="meta">
+                                Words <span class="post-count">1.6k</span> and
+                                Reading Time <span class="post-count">5</span> Minutes
+                            </span>
+                            <div class="blank_box"></div>
+                            <!-- 不蒜子统计 start -->
+                            <span class="meta">
+                                Viewed <span id="busuanzi_value_page_pv"><i class="fa fa-spinner fa-spin"></i></span> Times
+                            </span>
+                            <!-- 不蒜子统计 end -->
+                        
+
+                    </div>
+                
+
+                </div>
+            </div>
+        </div>      
+    </div>
+
+    
+    <div class="waveWrapper">
+        <div class="wave wave_before" style="background-image: url('/img/wave-light.png')"></div>
+        <div class="wave wave_after" style="background-image: url('/img/wave-light.png')"></div>
+    </div>
+    
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">周郎借风</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">主页</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/categories/">分类</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">关于</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">归档</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/photography/">摄影</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">标签</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+                    
+                    
+                    <li>
+                        <a href="https://allenzf.github.io" target="_blank">中文博客</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="更新-20250517"><a href="#更新-20250517" class="headerlink" title="更新 20250517"></a>更新 20250517</h1><hr>
+<p>沉浸式插件已经支持直接对本地HTML进行翻译并导出双语HTML文件（使用<strong>翻译HTML&#x2F;txt文件</strong>），所以以下流程就更加简单了。导出双语版HTML后可以直接使用wkhtmltopdf工具转换成PDF文档。</p>
+<p>虽然不用再托管网页了，但将本地网页托管的方法比较有用。当不需要记录笔记时使用网页的文档会更方便，可以随时翻译，并且可结合 kimi AI 大模型进行问答。</p>
+<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><hr>
+<p>RISC-V相关Spec都是英文的，在学习和查阅时存在语言gap，导致效率和准确性不足。因此探索将因为文档生成双语PDF读物，期望提升效率和准确性，避免重要内容被遗漏。</p>
+<p>本文讲述的方法需要满足以下条件：</p>
+<ul>
+<li>英文读物需要有<strong>网页版本</strong>，可用浏览器打开。（如果英文读物是PDF，也可输出双语版本，但是排版上是一页英文对应一页中文，阅读方面需要用双页滚动查看，不太方便，如果想要更好的排版，需要一定的金钱成本。）</li>
+<li>google浏览器，其他浏览其应该也可以，但没试过；</li>
+<li>沉浸式翻译插件；</li>
+<li>安装live-server命令行工具；</li>
+<li>安装wkhtmltopdf命令行工具;</li>
+</ul>
+<p>主要步骤：</p>
+<ol>
+<li>托管网页。将网页托管到服务器，如果直接使用file的形式打开，通常不能使用沉浸式翻译插件来翻译网页（可以翻译本地PDF）；</li>
+<li>通过翻译插件翻译网页；</li>
+<li>预览双语页面，导出双语页面到html文件；</li>
+<li>wkhtmltopdf命令行工具将html文件转换成pdf文件；</li>
+</ol>
+<p>通过上述方法，可以生成带有侧边栏大纲的PDF文件。</p>
+<h1 id="工具安装"><a href="#工具安装" class="headerlink" title="工具安装"></a>工具安装</h1><h2 id="沉浸式翻译插件安装"><a href="#沉浸式翻译插件安装" class="headerlink" title="沉浸式翻译插件安装"></a>沉浸式翻译插件安装</h2><hr>
+<p>在Bing上搜索”沉浸式翻译”，一般第一个就是官网，进入官网可以看到如下导航，选择自己使用的浏览器类型，安装使用说明安装即可。</p>
+<img src="/2025/05/15/%E5%B0%86%E6%9C%AC%E5%9C%B0%E7%BD%91%E9%A1%B5%E7%BF%BB%E8%AF%91%E6%88%90%E5%8F%8C%E8%AF%ADPDF/image.png" class="">
+
+<p>安装完成后可以在浏览器右上位置看到插件图标（酒红色那个）。</p>
+<img src="/2025/05/15/%E5%B0%86%E6%9C%AC%E5%9C%B0%E7%BD%91%E9%A1%B5%E7%BF%BB%E8%AF%91%E6%88%90%E5%8F%8C%E8%AF%ADPDF/image-1.png" class="">
+
+<p>点击插件按钮可以看到如下界面，可根据界面按需使用。值得一提的是，<strong>翻译服务</strong>和<strong>AI专家</strong>可以配置，翻译服务可以是常规的机器翻译，也可以是AI大模型翻译，其中通过SiliconCloud可配置不同的AI翻译模型；AI专家是翻译的类型和对特定网站的特定优化翻译。具体的配置可以通过图片左下角的<strong>设置</strong>进入。</p>
+<p>在导出双语页面时，需要使用图上右上角<strong>生成网页快照</strong>功能。</p>
+<img src="/2025/05/15/%E5%B0%86%E6%9C%AC%E5%9C%B0%E7%BD%91%E9%A1%B5%E7%BF%BB%E8%AF%91%E6%88%90%E5%8F%8C%E8%AF%ADPDF/image-3.png" class="">
+
+<p>其他重要的功能在上述图片的右下角<strong>更多</strong>菜单中。其中<strong>翻译本地PDF文件</strong>可以将PDF翻译成双语PDF，只是排版在不付费的情况下是一页英文对应一页中文的形式。<strong>立即翻译到页面底部</strong>是一个网页翻译的重要功能，在网页翻译时通常只是翻译窗口可见的部分，不可见部分不会翻译，而翻译是比较花时间的，在翻译服务中可以配置并行翻译的参数。<strong>临时开启译文编辑</strong>可以在网页上对译文进行编辑，不过当网页比较长时，对所有译文进行修正是一个耗时的工作，文档不是正式的文档时，通常还是不需要修改的。</p>
+<img src="/2025/05/15/%E5%B0%86%E6%9C%AC%E5%9C%B0%E7%BD%91%E9%A1%B5%E7%BF%BB%E8%AF%91%E6%88%90%E5%8F%8C%E8%AF%ADPDF/image-2.png" class="">
+
+
+
+<h2 id="live-server安装"><a href="#live-server安装" class="headerlink" title="live-server安装"></a>live-server安装</h2><hr>
+<p>在POWERSHELL中执行：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">set-ExecutionPolicy RemoteSigned</span><br><span class="line">winget install Schniz.fnm</span><br><span class="line">fnm install 22</span><br><span class="line">npm -v  # Should print &quot;10.9.2&quot;</span><br><span class="line">npm install -g live-server</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="wkhtmltopdf安装"><a href="#wkhtmltopdf安装" class="headerlink" title="wkhtmltopdf安装"></a>wkhtmltopdf安装</h2><hr>
+<p>直接在Bing上搜索工具名，通过网页下载离线安装包安装即可。注意，如果是命令行安装可能不可用，安装完后验证版本号<code>wkhtmltox.exe --version</code>,如果输出的**wkhtmltopdf 0.12.6.1 (with patched qt)**则可以使用，注意一定要带qt。</p>
+<h1 id="生成双语PDF流程"><a href="#生成双语PDF流程" class="headerlink" title="生成双语PDF流程"></a>生成双语PDF流程</h1><h2 id="网页托管"><a href="#网页托管" class="headerlink" title="网页托管"></a>网页托管</h2><hr>
+<p>通过命令行进入网页目录，在命令行中执行<code>live-server</code>，稍微等待即可更加命令行提示进入网页。通常是<code>http://127.0.0.1:8080/</code>网站。在页面上选择具体要翻译的页面，点击打开即可。</p>
+<h2 id="翻译页面"><a href="#翻译页面" class="headerlink" title="翻译页面"></a>翻译页面</h2><hr>
+<p>通过插件小图标可以对页面进行翻译，可以尝试不同的<strong>AI专家</strong>输出不同的中文翻译。选择比较满意的即可。</p>
+<p>通过<strong>立即翻译到页面底部</strong>功能对整个网页进行翻译。这里可能需要等待较长时间，具体需要看网页长度，浏览器可能会一直卡住，需要耐心等待，等待，等待。</p>
+<p>当网页不卡时，可以流畅地查看整个网页，此时双语版的网页展现在浏览器上。</p>
+<h2 id="导出到HTML"><a href="#导出到HTML" class="headerlink" title="导出到HTML"></a>导出到HTML</h2><hr>
+<p>在页面上使用<code>Ctrl+S</code>快捷键，注意保存类型一定要选<strong>网页，全部(<em>.htm;</em>.html)</strong>, 因为只有这个选项才能真正导出双语版的静态页面。</p>
+<img src="/2025/05/15/%E5%B0%86%E6%9C%AC%E5%9C%B0%E7%BD%91%E9%A1%B5%E7%BF%BB%E8%AF%91%E6%88%90%E5%8F%8C%E8%AF%ADPDF/image-6.png" class="">
+
+<p>导出成功后，会得到一个目录，里面有html后缀的文件，打开这些文件，找到双语版本的html那个。</p>
+<h2 id="生成PDF"><a href="#生成PDF" class="headerlink" title="生成PDF"></a>生成PDF</h2><hr>
+<p>在命令行使用<code>wkhtmltopdf toc name.html name.pdf</code>生成PDF。生成的PDF会带有侧边栏目录和中文翻译。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><hr>
+<p>上述方法是将英文网页生成带大纲的双语PDF，对离线本地网页或远程在线网页都适用。关键是如何得到双语网页。插件通常对本地网页（file:&#x2F;&#x2F;&#x2F;）没有翻译能力，所以需要先通过live-server托管网页。</p>
+<p>另一个关键问题是如何得到带大纲的PDF。wkhtmltopdf的toc参数可以生成带目录大纲的PDF。这就要求输入的html是双语版的，要想得到双语版的html，就需要将动态的中文翻译转换成静态的。</p>
+<p><strong>临时开启译文编辑</strong>是一个重要的功能。目前（2025）的翻译使用硅基流动的接口，免费模型支持到<strong>Qwen&#x2F;Qwen2.5-7B-Instruct</strong>，要想使用更优秀的模型需要购买。这个模型翻译的效果有些地方比较难以理解，可以通过临时编辑功能对中文进行重新整理，这在比较正式的版本比较有用。</p>
+
+                
+                <hr>
+                <!-- Pager -->
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2025/06/03/在docker容器中源码安装riscv-gnu-toolchain/" data-toggle="tooltip" data-placement="top" title="在docker容器中源码安装riscv-gnu-toolchain">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2025/04/24/RISC-V-time-cycle-instret-hpm/" data-toggle="tooltip" data-placement="top" title="RISC-V time/cycle/instret/hpm">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- tip start -->
+                
+
+                
+                <!-- tip end -->
+
+                <!-- Music start-->
+                
+                <!-- Music end -->
+
+                <!-- Sharing -->
+                
+                <!-- Sharing -->
+
+                <!-- gitment start -->
+                
+                <!-- gitment end -->
+
+                <!-- 来必力City版安装代码 -->
+                
+                <!-- City版安装代码已完成 -->
+
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+    
+      
+        <aside id="sidebar">
+          <div id="toc" class="toc-article">
+          <strong class="toc-title">Contents</strong>
+          
+            
+              <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E6%9B%B4%E6%96%B0-20250517"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">更新 20250517</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">背景</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E5%B7%A5%E5%85%B7%E5%AE%89%E8%A3%85"><span class="toc-nav-number">3.</span> <span class="toc-nav-text">工具安装</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%B2%89%E6%B5%B8%E5%BC%8F%E7%BF%BB%E8%AF%91%E6%8F%92%E4%BB%B6%E5%AE%89%E8%A3%85"><span class="toc-nav-number">3.1.</span> <span class="toc-nav-text">沉浸式翻译插件安装</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#live-server%E5%AE%89%E8%A3%85"><span class="toc-nav-number">3.2.</span> <span class="toc-nav-text">live-server安装</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#wkhtmltopdf%E5%AE%89%E8%A3%85"><span class="toc-nav-number">3.3.</span> <span class="toc-nav-text">wkhtmltopdf安装</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E7%94%9F%E6%88%90%E5%8F%8C%E8%AF%ADPDF%E6%B5%81%E7%A8%8B"><span class="toc-nav-number">4.</span> <span class="toc-nav-text">生成双语PDF流程</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E7%BD%91%E9%A1%B5%E6%89%98%E7%AE%A1"><span class="toc-nav-number">4.1.</span> <span class="toc-nav-text">网页托管</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E7%BF%BB%E8%AF%91%E9%A1%B5%E9%9D%A2"><span class="toc-nav-number">4.2.</span> <span class="toc-nav-text">翻译页面</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%AF%BC%E5%87%BA%E5%88%B0HTML"><span class="toc-nav-number">4.3.</span> <span class="toc-nav-text">导出到HTML</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E7%94%9F%E6%88%90PDF"><span class="toc-nav-number">4.4.</span> <span class="toc-nav-text">生成PDF</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-nav-number">5.</span> <span class="toc-nav-text">总结</span></a></li></ol>
+            
+          
+          </div>
+        </aside>
+      
+    
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <!-- <h5><a href="/tags/">FEATURED TAGS</a></h5> -->
+                    <h5><a href="/tags/"></a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#翻译" title="翻译">翻译</a>
+                        
+                          <a class="tag" href="/tags/#PDF" title="PDF">PDF</a>
+                        
+                          <a class="tag" href="/tags/#html" title="html">html</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                
+                <script src="https://giscus.app/client.js"
+                    data-repo="AllenZF/allenzf.github.io"
+                    data-repo-id="R_kgDOQMASLQ"
+                    data-category="General"
+                    data-category-id="DIC_kwDOQMASLc4CxR4Q"
+                    data-mapping="pathname"
+                    data-strict="0"
+                    data-reactions-enabled="1"
+                    data-emit-metadata="0"
+                    data-input-position="bottom"
+                    data-theme="preferred_color_scheme"
+                    data-lang="en"
+                    crossorigin="anonymous"
+                    async>
+                </script>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: 'ℬ'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+
+
+<style  type="text/css">
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/AllenZF">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://gitee.com/Sven">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-stack-1x fa-inverse">码</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/people/zhou-lang-jie-feng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; 周郎借风 2025 
+                    <br>
+                    Powered by 
+                    <a href="https://github.com/dusign/hexo-theme-snail">
+                        <i>hexo-theme-snail</i>
+                    </a> | 
+                    <iframe name="star" style="margin-left: 2px; margin-bottom:-5px;" frameborder="0" scrolling="0"
+                        width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=dusign&repo=hexo-theme-snail&type=star&count=true">
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+
+</footer>
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- Search -->
+
+<script src="/js/search.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://allenzf.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-XXXXXXXX-X';
+    var _gaDomain = 'yoursite';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+<!-- Search -->
+
+    <script type="text/javascript">      
+        var search_path = "search.xml";
+        if (search_path.length == 0) {
+            search_path = "search.xml";
+        }
+    var path = "/" + search_path;
+    searchFunc(path, 'local-search-input', 'local-search-result');
+    </script>
+
+
+<!-- busuanzi -->
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+
+    
+        <!-- background effects line -->
+        
+
+        
+            <script type="text/javascript" src="/js/mouse-click.js" content='[&quot;🌱&quot;,&quot;just do it&quot;,&quot;🍀&quot;]' color='[&quot;rgb(121,93,179)&quot; ,&quot;rgb(76,180,231)&quot; ,&quot;rgb(184,90,154)&quot;]'></script>
+        
+
+        <!-- background effects end -->
+    
+
+    <!--<script size="50" alpha='0.3' zIndex="-999" src="/js/ribbonStatic.js"></script>-->
+    
+        <script src="/js/ribbonDynamic.js"></script>
+    
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+
+</html>

@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="baidu-site-verification" content="093lY4ziMu" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="记录点滴">
+    <meta name="keyword"  content="加油, 个人博客">
+    <link rel="shortcut icon" href="/img/ironman-draw.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <!--<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
+    <title>
+        
+          kprobe使用：内核模块加载 - Sven-Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://allenzf.github.io/2025/09/16/kprobe使用：模块加载方式/">
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+
+    <!-- Custom CSS --> 
+    
+        
+<link rel="stylesheet" href="/css/dusign-light.css">
+
+        
+<link rel="stylesheet" href="/css/dusign-common-light.css">
+
+        
+<link rel="stylesheet" href="/css/font-awesome.css">
+
+        
+<link rel="stylesheet" href="/css/toc.css">
+
+        <!-- background effects end -->
+    
+    
+    <!-- Pygments Highlight CSS -->
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+
+    
+<link rel="stylesheet" href="/css/widget.css">
+
+
+    
+<link rel="stylesheet" href="/css/rocket.css">
+
+
+    
+<link rel="stylesheet" href="/css/signature.css">
+
+
+    
+<link rel="stylesheet" href="/css/fonts.googleapis.css">
+
+
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+    <!-- photography -->
+    
+<link rel="stylesheet" href="/css/photography.css">
+
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+<meta name="generator" content="Hexo 8.1.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- background effects start -->
+    
+    <!-- background effects end -->
+
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            
+                background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('../../../../img/header_img/Iron-Man-3.jpg')
+                /*post*/
+            
+        
+    }
+    
+    #signature{
+        background-image: url('/img/signature/Just-do-it-white.png');
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#Linux" title="Linux">Linux</a>
+                            
+                              <a class="tag" href="/tags/#kprobe" title="kprobe">kprobe</a>
+                            
+                        </div>
+                        <h1>kprobe使用：内核模块加载</h1>
+                        <h2 class="subheading">kprobe 使用方法</h2>
+                        <span class="meta">
+                            Posted by 周郎借风 on
+                            2025-09-16
+                        </span>
+
+                        
+                            <div class="blank_box"></div>
+                            <span class="meta">
+                                Words <span class="post-count">1.3k</span> and
+                                Reading Time <span class="post-count">5</span> Minutes
+                            </span>
+                            <div class="blank_box"></div>
+                            <!-- 不蒜子统计 start -->
+                            <span class="meta">
+                                Viewed <span id="busuanzi_value_page_pv"><i class="fa fa-spinner fa-spin"></i></span> Times
+                            </span>
+                            <!-- 不蒜子统计 end -->
+                        
+
+                    </div>
+                
+
+                </div>
+            </div>
+        </div>      
+    </div>
+
+    
+    <div class="waveWrapper">
+        <div class="wave wave_before" style="background-image: url('/img/wave-light.png')"></div>
+        <div class="wave wave_after" style="background-image: url('/img/wave-light.png')"></div>
+    </div>
+    
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">周郎借风</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">主页</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/categories/">分类</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">关于</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">归档</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/photography/">摄影</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">标签</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+                    
+                    
+                    <li>
+                        <a href="https://allenzf.github.io" target="_blank">中文博客</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="Kprobes-解决了什么问题"><a href="#Kprobes-解决了什么问题" class="headerlink" title="Kprobes 解决了什么问题"></a>Kprobes 解决了什么问题</h1><hr>
+<p>在 Linux Kernel 中需要 debug，需要知道内核函数变量的值，比较简单的做法是在内核代码对应的函数中插入 log 信息，但这种方式往往需要重新编译内核，然后启动设备，这往往比较繁琐而且改变内核运行过程。</p>
+<p>而利用 Kprobes (Kernel Probes) 这种动态探测技术，可以弥补上述缺点。用户可以自定义 Kprobes 的回调函数，然后指定探测点，当 Kernel 执行到探测点，在回调函数中获取 CPU 寄存器的值，同时内核返回原来的执行流程。</p>
+<p>Kprobes 技术提供了探测点的调用前、调用后和内存访问出错 3 种回调方式，分别是：</p>
+<ul>
+<li>pre_handler</li>
+<li>post_handler</li>
+<li>fault_handler</li>
+</ul>
+<p>其中 pre_handler 是执行到探测点前的回调函数，post_handler 是在执行到探测点后的回调函数，fault_handler 会在内存访问出错时的回调函数。</p>
+<h1 id="环境依赖"><a href="#环境依赖" class="headerlink" title="环境依赖"></a>环境依赖</h1><hr>
+<ul>
+<li>linux-6.17-rc5 源码</li>
+<li>已经建好的ubuntu-base 文件系统(见之前的文章)</li>
+</ul>
+<p><strong>编译源码和示例</strong>：最好在chroot下进行，一是方便安装软件，二是运行更快，三是qemu中可能存在各种问题。</p>
+<ol>
+<li>挂载ubuntu-base 文件系统：<code>sudo mount -o loop ubuntu_base.img ./rootfs</code></li>
+<li>挂载 wsl 下的 linux 源码到 &#x2F;mnt&#x2F;linux: <code>sudo mount --bind linux ./rootfs/mnt/linux</code></li>
+<li>chroot ubuntu-base 文件系统: <code>sudo chroot ./rootfs</code></li>
+<li>挂载各子系统：在 chroot 环境下：<code>/start.sh</code>，文件具体如下：</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line">mount -t proc none /proc</span><br><span class="line">mount -t sysfs none /sys</span><br><span class="line">mount -t devtmpfs none /dev</span><br><span class="line"><span class="built_in">mkdir</span> -p /dev/pts</span><br><span class="line">mount -t devpts devpts /dev/pts</span><br><span class="line">dhclient &amp;</span><br><span class="line">mount -t 9p -o trans=virtio hostshare /mnt</span><br><span class="line">mount -t tracefs none /sys/kernel/tracing</span><br></pre></td></tr></table></figure>
+
+<h1 id="探测-sys-exec-中的-bprm-变量值"><a href="#探测-sys-exec-中的-bprm-变量值" class="headerlink" title="探测 sys_exec 中的 bprm 变量值"></a>探测 sys_exec 中的 bprm 变量值</h1><hr>
+<p><a href="https://tinylab.org/linux-kprobes/">一文解读 Linux Kprobes 好处、用法和工作原理
+</a></p>
+<p>Linux 运行每一个可执行文件都会调用 sys_exec，通过这个系统调用陷入内核态，然后执行 do_execveat_common (Linux 4.4 版本，其他版本未验证）加载可执行新文件，其实现位于 <code>fs/exec.c</code>.</p>
+<p>在参考文献中，作者使用<code>if (!bprm)</code>作为<code>kprobe</code>的对象, 当 PC 运行到此处时，会触发<code>pre_handler</code>。这里使用 linux v6.17-rc5 的源码，在<code>fs/exec.c</code>中，对等的函数变为<code>alloc_bprm</code>：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">bprm = kzalloc(<span class="keyword">sizeof</span>(*bprm), GFP_KERNEL); <span class="comment">// line 1414</span></span><br><span class="line"><span class="keyword">if</span> (!bprm) &#123;                               <span class="comment">// line 1415</span></span><br><span class="line">       do_close_execat(file);                 <span class="comment">// line 1416</span></span><br><span class="line">       <span class="keyword">return</span> ERR_PTR(-ENOMEM);               <span class="comment">// line 1417</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">bprm-&gt;file = file;                         <span class="comment">// line 1420</span></span><br></pre></td></tr></table></figure>
+<p>查看system.map文件，找到<code>ffffffff80282144 t alloc_bprm</code>, 进而找到汇编后的代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">ffffffff80282144 &lt;alloc_bprm&gt;:</span><br><span class="line">alloc_bprm():</span><br><span class="line">/mnt/linux/fs/exec.c:1405</span><br><span class="line">ffffffff80282144:	7139                	addi	sp,sp,-64</span><br><span class="line">...</span><br><span class="line">ffffffff8028217e:	84aa                	mv	s1,a0</span><br><span class="line">alloc_bprm():</span><br><span class="line">/mnt/linux/fs/exec.c:1415</span><br><span class="line">ffffffff80282180:	18050163          	beqz	a0,ffffffff80282302 &lt;alloc_bprm+0x1be&gt;</span><br><span class="line">/mnt/linux/fs/exec.c:1420</span><br><span class="line">ffffffff80282184:	05253023          	sd	s2,64(a0)</span><br><span class="line">/mnt/linux/fs/exec.c:1422</span><br><span class="line">ffffffff80282188:	f9c00793          	li	a5,-100</span><br></pre></td></tr></table></figure>
+<p>关键就是<code>ffffffff80282180 beqz	a0,ffffffff80282302 &lt;alloc_bprm+0x1be&gt;</code>这一句, <code>ffffffff80282302</code> 地址是<code>do_close_execat()</code>函数的起始地址。可见<code>a0</code>就是<code>bprm</code>的值。因此，kprobe探测点为<code>ffffffff80282180</code>处的指令<code>18050163</code>，我们需要在此处打印一些有用信息。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">kprobe</span> <span class="title">kp</span> =</span> &#123;</span><br><span class="line">	.symbol_name	= <span class="string">&quot;alloc_bprm&quot;</span>,</span><br><span class="line">	.offset = <span class="number">0x3c</span>, <span class="comment">//  echo &quot;obase=16;$((0x80282180 - 0x80282144))&quot;|bc</span></span><br><span class="line">    .pre_handler = handler_pre，</span><br><span class="line">    .post_handler = handler_post，</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>在 linux&#x2F;samples&#x2F;kprobes 下已经demo示例，简单修改上述 kprobe 探测点即可，在 pre_handler 中已经有打印信息，只需添加 <code>a0</code> 的打印信息。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pr_info(<span class="string">&quot;&lt;%s&gt; p-&gt;addr = 0x%p, pc = 0x%lx, status = 0x%lx, a0 = 0x%lx\n&quot;</span>,</span><br><span class="line">		p-&gt;symbol_name, p-&gt;addr, regs-&gt;epc, regs-&gt;status， regs-&gt;a0);</span><br></pre></td></tr></table></figure>
+<p>另外，需要修改Makefile</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">obj-m += kprobe_example.o</span><br></pre></td></tr></table></figure>
+
+<h1 id="编译-kprobe-示例代码"><a href="#编译-kprobe-示例代码" class="headerlink" title="编译 kprobe 示例代码"></a>编译 kprobe 示例代码</h1><hr>
+<p>假设已经在chroot环境中编译了内核 6.17-rc5 (挂载到了 &#x2F;mnt&#x2F;linux), 并且已经按照上述要求修改了kprobe_example.c 文件。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /mnt/linux/samples/kprobes/</span><br><span class="line">make -C ../.. M=$(<span class="built_in">pwd</span>) modules</span><br><span class="line"><span class="comment"># 或，在linux根目录时</span></span><br><span class="line">make M=samples/kprobes modules</span><br><span class="line"><span class="built_in">exit</span>  <span class="comment"># 退出 chroot</span></span><br><span class="line"><span class="built_in">sudo</span> umount -l rootfs/mnt <span class="comment"># 卸载 linux 源码</span></span><br><span class="line"><span class="built_in">sudo</span> umount -l rootfs     <span class="comment"># 卸载 ubuntu base 文件系统</span></span><br></pre></td></tr></table></figure>
+<p>现在已经生成了 <code>kprobe_example.ko</code>。</p>
+<h1 id="qemu-加载-kprobe"><a href="#qemu-加载-kprobe" class="headerlink" title="qemu 加载 kprobe"></a>qemu 加载 kprobe</h1><hr>
+<p>由于 chroot 环境使用的是主机的系统，所以测试需要到 qemu 进行。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-system-riscv64 -smp 8 -cpu rva23s64 -M virt -m 512M -nographic -kernel /mnt/d/wsl/share/ubuntu/Image -drive file=/mnt/d/wsl/share/ubuntu/ubuntu_base.img,format=raw,<span class="built_in">id</span>=hd0,<span class="keyword">if</span>=none -device virtio-blk-device,drive=hd0 -append <span class="string">&quot;root=/dev/vda rw console=ttyS0 init=/bin/bash&quot;</span> -fsdev <span class="built_in">local</span>,security_model=mapped-xattr,<span class="built_in">id</span>=fsdev0,path=/home/xxx/wks/tools -device virtio-9p-pci,<span class="built_in">id</span>=fs0,fsdev=fsdev0,mount_tag=hostshare -device virtio-net-device,netdev=net0 -netdev user,<span class="built_in">id</span>=net0</span><br></pre></td></tr></table></figure>
+<p>进入 os 后，先执行 <code>/start.sh</code> 挂载 proc, sys, dev 等。然后加载 kprobe_example.ko 驱动。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/start.sh</span><br><span class="line">insmod kprobe_example.ko</span><br><span class="line"><span class="comment"># [  848.177529] kprobe_example: loading out-of-tree module taints kernel.</span></span><br><span class="line"><span class="comment"># [  848.530845] kprobe_init: Planted kprobe at 00000000a417bfe6</span></span><br><span class="line"><span class="comment"># 注册驱动后，在命令行输入命令，就会触发kprobe调用，如下</span></span><br><span class="line"><span class="built_in">uname</span> -r</span><br><span class="line"><span class="comment"># [ 1018.088978] handler_pre: &lt;alloc_bprm&gt; p-&gt;addr = 0x00000000a417bfe6, pc = 0xffffffff80282180, status = 0x200000120, a0 = 0xffffffd60266d800</span></span><br><span class="line"><span class="comment"># [ 1018.090076] handler_post: &lt;alloc_bprm&gt; p-&gt;addr = 0x00000000a417bfe6, status = 0x200000120</span></span><br><span class="line"><span class="comment"># 6.17.0-rc5-dirty</span></span><br><span class="line">rmmod kprobe_example.ko <span class="comment"># 移除 kprobe</span></span><br></pre></td></tr></table></figure>
+<p>输入<code>uname -r</code>后先打印了 handler_pre 中的log信息，即执行被探测指令前的信息，a0 不为 0 (实际为 kzalloc 分配的堆空间地址)，跳转并执行 <code>do_close_execat(file);</code>，第行打印 handler_post 的log信息，由于 a0 在执行前后并未改变，所以 handler_post 没有更多有用信息，这里只是展示其使用方式，并未打印 a0. 第三行是<code>uname -r</code>的真正输出，是系统版本号。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><hr>
+<p>内核模块加载方式依赖于源码和相关头文件，因此相对来说比较麻烦，但<strong>性能开销</strong>是最小的，在硅后验证中，可以长期运行，来复现问题。</p>
+
+                
+                <hr>
+                <!-- Pager -->
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2025/09/16/kprobe使用：tracefs-perf-eBPF-bcc/" data-toggle="tooltip" data-placement="top" title="kprobe使用：tracefs/perf/eBPF(bcc)">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2025/09/05/制作-ubuntu-base-文件系统/" data-toggle="tooltip" data-placement="top" title="制作 ubuntu-base 文件系统">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- tip start -->
+                
+
+                
+                <!-- tip end -->
+
+                <!-- Music start-->
+                
+                <!-- Music end -->
+
+                <!-- Sharing -->
+                
+                <!-- Sharing -->
+
+                <!-- gitment start -->
+                
+                <!-- gitment end -->
+
+                <!-- 来必力City版安装代码 -->
+                
+                <!-- City版安装代码已完成 -->
+
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+    
+      
+        <aside id="sidebar">
+          <div id="toc" class="toc-article">
+          <strong class="toc-title">Contents</strong>
+          
+            
+              <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#Kprobes-%E8%A7%A3%E5%86%B3%E4%BA%86%E4%BB%80%E4%B9%88%E9%97%AE%E9%A2%98"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">Kprobes 解决了什么问题</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E7%8E%AF%E5%A2%83%E4%BE%9D%E8%B5%96"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">环境依赖</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E6%8E%A2%E6%B5%8B-sys-exec-%E4%B8%AD%E7%9A%84-bprm-%E5%8F%98%E9%87%8F%E5%80%BC"><span class="toc-nav-number">3.</span> <span class="toc-nav-text">探测 sys_exec 中的 bprm 变量值</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E7%BC%96%E8%AF%91-kprobe-%E7%A4%BA%E4%BE%8B%E4%BB%A3%E7%A0%81"><span class="toc-nav-number">4.</span> <span class="toc-nav-text">编译 kprobe 示例代码</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#qemu-%E5%8A%A0%E8%BD%BD-kprobe"><span class="toc-nav-number">5.</span> <span class="toc-nav-text">qemu 加载 kprobe</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-nav-number">6.</span> <span class="toc-nav-text">总结</span></a></li></ol>
+            
+          
+          </div>
+        </aside>
+      
+    
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <!-- <h5><a href="/tags/">FEATURED TAGS</a></h5> -->
+                    <h5><a href="/tags/"></a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#Linux" title="Linux">Linux</a>
+                        
+                          <a class="tag" href="/tags/#kprobe" title="kprobe">kprobe</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                
+                <script src="https://giscus.app/client.js"
+                    data-repo="AllenZF/allenzf.github.io"
+                    data-repo-id="R_kgDOQMASLQ"
+                    data-category="General"
+                    data-category-id="DIC_kwDOQMASLc4CxR4Q"
+                    data-mapping="pathname"
+                    data-strict="0"
+                    data-reactions-enabled="1"
+                    data-emit-metadata="0"
+                    data-input-position="bottom"
+                    data-theme="preferred_color_scheme"
+                    data-lang="en"
+                    crossorigin="anonymous"
+                    async>
+                </script>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: 'ℬ'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+
+
+<style  type="text/css">
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/AllenZF">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://gitee.com/Sven">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-stack-1x fa-inverse">码</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/people/zhou-lang-jie-feng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; 周郎借风 2025 
+                    <br>
+                    Powered by 
+                    <a href="https://github.com/dusign/hexo-theme-snail">
+                        <i>hexo-theme-snail</i>
+                    </a> | 
+                    <iframe name="star" style="margin-left: 2px; margin-bottom:-5px;" frameborder="0" scrolling="0"
+                        width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=dusign&repo=hexo-theme-snail&type=star&count=true">
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+
+</footer>
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- Search -->
+
+<script src="/js/search.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://allenzf.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-XXXXXXXX-X';
+    var _gaDomain = 'yoursite';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+<!-- Search -->
+
+    <script type="text/javascript">      
+        var search_path = "search.xml";
+        if (search_path.length == 0) {
+            search_path = "search.xml";
+        }
+    var path = "/" + search_path;
+    searchFunc(path, 'local-search-input', 'local-search-result');
+    </script>
+
+
+<!-- busuanzi -->
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+
+    
+        <!-- background effects line -->
+        
+
+        
+            <script type="text/javascript" src="/js/mouse-click.js" content='[&quot;🌱&quot;,&quot;just do it&quot;,&quot;🍀&quot;]' color='[&quot;rgb(121,93,179)&quot; ,&quot;rgb(76,180,231)&quot; ,&quot;rgb(184,90,154)&quot;]'></script>
+        
+
+        <!-- background effects end -->
+    
+
+    <!--<script size="50" alpha='0.3' zIndex="-999" src="/js/ribbonStatic.js"></script>-->
+    
+        <script src="/js/ribbonDynamic.js"></script>
+    
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+
+</html>

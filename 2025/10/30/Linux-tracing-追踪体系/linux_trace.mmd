@@ -1,0 +1,43 @@
+graph LR
+A[Linux 追踪体系] --> B[静态追踪]
+A --> C[动态追踪]
+A --> E[硬件辅助追踪]
+
+B --> B1[Tracepoints]
+B --> B2["Event Tracing (TRACE_EVENT)"]
+C --> C1["Ftrace (Function Tracer)"]
+C --> C2[Kprobes / Kretprobes]
+C1 --> C3[Fprobe / Fprobetrace]
+C --基于事件--> C4[Eprobe]
+C --> C5[Uprobes / Uprobetracer]
+C --> D1[user_events]
+C --> D2[eBPF]
+E --> E1[E/N-trace]
+E --> E2[Coresight]
+E --> E3[Intel TH]
+
+A --> F[统一后端]
+F --> F1[Lockless Ring Buffer]
+F --> F2["tracefs (/sys/kernel/tracing)"]
+
+classDef moduleA fill:#FF9999,stroke:#FFFFFF
+classDef moduleB fill:#99FF99,stroke:#FFFFFF
+classDef moduleC fill:#9999FF,stroke:#FFFFFF
+classDef moduleD fill:#FF99FF,stroke:#FFFFFF
+classDef moduleE fill:#FFFF99,stroke:#FFFFFF
+classDef moduleF fill:#99FFFF,stroke:#FFFFFF
+classDef moduleG fill:#FFB366,stroke:#FFFFFF
+classDef moduleH fill:#CC99FF,stroke:#FFFFFF
+classDef moduleI fill:#99FFCC,stroke:#FFFFFF
+classDef moduleJ fill:#FF6666,stroke:#FFFFFF
+classDef moduleK fill:#66B2FF,stroke:#FFFFFF
+classDef moduleL fill:#FF99CC,stroke:#FFFFFF
+classDef moduleM fill:#B3FF66,stroke:#FFFFFF
+classDef moduleN fill:#66FFFF,stroke:#FFFFFF
+
+class A, moduleJ
+class B, moduleB
+class C, moduleC
+class E, moduleD
+class F, moduleE
+

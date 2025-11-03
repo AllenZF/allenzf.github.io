@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="baidu-site-verification" content="093lY4ziMu" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="记录点滴">
+    <meta name="keyword"  content="加油, 个人博客">
+    <link rel="shortcut icon" href="/img/ironman-draw.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <!--<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
+    <title>
+        
+          Linux源码解读(OpenAI)：上下文切换 - Sven-Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://allenzf.github.io/2025/09/19/Linux源码解读-OpenAI-：上下文切换/">
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+
+    <!-- Custom CSS --> 
+    
+        
+<link rel="stylesheet" href="/css/dusign-light.css">
+
+        
+<link rel="stylesheet" href="/css/dusign-common-light.css">
+
+        
+<link rel="stylesheet" href="/css/font-awesome.css">
+
+        
+<link rel="stylesheet" href="/css/toc.css">
+
+        <!-- background effects end -->
+    
+    
+    <!-- Pygments Highlight CSS -->
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+
+    
+<link rel="stylesheet" href="/css/widget.css">
+
+
+    
+<link rel="stylesheet" href="/css/rocket.css">
+
+
+    
+<link rel="stylesheet" href="/css/signature.css">
+
+
+    
+<link rel="stylesheet" href="/css/fonts.googleapis.css">
+
+
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+    <!-- photography -->
+    
+<link rel="stylesheet" href="/css/photography.css">
+
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+<meta name="generator" content="Hexo 8.1.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- background effects start -->
+    
+    <!-- background effects end -->
+
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            
+                background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('../../../../img/header_img/Iron-Man-3.jpg')
+                /*post*/
+            
+        
+    }
+    
+    #signature{
+        background-image: url('/img/signature/Just-do-it-white.png');
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#Linux" title="Linux">Linux</a>
+                            
+                              <a class="tag" href="/tags/#kernel" title="kernel">kernel</a>
+                            
+                              <a class="tag" href="/tags/#context_switch" title="context_switch">context_switch</a>
+                            
+                        </div>
+                        <h1>Linux源码解读(OpenAI)：上下文切换</h1>
+                        <h2 class="subheading">Linux源码解读(OpenAI)</h2>
+                        <span class="meta">
+                            Posted by 周郎借风 on
+                            2025-09-19
+                        </span>
+
+                        
+                            <div class="blank_box"></div>
+                            <span class="meta">
+                                Words <span class="post-count">2.6k</span> and
+                                Reading Time <span class="post-count">10</span> Minutes
+                            </span>
+                            <div class="blank_box"></div>
+                            <!-- 不蒜子统计 start -->
+                            <span class="meta">
+                                Viewed <span id="busuanzi_value_page_pv"><i class="fa fa-spinner fa-spin"></i></span> Times
+                            </span>
+                            <!-- 不蒜子统计 end -->
+                        
+
+                    </div>
+                
+
+                </div>
+            </div>
+        </div>      
+    </div>
+
+    
+    <div class="waveWrapper">
+        <div class="wave wave_before" style="background-image: url('/img/wave-light.png')"></div>
+        <div class="wave wave_after" style="background-image: url('/img/wave-light.png')"></div>
+    </div>
+    
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">周郎借风</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">主页</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/categories/">分类</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">关于</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">归档</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/photography/">摄影</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">标签</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+                    
+                    
+                    <li>
+                        <a href="https://allenzf.github.io" target="_blank">中文博客</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">File: Documentation/context-switch.md</span><br><span class="line">Generated with: AI-assisted authoring</span><br><span class="line">AI model: unspecified (inserted by maintainers)</span><br><span class="line">Generation date: 2025-09-19</span><br><span class="line"></span><br><span class="line">Repository: linux (torvalds)</span><br><span class="line">Branch: master</span><br><span class="line">Commit: 76eeb9b8de98</span><br><span class="line">Nearest tag: v6.17-rc5</span><br><span class="line">Workspace status: uncommitted local changes present (see git status)</span><br><span class="line"></span><br><span class="line">Note: Please update the &quot;AI model&quot; field if you want a specific model identifier to be recorded. The commit and tag info reflect the source tree used when this document was edited.</span><br></pre></td></tr></table></figure>
+
+<h2 id="深入理解-context-switch-整理版"><a href="#深入理解-context-switch-整理版" class="headerlink" title="深入理解 context_switch (整理版)"></a>深入理解 context_switch (整理版)</h2><p>本文档目标：把 <code>kernel/sched/core.c</code> 中的 <code>context_switch()</code> 的实现与设计意图，用更清晰的结构和排版讲清楚，便于阅读和检索。</p>
+<p>如果你只想快速了解要点，请看 “TL;DR &#x2F; 快速参考”。否则继续阅读下面的分节（从概览到架构差异、RISC-V 细节与实践）。</p>
+<hr>
+<h2 id="快速参考"><a href="#快速参考" class="headerlink" title="快速参考"></a>快速参考</h2><ul>
+<li>context_switch 做三件事：<ol>
+<li>准备与同步（prepare_task_switch、arch hook、membarrier）</li>
+<li>切换地址空间（lazy TLB &#x2F; switch_mm &#x2F; ASID &#x2F; SATP）</li>
+<li>切换寄存器&#x2F;栈（switch_to -&gt; __switch_to），并完成收尾（finish_task_switch）</li>
+</ol>
+</li>
+<li>主要分支由 <code>next-&gt;mm</code> 是否为空决定（内核线程 vs 用户线程）。</li>
+<li>RISC-V 关键点：ASID 分配、SATP 写入、TLB&#x2F;ICACHE 刷新、<code>__switch_to</code> 汇编负责快速寄存器交换。</li>
+</ul>
+<hr>
+<h2 id="目录（快速跳转）"><a href="#目录（快速跳转）" class="headerlink" title="目录（快速跳转）"></a>目录（快速跳转）</h2><ul>
+<li>函数接口（inputs&#x2F;outputs）</li>
+<li>快速流程图与代码要点</li>
+<li>逐段解析（详细）</li>
+<li>RISC-V：实现细节与汇编摘录</li>
+<li>实验与调试（try it）</li>
+<li>Graphviz 图与渲染</li>
+<li>参考与下一步</li>
+</ul>
+<hr>
+<h2 id="函数接口（contract）"><a href="#函数接口（contract）" class="headerlink" title="函数接口（contract）"></a>函数接口（contract）</h2><ul>
+<li>输入：<ul>
+<li><code>struct rq *rq</code> — 目标 CPU 的 runqueue</li>
+<li><code>struct task_struct *prev</code> — 要切出的任务</li>
+<li><code>struct task_struct *next</code> — 要切入的任务</li>
+<li><code>struct rq_flags *rf</code> — 调度过程中使用的标志</li>
+</ul>
+</li>
+<li>输出：返回更新后的 <code>rq</code>（通常 <code>finish_task_switch</code> 的返回值）</li>
+<li>成功条件：寄存器&#x2F;栈、MM（如适用）正确切换，相关屏障与 tracepoints 执行完毕</li>
+<li>错误&#x2F;异常：本函数不返回错误码；异常由上层检测（WARN、BUG、trace）</li>
+</ul>
+<hr>
+<h2 id="快速流程图与代码要点"><a href="#快速流程图与代码要点" class="headerlink" title="快速流程图与代码要点"></a>快速流程图与代码要点</h2><p>核心代码（节选，来自 <code>kernel/sched/core.c</code>）：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> __always_inline <span class="keyword">struct</span> rq *</span><br><span class="line"><span class="title function_">context_switch</span><span class="params">(<span class="keyword">struct</span> rq *rq, <span class="keyword">struct</span> task_struct *prev,</span></span><br><span class="line"><span class="params">         <span class="keyword">struct</span> task_struct *next, <span class="keyword">struct</span> rq_flags *rf)</span></span><br><span class="line">&#123;</span><br><span class="line">  prepare_task_switch(rq, prev, next);</span><br><span class="line">  arch_start_context_switch(prev);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (!next-&gt;mm) &#123; <span class="comment">/* to kernel */</span></span><br><span class="line">    enter_lazy_tlb(prev-&gt;active_mm, next);</span><br><span class="line">    next-&gt;active_mm = prev-&gt;active_mm;</span><br><span class="line">    <span class="keyword">if</span> (prev-&gt;mm)</span><br><span class="line">      mmgrab_lazy_tlb(prev-&gt;active_mm);</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">      prev-&gt;active_mm = <span class="literal">NULL</span>;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123; <span class="comment">/* to user */</span></span><br><span class="line">    membarrier_switch_mm(rq, prev-&gt;active_mm, next-&gt;mm);</span><br><span class="line">    switch_mm_irqs_off(prev-&gt;active_mm, next-&gt;mm, next);</span><br><span class="line">    lru_gen_use_mm(next-&gt;mm);</span><br><span class="line">    <span class="keyword">if</span> (!prev-&gt;mm) &#123;</span><br><span class="line">      rq-&gt;prev_mm = prev-&gt;active_mm;</span><br><span class="line">      prev-&gt;active_mm = <span class="literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  switch_mm_cid(rq, prev, next);</span><br><span class="line">  prepare_lock_switch(rq, next, rf);</span><br><span class="line"></span><br><span class="line">  <span class="comment">/* low-level register/stack switch */</span></span><br><span class="line">  switch_to(prev, next, prev);</span><br><span class="line">  barrier();</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> finish_task_switch(prev);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<img src="/2025/09/19/Linux%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB-OpenAI-%EF%BC%9A%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%87%E6%8D%A2/context-switch-riscv.svg" class="">
+<p>关键流程（高阶）：prepare -&gt; arch hook -&gt; MM 决策 -&gt; switch_mm_cid -&gt; prepare_lock_switch -&gt; switch_to -&gt; finish</p>
+<hr>
+<h2 id="逐段详解"><a href="#逐段详解" class="headerlink" title="逐段详解"></a>逐段详解</h2><p>下面对 <code>context_switch</code> 的每个阶段给出更深入的实现细节、涉及的子系统和常见的实现注意点。目标是帮助读者把高层逻辑与内核中并发&#x2F;性能考虑联系起来。</p>
+<ol>
+<li>prepare_task_switch(rq, prev, next)</li>
+</ol>
+<ul>
+<li>作用：准备切换所需的高层状态，常见内容包括：<ul>
+<li>更新调度统计（如 <code>schedstat</code>、<code>nr_switches</code>），并触发相应的 tracepoint（例如 <code>sched_switch</code> 的前序信息）。</li>
+<li>为后续的 MM 切换或寄存器切换做好条件检查（例如确保 <code>next</code> 的状态可运行、处理 DEAD 状态等）。</li>
+<li>设置或调整与延迟清理有关的字段（例如在某些路径把 <code>rq-&gt;prev_mm</code> 标记为待释放）。</li>
+<li>禁用抢占&#x2F;递增上下文切换计数以保证临界区（上层 schedule 路径在进入 context_switch 前通常已禁用抢占）。</li>
+</ul>
+</li>
+</ul>
+<p>注意：此阶段应尽量轻量，以避免把昂贵操作放在调度临界路径内；昂贵清理通常延迟到 <code>finish_task_switch()</code>。</p>
+<ol start="2">
+<li>arch_start_context_switch(prev)</li>
+</ol>
+<ul>
+<li>作用：为架构或虚拟化层提供一个切换前的钩子，常见用途：<ul>
+<li>对 paravirt 或 hypervisor 通知（在某些实现中会合并页表切换&#x2F;切换后处理以减少超主机调用）。</li>
+<li>做架构相关的快表清理或为接下来 <code>switch_to</code> 的汇编做准备（默认实现为空宏）。</li>
+</ul>
+</li>
+</ul>
+<p>实现要点：各架构可选择性覆盖此钩子；文档在 <code>include/linux/pgtable.h</code> 有宏定义。</p>
+<ol start="3">
+<li>MM（地址空间）处理</li>
+</ol>
+<p>这是 context_switch 中最复杂且对性能影响最大的部分之一。核心决策基于 <code>next-&gt;mm</code>：</p>
+<ul>
+<li><p>to kernel (next-&gt;mm &#x3D;&#x3D; NULL)</p>
+<ul>
+<li>行为：内核线程没有独立用户页表，内核通常把 <code>next-&gt;active_mm</code> 设为 <code>prev-&gt;active_mm</code> 并使用 lazy TLB 机制继续访问同一地址空间直到合适时机释放。</li>
+<li>关键函数：<code>enter_lazy_tlb()</code>（在某些架构此函数会处理 lazy 引用转移并标记 active_mm），以及在必要时对 <code>prev-&gt;active_mm</code> 做引用计数增量（<code>mmgrab_lazy_tlb</code>）。</li>
+</ul>
+</li>
+<li><p>to user (next-&gt;mm !&#x3D; NULL)</p>
+<ul>
+<li>行为：必须把 CPU 的页表上下文从 <code>prev-&gt;active_mm</code> 切换到 <code>next-&gt;mm</code>。此路径涉及多项操作：<ul>
+<li><code>membarrier_switch_mm()</code>：处理 sys_membarrier 要求的屏障语义，保证 return-to-user 的屏障可见性。</li>
+<li><code>switch_mm_irqs_off(prev-&gt;active_mm, next-&gt;mm, next)</code>：执行实际的页表切换；该接口通常在关中断上下文执行以避免并发访问页表寄存器或发生部分可见状态。</li>
+<li><code>lru_gen_use_mm(next-&gt;mm)</code>：通知 LRU-generation 子系统此 mm 被访问，用于内存回收&#x2F;衰老策略。</li>
+<li>延迟 mmdrop：若 <code>prev</code> 是内核线程，会把 <code>prev-&gt;active_mm</code> 放到 <code>rq-&gt;prev_mm</code>，在 <code>finish_task_switch()</code> 中再执行 mmdrop（因为 mmdrop 可能较慢，应避免在临界路径做）。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>实现要点与风险：</p>
+<ul>
+<li>页表切换通常涉及写入特权寄存器（如 SATP），并可能触发 TLB invalidation。各架构会有专门实现（<code>switch_mm()</code>&#x2F;<code>switch_mm_irqs_off()</code>）来封装这些细节。</li>
+<li>为了性能，ASID（或其他硬件上下文 ID）通常被重用&#x2F;分配；当 ASID 不足时会发生 rollover，此时需要全局 TLB flush 并更新版本号（参见各架构实现）。</li>
+</ul>
+<ol start="4">
+<li>switch_mm_cid(rq, prev, next)</li>
+</ol>
+<ul>
+<li><p>作用：维护与上下文 ID（ASID、CID）相关的 CPU 层次跟踪和统计，并在必要时触发基于 CID 的操作（例如为 perf&#x2F;ptrace&#x2F;硬件上下文管理同步）。</p>
+</li>
+<li><p>要点：该函数依赖此前的屏障（membarrier &#x2F; switch_mm）来保证可见性；如果这些屏障被修改，<code>switch_mm_cid()</code> 的语义可能需要对齐更新。</p>
+</li>
+</ul>
+<ol start="5">
+<li>prepare_lock_switch(rq, next, rf)</li>
+</ol>
+<ul>
+<li>作用：准备 runqueue&#x2F;锁状态以便执行低层寄存器切换。具体含义包括：<ul>
+<li>确保 <code>rq-&gt;curr</code>&#x2F;<code>rq-&gt;nr_running</code> 等调度元数据在切换点的一致性；</li>
+<li>将需要在切换期间保留或临时调整的锁标志合并到 <code>rf</code> 中（<code>rq_flags</code> 用于在 schedule 路径上下文中传递锁&#x2F;irq 状态）；</li>
+<li>在一些实现中会处理与 load-balancing 或偷取相关的最后准备步骤。</li>
+</ul>
+</li>
+</ul>
+<p>实现注意：准备阶段越简短越好，复杂的同步应尽可能延后或拆分。</p>
+<ol start="6">
+<li>switch_to(prev, next, prev) &#x2F; __switch_to</li>
+</ol>
+<ul>
+<li><p><code>switch_to</code> 是架构层的宏封装：它在调用汇编切换前处理 FPU&#x2F;向量寄存器的保存&#x2F;恢复、环境 CSR（如 ENVCFG）的写入、以及在需要时执行 icache flush 检查。</p>
+</li>
+<li><p><code>__switch_to</code>（通常为汇编）负责：</p>
+<ul>
+<li>保存 callee-saved 寄存器（例如 ra, s0-s11）到 <code>prev-&gt;thread</code>；</li>
+<li>恢复 <code>next-&gt;thread</code> 中保存的寄存器并切换 <code>tp</code>&#x2F;thread_info，使 <code>current</code> 读写快速生效；</li>
+<li>可能还会在硬件&#x2F;ABI 层面处理特殊位（如 SUM&#x2F;FS）或 shadow call stack 的保存&#x2F;恢复；</li>
+<li>返回时，低层寄存器与内核栈已切换到 <code>next</code> 的上下文。<code>last</code> 参数通常用于让上层记录&#x2F;获得被切出的 <code>prev</code> 指针以便后续清理。</li>
+</ul>
+</li>
+</ul>
+<p>实现要点与代价：寄存器保存&#x2F;恢复代价是上下文切换的固定开销，同时 FPU&#x2F;向量寄存器（如果热切换）可能导致显著额外开销；因此内核通过惰性保存&#x2F;恢复减少频率（如 lazy FPU）。</p>
+<ol start="7">
+<li>barrier() 与内存可见性</li>
+</ol>
+<ul>
+<li>在完成低层切换后使用编译器&#x2F;CPU barrier 来保证内存操作顺序，必要时配合 <code>membarrier</code> 系统调用的语义，确保用户态恢复前的屏障约束被满足。</li>
+</ul>
+<ol start="8">
+<li>finish_task_switch(prev)</li>
+</ol>
+<ul>
+<li>作用：完成切换后的清理与统计，是把昂贵或可以延后操作移出临界路径的主要场所，常见工作包括：<ul>
+<li>执行 lazy TLB &#x2F; lazy mm 的卸载（如 <code>mmdrop_lazy_tlb()</code>）；</li>
+<li>触发 tracepoints（<code>sched_switch</code> 的后序）、更新调度统计、以及 <code>nr_context_switches</code> 的计数；</li>
+<li>通知 RCU（<code>rcu_note_context_switch()</code>）表明当前任务进入或退出 quiescent state；</li>
+<li>释放或减少对 <code>prev-&gt;active_mm</code> 的引用（延迟的 mmdrop）；</li>
+<li>恢复 preemption &#x2F; 恢复中断状态（如果在切换路径中被暂时修改）。</li>
+</ul>
+</li>
+</ul>
+<p>实现要点：把昂贵清理延迟到这里能显著降低上下文切换的延迟，但会在短期内增加内存占用或延迟回收；必须保证并发安全。</p>
+<hr>
+<h2 id="RISC-V：实现细节与汇编摘录"><a href="#RISC-V：实现细节与汇编摘录" class="headerlink" title="RISC-V：实现细节与汇编摘录"></a>RISC-V：实现细节与汇编摘录</h2><p>位置参考：</p>
+<ul>
+<li><code>arch/riscv/kernel/entry.S</code>（<code>__switch_to</code> 汇编）</li>
+<li><code>arch/riscv/include/asm/switch_to.h</code>（<code>switch_to</code> 宏）</li>
+<li><code>arch/riscv/mm/context.c</code>（<code>switch_mm</code>、ASID 管理）</li>
+</ul>
+<p>汇编摘录（节选，带关键注释）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">SYM_FUNC_START(__switch_to)</span><br><span class="line">  /* Save context into prev-&gt;thread */</span><br><span class="line">  li    a4,  TASK_THREAD_RA        # offset base for prev-&gt;thread</span><br><span class="line">  add   a3, a0, a4                # a3 = prev + offset</span><br><span class="line">  add   a4, a1, a4                # a4 = next + offset</span><br><span class="line">  REG_S ra,  TASK_THREAD_RA_RA(a3)</span><br><span class="line">  REG_S sp,  TASK_THREAD_SP_RA(a3)</span><br><span class="line">  REG_S s0,  TASK_THREAD_S0_RA(a3)</span><br><span class="line">  ...                            # 保存 s1..s11</span><br><span class="line"></span><br><span class="line">  /* save the user space access flag */</span><br><span class="line">  csrr  s0, CSR_STATUS</span><br><span class="line">  REG_S s0, TASK_THREAD_SUM_RA(a3)</span><br><span class="line"></span><br><span class="line">  scs_save_current</span><br><span class="line"></span><br><span class="line">  /* Restore context from next-&gt;thread */</span><br><span class="line">  REG_L s0,  TASK_THREAD_SUM_RA(a4)</span><br><span class="line">  li    s1,  SR_SUM</span><br><span class="line">  and   s0,  s0, s1</span><br><span class="line">  csrs  CSR_STATUS, s0           # restore SUM bit in status CSR</span><br><span class="line">  REG_L ra,  TASK_THREAD_RA_RA(a4)</span><br><span class="line">  REG_L sp,  TASK_THREAD_SP_RA(a4)</span><br><span class="line">  ...                            # 恢复 s1..s11</span><br><span class="line"></span><br><span class="line">  move tp, a1                    # set tp to next (thread_info)</span><br><span class="line">  scs_load_current</span><br><span class="line">  ret</span><br><span class="line">SYM_FUNC_END(__switch_to)</span><br></pre></td></tr></table></figure>
+
+<p>简要寄存器表：ra, sp, s0-s11（callee-saved），以及 <code>CSR_STATUS</code>（SUM&#x2F;FS 位）。</p>
+<p>是否需要，我可以把 <code>TASK_THREAD_*</code> 的具体偏移表也摘录进来（需要读取对应 header）。</p>
+<hr>
+<h2 id="实验与调试（Try-it）"><a href="#实验与调试（Try-it）" class="headerlink" title="实验与调试（Try it）"></a>实验与调试（Try it）</h2><p>快速命令（在仓库根目录）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看 context_switch 源码段</span></span><br><span class="line">sed -n <span class="string">&#x27;5288,5360p&#x27;</span> kernel/sched/core.c</span><br></pre></td></tr></table></figure>
+
+<p>调试提示：使用 tracepoints（<code>sched_switch</code>、<code>rcu_note_context_switch</code>）、ftrace 或在 <code>__switch_to</code> 附近设置 kgdb&#x2F;kprobe 来观察寄存器切换。</p>
+<hr>
+<h2 id="参考与下一步"><a href="#参考与下一步" class="headerlink" title="参考与下一步"></a>参考与下一步</h2><ul>
+<li><code>kernel/sched/core.c</code></li>
+<li><code>arch/*/kernel</code>（各架构的 <code>__switch_to</code> &#x2F; <code>switch_mm</code> 实现）</li>
+<li><code>arch/riscv/mm/context.c</code>（ASID 管理）</li>
+<li>I-cache 刷新与 membarrier：RISC-V 的 membarrier&#x2F;ICACHE 协作在 <code>membarrier_arch_switch_mm</code> &#x2F; <code>flush_icache_deferred</code> 中体现；<code>context_switch</code>（上游）调用的 <code>membarrier_switch_mm</code> 需与此配合以保证用户态指令可见性。</li>
+<li>ASID 池与 rollover：实现维护 <code>current_version</code>、<code>context_asid_map</code>、每 CPU 的 <code>active_context</code> 和 <code>reserved_context</code>，当 ASID 不足时会触发 rollover（增加版本）并在 <code>__flush_context</code> 中更新状态并强制各 CPU 做 TLB 无效化。</li>
+<li>SMP&#x2F;迁移：<code>switch_to_should_flush_icache</code> 会在任务迁移（<code>thread.prev_cpu</code>）或 mm&#x2F;thread 标记了 <code>force_icache_flush</code> 时触发 i-cache flush，避免执行 stale 指令流。</li>
+</ul>
+<hr>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>本文档给出了 <code>context_switch</code> 的结构化、可读版本，强调了 MM 管理、屏障语义和低层切换点。下一步可以：</p>
+<ul>
+<li>对比 x86&#x2F;arm64 的 <code>switch_to</code> 与 <code>switch_mm</code> 实现差异；</li>
+<li>使用 tracepoints 和 perf 收集上下文切换的延迟分布；</li>
+<li>深入 read&#x2F;modify <code>enter_lazy_tlb</code>、<code>switch_mm_irqs_off</code> 的实现细节。</li>
+</ul>
+
+                
+                <hr>
+                <!-- Pager -->
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2025/09/30/RISC-V-MTE-Spec-学习笔记/" data-toggle="tooltip" data-placement="top" title="RISC-V MTE 内存标签">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2025/09/19/Linux源码解读：上下文切换/" data-toggle="tooltip" data-placement="top" title="Linux源码解读(灵码)：上下文切换">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- tip start -->
+                
+
+                
+                <!-- tip end -->
+
+                <!-- Music start-->
+                
+                <!-- Music end -->
+
+                <!-- Sharing -->
+                
+                <!-- Sharing -->
+
+                <!-- gitment start -->
+                
+                <!-- gitment end -->
+
+                <!-- 来必力City版安装代码 -->
+                
+                <!-- City版安装代码已完成 -->
+
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+    
+      
+        <aside id="sidebar">
+          <div id="toc" class="toc-article">
+          <strong class="toc-title">Contents</strong>
+          
+            
+              <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-context-switch-%E6%95%B4%E7%90%86%E7%89%88"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">深入理解 context_switch (整理版)</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%BF%AB%E9%80%9F%E5%8F%82%E8%80%83"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">快速参考</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E7%9B%AE%E5%BD%95%EF%BC%88%E5%BF%AB%E9%80%9F%E8%B7%B3%E8%BD%AC%EF%BC%89"><span class="toc-nav-number">3.</span> <span class="toc-nav-text">目录（快速跳转）</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%87%BD%E6%95%B0%E6%8E%A5%E5%8F%A3%EF%BC%88contract%EF%BC%89"><span class="toc-nav-number">4.</span> <span class="toc-nav-text">函数接口（contract）</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%BF%AB%E9%80%9F%E6%B5%81%E7%A8%8B%E5%9B%BE%E4%B8%8E%E4%BB%A3%E7%A0%81%E8%A6%81%E7%82%B9"><span class="toc-nav-number">5.</span> <span class="toc-nav-text">快速流程图与代码要点</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E9%80%90%E6%AE%B5%E8%AF%A6%E8%A7%A3"><span class="toc-nav-number">6.</span> <span class="toc-nav-text">逐段详解</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#RISC-V%EF%BC%9A%E5%AE%9E%E7%8E%B0%E7%BB%86%E8%8A%82%E4%B8%8E%E6%B1%87%E7%BC%96%E6%91%98%E5%BD%95"><span class="toc-nav-number">7.</span> <span class="toc-nav-text">RISC-V：实现细节与汇编摘录</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%AE%9E%E9%AA%8C%E4%B8%8E%E8%B0%83%E8%AF%95%EF%BC%88Try-it%EF%BC%89"><span class="toc-nav-number">8.</span> <span class="toc-nav-text">实验与调试（Try it）</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%8F%82%E8%80%83%E4%B8%8E%E4%B8%8B%E4%B8%80%E6%AD%A5"><span class="toc-nav-number">9.</span> <span class="toc-nav-text">参考与下一步</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E7%BB%93%E8%AF%AD"><span class="toc-nav-number">10.</span> <span class="toc-nav-text">结语</span></a></li></ol>
+            
+          
+          </div>
+        </aside>
+      
+    
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <!-- <h5><a href="/tags/">FEATURED TAGS</a></h5> -->
+                    <h5><a href="/tags/"></a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#Linux" title="Linux">Linux</a>
+                        
+                          <a class="tag" href="/tags/#kernel" title="kernel">kernel</a>
+                        
+                          <a class="tag" href="/tags/#context_switch" title="context_switch">context_switch</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                
+                <script src="https://giscus.app/client.js"
+                    data-repo="AllenZF/allenzf.github.io"
+                    data-repo-id="R_kgDOQMASLQ"
+                    data-category="General"
+                    data-category-id="DIC_kwDOQMASLc4CxR4Q"
+                    data-mapping="pathname"
+                    data-strict="0"
+                    data-reactions-enabled="1"
+                    data-emit-metadata="0"
+                    data-input-position="bottom"
+                    data-theme="preferred_color_scheme"
+                    data-lang="en"
+                    crossorigin="anonymous"
+                    async>
+                </script>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: 'ℬ'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+
+
+<style  type="text/css">
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/AllenZF">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://gitee.com/Sven">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-stack-1x fa-inverse">码</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/people/zhou-lang-jie-feng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; 周郎借风 2025 
+                    <br>
+                    Powered by 
+                    <a href="https://github.com/dusign/hexo-theme-snail">
+                        <i>hexo-theme-snail</i>
+                    </a> | 
+                    <iframe name="star" style="margin-left: 2px; margin-bottom:-5px;" frameborder="0" scrolling="0"
+                        width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=dusign&repo=hexo-theme-snail&type=star&count=true">
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+
+</footer>
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- Search -->
+
+<script src="/js/search.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://allenzf.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-XXXXXXXX-X';
+    var _gaDomain = 'yoursite';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+<!-- Search -->
+
+    <script type="text/javascript">      
+        var search_path = "search.xml";
+        if (search_path.length == 0) {
+            search_path = "search.xml";
+        }
+    var path = "/" + search_path;
+    searchFunc(path, 'local-search-input', 'local-search-result');
+    </script>
+
+
+<!-- busuanzi -->
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+
+    
+        <!-- background effects line -->
+        
+
+        
+            <script type="text/javascript" src="/js/mouse-click.js" content='[&quot;🌱&quot;,&quot;just do it&quot;,&quot;🍀&quot;]' color='[&quot;rgb(121,93,179)&quot; ,&quot;rgb(76,180,231)&quot; ,&quot;rgb(184,90,154)&quot;]'></script>
+        
+
+        <!-- background effects end -->
+    
+
+    <!--<script size="50" alpha='0.3' zIndex="-999" src="/js/ribbonStatic.js"></script>-->
+    
+        <script src="/js/ribbonDynamic.js"></script>
+    
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+
+</html>

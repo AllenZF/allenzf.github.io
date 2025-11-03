@@ -1,0 +1,404 @@
+# tracer: function
+#
+# entries-in-buffer/entries-written: 52/52   #P:2
+#
+#                                _-----=> irqs-off/BH-disabled
+#                               / _----=> need-resched
+#                              | / _---=> hardirq/softirq
+#                              || / _--=> preempt-depth
+#                              ||| / _-=> migrate-disable
+#                              |||| /     delay
+#           TASK-PID     CPU#  |||||  TIMESTAMP  FUNCTION
+#              | |         |   |||||     |         |
+            perf-261     [000] .....   911.384767: pmu_sbi_event_map <-riscv_pmu_event_init
+            perf-261     [000] .....   911.385245: <stack trace>
+ => ftrace_call
+ => perf_try_init_event
+ => perf_event_alloc.part.0
+ => __do_sys_perf_event_open
+ => __riscv_sys_perf_event_open
+ => do_trap_ecall_u
+ => ret_from_exception
+ => 0x68ac268b
+            perf-261     [000] .....   911.385389: pmu_sbi_event_init <-riscv_pmu_event_init
+            perf-261     [000] .....   911.385396: <stack trace>
+ => ftrace_call
+ => perf_try_init_event
+ => perf_event_alloc.part.0
+ => __do_sys_perf_event_open
+ => __riscv_sys_perf_event_open
+ => do_trap_ecall_u
+ => ret_from_exception
+ => 0x68ac268b
+            perf-261     [000] .....   911.385438: pmu_sbi_ctr_get_width <-riscv_pmu_event_init
+            perf-261     [000] .....   911.385444: <stack trace>
+ => ftrace_call
+ => perf_try_init_event
+ => perf_event_alloc.part.0
+ => __do_sys_perf_event_open
+ => __riscv_sys_perf_event_open
+ => do_trap_ecall_u
+ => ret_from_exception
+ => 0x68ac268b
+            perf-261     [000] .....   911.405656: pmu_sbi_event_map <-riscv_pmu_event_init
+            perf-261     [000] .....   911.405674: <stack trace>
+ => ftrace_call
+ => perf_try_init_event
+ => perf_event_alloc.part.0
+ => __do_sys_perf_event_open
+ => __riscv_sys_perf_event_open
+ => do_trap_ecall_u
+ => ret_from_exception
+ => 0x68ac268b
+            perf-261     [000] .....   911.405678: pmu_sbi_event_init <-riscv_pmu_event_init
+            perf-261     [000] .....   911.405684: <stack trace>
+ => ftrace_call
+ => perf_try_init_event
+ => perf_event_alloc.part.0
+ => __do_sys_perf_event_open
+ => __riscv_sys_perf_event_open
+ => do_trap_ecall_u
+ => ret_from_exception
+ => 0x68ac268b
+            perf-261     [000] .....   911.405687: pmu_sbi_ctr_get_width <-riscv_pmu_event_init
+            perf-261     [000] .....   911.405692: <stack trace>
+ => ftrace_call
+ => perf_try_init_event
+ => perf_event_alloc.part.0
+ => __do_sys_perf_event_open
+ => __riscv_sys_perf_event_open
+ => do_trap_ecall_u
+ => ret_from_exception
+ => 0x68ac268b
+            date-262     [001] d..2.   911.415279: pmu_sbi_ctr_get_idx <-riscv_pmu_add
+            date-262     [001] d..2.   911.415302: <stack trace>
+ => ftrace_call
+ => event_sched_in
+ => merge_sched_in
+ => visit_groups_merge.constprop.0.isra.0
+ => ctx_groups_sched_in
+ => ctx_sched_in
+ => ctx_resched
+ => perf_event_exec
+ => begin_new_exec
+ => load_elf_binary
+ => bprm_execve
+ => do_execveat_common.isra.0
+ => __riscv_sys_execve
+ => do_trap_ecall_u
+ => ret_from_exception
+            date-262     [001] d..2.   911.416049: pmu_sbi_ctr_get_width <-riscv_pmu_start
+            date-262     [001] d..2.   911.416060: <stack trace>
+ => ftrace_call
+ => riscv_pmu_add
+ => event_sched_in
+ => merge_sched_in
+ => visit_groups_merge.constprop.0.isra.0
+ => ctx_groups_sched_in
+ => ctx_sched_in
+ => ctx_resched
+ => perf_event_exec
+ => begin_new_exec
+ => load_elf_binary
+ => bprm_execve
+ => do_execveat_common.isra.0
+ => __riscv_sys_execve
+ => do_trap_ecall_u
+ => ret_from_exception
+            date-262     [001] d..2.   911.416100: pmu_sbi_ctr_get_width <-riscv_pmu_event_set_period
+            date-262     [001] d..2.   911.416108: <stack trace>
+ => ftrace_call
+ => riscv_pmu_start
+ => riscv_pmu_add
+ => event_sched_in
+ => merge_sched_in
+ => visit_groups_merge.constprop.0.isra.0
+ => ctx_groups_sched_in
+ => ctx_sched_in
+ => ctx_resched
+ => perf_event_exec
+ => begin_new_exec
+ => load_elf_binary
+ => bprm_execve
+ => do_execveat_common.isra.0
+ => __riscv_sys_execve
+ => do_trap_ecall_u
+ => ret_from_exception
+            date-262     [001] d..2.   911.416165: pmu_sbi_ctr_start <-riscv_pmu_start
+            date-262     [001] d..2.   911.416173: <stack trace>
+ => ftrace_call
+ => riscv_pmu_add
+ => event_sched_in
+ => merge_sched_in
+ => visit_groups_merge.constprop.0.isra.0
+ => ctx_groups_sched_in
+ => ctx_sched_in
+ => ctx_resched
+ => perf_event_exec
+ => begin_new_exec
+ => load_elf_binary
+ => bprm_execve
+ => do_execveat_common.isra.0
+ => __riscv_sys_execve
+ => do_trap_ecall_u
+ => ret_from_exception
+            date-262     [001] d..2.   911.416740: pmu_sbi_ctr_get_idx <-riscv_pmu_add
+            date-262     [001] d..2.   911.416751: <stack trace>
+ => ftrace_call
+ => event_sched_in
+ => merge_sched_in
+ => visit_groups_merge.constprop.0.isra.0
+ => ctx_groups_sched_in
+ => ctx_sched_in
+ => ctx_resched
+ => perf_event_exec
+ => begin_new_exec
+ => load_elf_binary
+ => bprm_execve
+ => do_execveat_common.isra.0
+ => __riscv_sys_execve
+ => do_trap_ecall_u
+ => ret_from_exception
+            date-262     [001] d..2.   911.416798: pmu_sbi_ctr_get_width <-riscv_pmu_start
+            date-262     [001] d..2.   911.416806: <stack trace>
+ => ftrace_call
+ => riscv_pmu_add
+ => event_sched_in
+ => merge_sched_in
+ => visit_groups_merge.constprop.0.isra.0
+ => ctx_groups_sched_in
+ => ctx_sched_in
+ => ctx_resched
+ => perf_event_exec
+ => begin_new_exec
+ => load_elf_binary
+ => bprm_execve
+ => do_execveat_common.isra.0
+ => __riscv_sys_execve
+ => do_trap_ecall_u
+ => ret_from_exception
+            date-262     [001] d..2.   911.416808: pmu_sbi_ctr_get_width <-riscv_pmu_event_set_period
+            date-262     [001] d..2.   911.416816: <stack trace>
+ => ftrace_call
+ => riscv_pmu_start
+ => riscv_pmu_add
+ => event_sched_in
+ => merge_sched_in
+ => visit_groups_merge.constprop.0.isra.0
+ => ctx_groups_sched_in
+ => ctx_sched_in
+ => ctx_resched
+ => perf_event_exec
+ => begin_new_exec
+ => load_elf_binary
+ => bprm_execve
+ => do_execveat_common.isra.0
+ => __riscv_sys_execve
+ => do_trap_ecall_u
+ => ret_from_exception
+            date-262     [001] d..2.   911.416818: pmu_sbi_ctr_start <-riscv_pmu_start
+            date-262     [001] d..2.   911.416825: <stack trace>
+ => ftrace_call
+ => riscv_pmu_add
+ => event_sched_in
+ => merge_sched_in
+ => visit_groups_merge.constprop.0.isra.0
+ => ctx_groups_sched_in
+ => ctx_sched_in
+ => ctx_resched
+ => perf_event_exec
+ => begin_new_exec
+ => load_elf_binary
+ => bprm_execve
+ => do_execveat_common.isra.0
+ => __riscv_sys_execve
+ => do_trap_ecall_u
+ => ret_from_exception
+            date-262     [001] d..1.   911.425606: pmu_sbi_ctr_stop <-riscv_pmu_stop
+            date-262     [001] d..1.   911.425625: <stack trace>
+ => ftrace_call
+ => riscv_pmu_del
+ => event_sched_out
+ => group_sched_out
+ => __pmu_ctx_sched_out
+ => ctx_sched_out
+ => task_ctx_sched_out
+ => perf_event_exit_task
+ => do_exit
+ => do_group_exit
+ => __wake_up_parent
+ => do_trap_ecall_u
+ => ret_from_exception
+            date-262     [001] d..1.   911.425725: pmu_sbi_ctr_get_width <-riscv_pmu_event_update
+            date-262     [001] d..1.   911.425734: <stack trace>
+ => ftrace_call
+ => riscv_pmu_stop
+ => riscv_pmu_del
+ => event_sched_out
+ => group_sched_out
+ => __pmu_ctx_sched_out
+ => ctx_sched_out
+ => task_ctx_sched_out
+ => perf_event_exit_task
+ => do_exit
+ => do_group_exit
+ => __wake_up_parent
+ => do_trap_ecall_u
+ => ret_from_exception
+            date-262     [001] d..1.   911.425748: pmu_sbi_ctr_read <-riscv_pmu_event_update
+            date-262     [001] d..1.   911.425755: <stack trace>
+ => ftrace_call
+ => riscv_pmu_stop
+ => riscv_pmu_del
+ => event_sched_out
+ => group_sched_out
+ => __pmu_ctx_sched_out
+ => ctx_sched_out
+ => task_ctx_sched_out
+ => perf_event_exit_task
+ => do_exit
+ => do_group_exit
+ => __wake_up_parent
+ => do_trap_ecall_u
+ => ret_from_exception
+            date-262     [001] d..1.   911.425776: riscv_pmu_ctr_read_csr <-pmu_sbi_ctr_read
+            date-262     [001] d..1.   911.425783: <stack trace>
+ => ftrace_call
+ => riscv_pmu_event_update
+ => riscv_pmu_stop
+ => riscv_pmu_del
+ => event_sched_out
+ => group_sched_out
+ => __pmu_ctx_sched_out
+ => ctx_sched_out
+ => task_ctx_sched_out
+ => perf_event_exit_task
+ => do_exit
+ => do_group_exit
+ => __wake_up_parent
+ => do_trap_ecall_u
+ => ret_from_exception
+            date-262     [001] d..1.   911.425873: pmu_sbi_ctr_stop <-riscv_pmu_del
+            date-262     [001] d..1.   911.425880: <stack trace>
+ => ftrace_call
+ => event_sched_out
+ => group_sched_out
+ => __pmu_ctx_sched_out
+ => ctx_sched_out
+ => task_ctx_sched_out
+ => perf_event_exit_task
+ => do_exit
+ => do_group_exit
+ => __wake_up_parent
+ => do_trap_ecall_u
+ => ret_from_exception
+ => __wake_up_parent
+            date-262     [001] d..1.   911.425893: pmu_sbi_ctr_clear_idx <-riscv_pmu_del
+            date-262     [001] d..1.   911.425900: <stack trace>
+ => ftrace_call
+ => event_sched_out
+ => group_sched_out
+ => __pmu_ctx_sched_out
+ => ctx_sched_out
+ => task_ctx_sched_out
+ => perf_event_exit_task
+ => do_exit
+ => do_group_exit
+ => __wake_up_parent
+ => do_trap_ecall_u
+ => ret_from_exception
+ => __wake_up_parent
+            date-262     [001] d..1.   911.425926: pmu_sbi_ctr_stop <-riscv_pmu_stop
+            date-262     [001] d..1.   911.425933: <stack trace>
+ => ftrace_call
+ => riscv_pmu_del
+ => event_sched_out
+ => group_sched_out
+ => __pmu_ctx_sched_out
+ => ctx_sched_out
+ => task_ctx_sched_out
+ => perf_event_exit_task
+ => do_exit
+ => do_group_exit
+ => __wake_up_parent
+ => do_trap_ecall_u
+ => ret_from_exception
+            date-262     [001] d..1.   911.425939: pmu_sbi_ctr_get_width <-riscv_pmu_event_update
+            date-262     [001] d..1.   911.425945: <stack trace>
+ => ftrace_call
+ => riscv_pmu_stop
+ => riscv_pmu_del
+ => event_sched_out
+ => group_sched_out
+ => __pmu_ctx_sched_out
+ => ctx_sched_out
+ => task_ctx_sched_out
+ => perf_event_exit_task
+ => do_exit
+ => do_group_exit
+ => __wake_up_parent
+ => do_trap_ecall_u
+ => ret_from_exception
+            date-262     [001] d..1.   911.425947: pmu_sbi_ctr_read <-riscv_pmu_event_update
+            date-262     [001] d..1.   911.425954: <stack trace>
+ => ftrace_call
+ => riscv_pmu_stop
+ => riscv_pmu_del
+ => event_sched_out
+ => group_sched_out
+ => __pmu_ctx_sched_out
+ => ctx_sched_out
+ => task_ctx_sched_out
+ => perf_event_exit_task
+ => do_exit
+ => do_group_exit
+ => __wake_up_parent
+ => do_trap_ecall_u
+ => ret_from_exception
+            date-262     [001] d..1.   911.425956: riscv_pmu_ctr_read_csr <-pmu_sbi_ctr_read
+            date-262     [001] d..1.   911.425963: <stack trace>
+ => ftrace_call
+ => riscv_pmu_event_update
+ => riscv_pmu_stop
+ => riscv_pmu_del
+ => event_sched_out
+ => group_sched_out
+ => __pmu_ctx_sched_out
+ => ctx_sched_out
+ => task_ctx_sched_out
+ => perf_event_exit_task
+ => do_exit
+ => do_group_exit
+ => __wake_up_parent
+ => do_trap_ecall_u
+ => ret_from_exception
+            date-262     [001] d..1.   911.425973: pmu_sbi_ctr_stop <-riscv_pmu_del
+            date-262     [001] d..1.   911.425979: <stack trace>
+ => ftrace_call
+ => event_sched_out
+ => group_sched_out
+ => __pmu_ctx_sched_out
+ => ctx_sched_out
+ => task_ctx_sched_out
+ => perf_event_exit_task
+ => do_exit
+ => do_group_exit
+ => __wake_up_parent
+ => do_trap_ecall_u
+ => ret_from_exception
+ => __wake_up_parent
+            date-262     [001] d..1.   911.425985: pmu_sbi_ctr_clear_idx <-riscv_pmu_del
+            date-262     [001] d..1.   911.425991: <stack trace>
+ => ftrace_call
+ => event_sched_out
+ => group_sched_out
+ => __pmu_ctx_sched_out
+ => ctx_sched_out
+ => task_ctx_sched_out
+ => perf_event_exit_task
+ => do_exit
+ => do_group_exit
+ => __wake_up_parent
+ => do_trap_ecall_u
+ => ret_from_exception
+ => __wake_up_parent

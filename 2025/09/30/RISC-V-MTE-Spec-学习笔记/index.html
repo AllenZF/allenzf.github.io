@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="baidu-site-verification" content="093lY4ziMu" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="记录点滴">
+    <meta name="keyword"  content="加油, 个人博客">
+    <link rel="shortcut icon" href="/img/ironman-draw.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <!--<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
+    <title>
+        
+          RISC-V MTE 内存标签 - Sven-Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://allenzf.github.io/2025/09/30/RISC-V-MTE-Spec-学习笔记/">
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+
+    <!-- Custom CSS --> 
+    
+        
+<link rel="stylesheet" href="/css/dusign-light.css">
+
+        
+<link rel="stylesheet" href="/css/dusign-common-light.css">
+
+        
+<link rel="stylesheet" href="/css/font-awesome.css">
+
+        
+<link rel="stylesheet" href="/css/toc.css">
+
+        <!-- background effects end -->
+    
+    
+    <!-- Pygments Highlight CSS -->
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+
+    
+<link rel="stylesheet" href="/css/widget.css">
+
+
+    
+<link rel="stylesheet" href="/css/rocket.css">
+
+
+    
+<link rel="stylesheet" href="/css/signature.css">
+
+
+    
+<link rel="stylesheet" href="/css/fonts.googleapis.css">
+
+
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+    <!-- photography -->
+    
+<link rel="stylesheet" href="/css/photography.css">
+
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+<meta name="generator" content="Hexo 8.1.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- background effects start -->
+    
+    <!-- background effects end -->
+
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            
+                background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('../../../../img/header_img/Iron-Man-3.jpg')
+                /*post*/
+            
+        
+    }
+    
+    #signature{
+        background-image: url('/img/signature/Just-do-it-white.png');
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#RISC-V" title="RISC-V">RISC-V</a>
+                            
+                              <a class="tag" href="/tags/#MTE" title="MTE">MTE</a>
+                            
+                              <a class="tag" href="/tags/#memory tagging" title="memory tagging">memory tagging</a>
+                            
+                        </div>
+                        <h1>RISC-V MTE 内存标签</h1>
+                        <h2 class="subheading">RISC-V Spec 学习笔记</h2>
+                        <span class="meta">
+                            Posted by 周郎借风 on
+                            2025-09-30
+                        </span>
+
+                        
+                            <div class="blank_box"></div>
+                            <span class="meta">
+                                Words <span class="post-count">4.3k</span> and
+                                Reading Time <span class="post-count">16</span> Minutes
+                            </span>
+                            <div class="blank_box"></div>
+                            <!-- 不蒜子统计 start -->
+                            <span class="meta">
+                                Viewed <span id="busuanzi_value_page_pv"><i class="fa fa-spinner fa-spin"></i></span> Times
+                            </span>
+                            <!-- 不蒜子统计 end -->
+                        
+
+                    </div>
+                
+
+                </div>
+            </div>
+        </div>      
+    </div>
+
+    
+    <div class="waveWrapper">
+        <div class="wave wave_before" style="background-image: url('/img/wave-light.png')"></div>
+        <div class="wave wave_after" style="background-image: url('/img/wave-light.png')"></div>
+    </div>
+    
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">周郎借风</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">主页</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/categories/">分类</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">关于</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">归档</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/photography/">摄影</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">标签</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+                    
+                    
+                    <li>
+                        <a href="https://allenzf.github.io" target="_blank">中文博客</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h2 id="📋-文档基本信息"><a href="#📋-文档基本信息" class="headerlink" title="📋 文档基本信息"></a>📋 文档基本信息</h2><p>基于 <code>riscv-mte.html</code> 文档的详细知识点梳理</p>
+<ul>
+<li><strong>文档标题</strong>: RISC-V Memory Tagging Extension</li>
+<li><strong>版本</strong>: v0.0.0 (Draft)</li>
+<li><strong>日期</strong>: 2025-09-28</li>
+<li><strong>状态</strong>: 开发阶段草案</li>
+</ul>
+<hr>
+<h2 id="📖-第1章-介绍"><a href="#📖-第1章-介绍" class="headerlink" title="📖 第1章 - 介绍"></a>📖 第1章 - 介绍</h2><h3 id="🔍-背景与问题陈述"><a href="#🔍-背景与问题陈述" class="headerlink" title="🔍 背景与问题陈述"></a>🔍 背景与问题陈述</h3><h4 id="内存安全问题根源"><a href="#内存安全问题根源" class="headerlink" title="内存安全问题根源"></a><strong>内存安全问题根源</strong></h4><ul>
+<li>生产级软件大多使用C&#x2F;C++等内存管理原语强大的语言</li>
+<li>协作开发和紧锣密鼓的工期导致引入内存安全bug</li>
+<li>内存安全问题的核心是违反语言规范的无效内存访问</li>
+</ul>
+<h4 id="对象生命周期管理"><a href="#对象生命周期管理" class="headerlink" title="对象生命周期管理"></a><strong>对象生命周期管理</strong></h4><table>
+<thead>
+<tr>
+<th>内存类型</th>
+<th>生命周期管理</th>
+<th>示例</th>
+<th>生命周期边界</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>堆内存</strong></td>
+<td>内存分配器管理</td>
+<td>malloc&#x2F;free</td>
+<td>malloc ~ free调用之间</td>
+</tr>
+<tr>
+<td><strong>栈内存</strong></td>
+<td>编译器作用域规则</td>
+<td>局部变量</td>
+<td>程序语言作用域规则</td>
+</tr>
+<tr>
+<td><strong>全局变量</strong></td>
+<td>操作系统管理</td>
+<td>全局变量</td>
+<td>进程启动 ~ 进程关闭</td>
+</tr>
+</tbody></table>
+<h4 id="主要内存安全漏洞类型"><a href="#主要内存安全漏洞类型" class="headerlink" title="主要内存安全漏洞类型"></a><strong>主要内存安全漏洞类型</strong></h4><ul>
+<li><p><strong>时间安全性问题(Temporal)</strong></p>
+<ul>
+<li>Use-after-free (UAF) - 堆内存</li>
+<li>Stack use after return&#x2F;scope - 栈内存</li>
+</ul>
+</li>
+<li><p><strong>空间安全性问题(Spatial)</strong></p>
+<ul>
+<li>缓冲区溢出&#x2F;下溢</li>
+<li>越界访问</li>
+</ul>
+</li>
+</ul>
+<h3 id="🛡️-内存标签保护机制"><a href="#🛡️-内存标签保护机制" class="headerlink" title="🛡️ 内存标签保护机制"></a>🛡️ 内存标签保护机制</h3><h4 id="锁钥模型-Lock-and-Key"><a href="#锁钥模型-Lock-and-Key" class="headerlink" title="锁钥模型(Lock-and-Key)"></a><strong>锁钥模型(Lock-and-Key)</strong></h4><ul>
+<li><strong>内存标签(锁)</strong>: 为内存块分配唯一标识</li>
+<li><strong>指针标签(钥)</strong>: 指针高位存储对应的标签标识</li>
+<li><strong>访问验证</strong>: 访问时验证锁钥匹配，不匹配则终止程序</li>
+</ul>
+<h4 id="生命周期管理流程"><a href="#生命周期管理流程" class="headerlink" title="生命周期管理流程"></a><strong>生命周期管理流程</strong></h4><ol>
+<li><strong>对象创建</strong>: malloc时分配相同标签给内存和指针</li>
+<li><strong>访问验证</strong>: 使用指针时验证标签匹配</li>
+<li><strong>对象销毁</strong>: free时更改内存标签，使旧指针失效</li>
+</ol>
+<h4 id="现有软件方案对比"><a href="#现有软件方案对比" class="headerlink" title="现有软件方案对比"></a><strong>现有软件方案对比</strong></h4><table>
+<thead>
+<tr>
+<th>方案</th>
+<th>实现方式</th>
+<th>适用场景</th>
+<th>性能影响</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>HWAddressSanitizer</strong></td>
+<td>指针掩码技术</td>
+<td>单元测试&#x2F;开发者测试</td>
+<td>中等到显著</td>
+</tr>
+<tr>
+<td><strong>AddressSanitizer</strong></td>
+<td>纯软件实现</td>
+<td>模糊测试&#x2F;特殊测试框架</td>
+<td>显著开销</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="🏗️-第2章-内存标签扩展-Zimt"><a href="#🏗️-第2章-内存标签扩展-Zimt" class="headerlink" title="🏗️ 第2章 - 内存标签扩展 (Zimt)"></a>🏗️ 第2章 - 内存标签扩展 (Zimt)</h2><h3 id="🔬-基础架构设计"><a href="#🔬-基础架构设计" class="headerlink" title="🔬 基础架构设计"></a>🔬 基础架构设计</h3><h4 id="核心设计原则"><a href="#核心设计原则" class="headerlink" title="核心设计原则"></a><strong>核心设计原则</strong></h4><ul>
+<li><strong>内存块划分</strong>: 16字节为单位的连续内存块(MC)</li>
+<li><strong>XLEN要求</strong>: 仅支持64位架构，依赖指针掩码扩展</li>
+<li><strong>编码兼容性</strong>: 使用zimop编码保证二进制兼容性</li>
+</ul>
+<h4 id="标签配置规范"><a href="#标签配置规范" class="headerlink" title="标签配置规范"></a><strong>标签配置规范</strong></h4><table>
+<thead>
+<tr>
+<th>指针标签宽度</th>
+<th>内存标签宽度</th>
+<th>可用标签空间</th>
+<th>存储效率</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>4位</td>
+<td>4位</td>
+<td>16个唯一值</td>
+<td>高(每字节存2个标签)</td>
+</tr>
+<tr>
+<td>7位</td>
+<td>8位</td>
+<td>128个唯一值</td>
+<td>标准(每字节存1个标签)</td>
+</tr>
+</tbody></table>
+<p>内存标签宽度为8位，可提供256中标签值，安全性比4位（16种标签值）高，但实际使用时因为指针标签只有7位，所以只有128种标签值。为啥是7位，因为Sv57只有7位是可以提供给内存标签。因此标签的最大宽度实际只有7位。</p>
+<h3 id="💻-内存操作"><a href="#💻-内存操作" class="headerlink" title="💻 内存操作"></a>💻 内存操作</h3><h4 id="加载-存储操作分类"><a href="#加载-存储操作分类" class="headerlink" title="加载&#x2F;存储操作分类"></a><strong>加载&#x2F;存储操作分类</strong></h4><ol>
+<li><p><strong>常规加载&#x2F;存储操作</strong></p>
+<ul>
+<li>对具有 –R、X-R、-WR、XWR权限的页面操作</li>
+<li>用于标准内存访问指令（除settag和checktag）</li>
+</ul>
+</li>
+<li><p><strong>检查型（checked）加载&#x2F;存储</strong></p>
+<ul>
+<li>启用了标签检查的常规操作</li>
+<li>在访问时执行标签验证</li>
+</ul>
+</li>
+<li><p><strong>非检查型（unchecked）加载&#x2F;存储</strong></p>
+<ul>
+<li>禁用标签检查的常规操作</li>
+<li>用于可信代码路径优化（有些函数或执行环境是值得信赖的，没必要进行标签检查。）</li>
+</ul>
+</li>
+<li><p><strong>标签加载&#x2F;存储操作</strong></p>
+<ul>
+<li>专门用于标签存储区的操作（gentag, addtag, settag, checktag）</li>
+<li>需要特定的页面权限(标签存储区)</li>
+</ul>
+</li>
+</ol>
+<h3 id="🎯-标签管理指令集"><a href="#🎯-标签管理指令集" class="headerlink" title="🎯 标签管理指令集"></a>🎯 标签管理指令集</h3><h4 id="标签生成指令-gentag-rd"><a href="#标签生成指令-gentag-rd" class="headerlink" title="标签生成指令 - gentag rd"></a><strong>标签生成指令 - <code>gentag rd</code></strong></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gentag t0  # 在t0高位生成随机标签</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>功能</strong>: 生成<strong>伪随机</strong>指针标签</li>
+<li><strong>条件</strong>: 内存标签启用时生成随机值（会出现什么值是随机的），内存标签禁用则回退zimop行为（t0会被清空）</li>
+<li><strong>安全性</strong>: 确保标签在调用间均匀分布（每个值出现的概率是一样的）</li>
+</ul>
+<h4 id="标签算术指令-addtag-rd-rs1-tag-imm4"><a href="#标签算术指令-addtag-rd-rs1-tag-imm4" class="headerlink" title="标签算术指令 - addtag rd, rs1, #tag_imm4"></a><strong>标签算术指令 - <code>addtag rd, rs1, #tag_imm4</code></strong></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">addtag t1, t0, 1  # 在t0标签（高位）基础上加1（左移到高位）存到t1的高位，内存标签禁用则回退zimop行为（t0会被清空）</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>应用</strong>: 编译器派生相关对象的标签</li>
+<li><strong>优势</strong>: 静态确定性地计算栈对象标签（gentag已经获得了随机标签，这里只需算术计算标签）</li>
+<li><strong>用途</strong>: 编译器为堆栈上的连续对象分配不同的标记（具有相同的基标记），从而帮助捕获相邻溢出错误。这也有助于语言运行时在异常展开等事件中，以确定性方式计算堆栈上对象的标记。</li>
+</ul>
+<h4 id="内存标签设置指令-settag-rs1-chunk-count"><a href="#内存标签设置指令-settag-rs1-chunk-count" class="headerlink" title="内存标签设置指令 - settag rs1, #chunk_count"></a><strong>内存标签设置指令 - <code>settag rs1, #chunk_count</code></strong></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">gentag t0, zero      # 生成基础标签(base tag)</span><br><span class="line">or s1, s1, t0        # 组合地址和标签(s1是va)</span><br><span class="line">settag s1, 1         # 为s1指向的内存块(前2个内存块)设置标签</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>范围</strong>: 支持1-16个连续内存块（编码中用4个bit来表示chunk_count, 因此，0表示1个内存块，1表示2个内存块，15表示16个内存块）</li>
+<li><strong>地址计算</strong>: <code>rs1 &amp; (~0xF)</code> 获取起始地址（有效地址：不包含高位）</li>
+<li><strong>对齐要求</strong>: 无原子性保证，可能分割为多次存储</li>
+</ul>
+<h3 id="⚡-标签检查机制"><a href="#⚡-标签检查机制" class="headerlink" title="⚡ 标签检查机制"></a>⚡ 标签检查机制</h3><h4 id="检查触发条件"><a href="#检查触发条件" class="headerlink" title="检查触发条件"></a><strong>检查触发条件</strong></h4><ul>
+<li><strong>M模式</strong>: 所有常规加载&#x2F;存储都检查</li>
+<li><strong>非M模式</strong>: <ul>
+<li><code>satp.MODE == Bare</code>: 全部检查</li>
+<li><code>satp.MODE != Bare</code>: 仅标记页面（叶子PTE）检查</li>
+</ul>
+</li>
+</ul>
+<h4 id="检查豁免规则"><a href="#检查豁免规则" class="headerlink" title="检查豁免规则"></a><strong>检查豁免规则</strong></h4><ul>
+<li><strong>栈指针访问</strong>: sp&#x2F;x2相对访问不检查</li>
+<li><strong>标签不匹配</strong>: 触发软件检查异常(tval&#x3D;4)</li>
+<li><strong>标签查找</strong>: mc_tag是从内存中获取的，其本身也要进行PMP等权限检查，可能会产生页面错误&#x2F;访问错误</li>
+</ul>
+<h4 id="显式检查指令-checktag-rs1-chunk-count"><a href="#显式检查指令-checktag-rs1-chunk-count" class="headerlink" title="显式检查指令 - checktag rs1, #chunk_count"></a><strong>显式检查指令 - <code>checktag rs1, #chunk_count</code></strong></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">checktag s1, 1  # 显式检查s1指向的连续的2个内存块标签</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>强制检查</strong>: 不受页面标记（MTAG）影响</li>
+<li><strong>用途</strong>: 调试和验证场景</li>
+</ul>
+<h3 id="🔧-控制系统寄存器配置"><a href="#🔧-控制系统寄存器配置" class="headerlink" title="🔧 控制系统寄存器配置"></a>🔧 控制系统寄存器配置</h3><h4 id="MT-MODE编码规范"><a href="#MT-MODE编码规范" class="headerlink" title="MT_MODE编码规范"></a><strong>MT_MODE编码规范</strong></h4><table>
+<thead>
+<tr>
+<th>模式值</th>
+<th>状态</th>
+<th>指针标签宽度</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>00</td>
+<td>禁用</td>
+<td>-</td>
+</tr>
+<tr>
+<td>01</td>
+<td>保留</td>
+<td>-</td>
+</tr>
+<tr>
+<td>10</td>
+<td>启用</td>
+<td>4位</td>
+</tr>
+<tr>
+<td>11</td>
+<td>启用</td>
+<td>7位</td>
+</tr>
+</tbody></table>
+<h4 id="特权级别控制寄存器"><a href="#特权级别控制寄存器" class="headerlink" title="特权级别控制寄存器"></a><strong>特权级别控制寄存器</strong></h4><table>
+<thead>
+<tr>
+<th>特权级别</th>
+<th>控制寄存器</th>
+<th>影响模式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>M模式</td>
+<td><code>mseccfg.MT_MODE</code></td>
+<td>M模式启用</td>
+</tr>
+<tr>
+<td>HS&#x2F;S模式</td>
+<td><code>menvcfg.MT_MODE</code></td>
+<td>HS&#x2F;S模式启用</td>
+</tr>
+<tr>
+<td>VU&#x2F;U模式</td>
+<td><code>senvcfg.MT_MODE</code></td>
+<td>VU&#x2F;U模式启用</td>
+</tr>
+<tr>
+<td>VS模式</td>
+<td><code>henvcfg.MT_MODE</code></td>
+<td>VS模式启用</td>
+</tr>
+</tbody></table>
+<h4 id="异步报告控制"><a href="#异步报告控制" class="headerlink" title="异步报告控制"></a><strong>异步报告控制</strong></h4><ul>
+<li><strong>MT_ASYNC位</strong>: <strong>存储</strong>操作，标签不匹配可以异步报告</li>
+<li><strong>保证同步</strong>: <strong>加载</strong>操作始终保持同步错误报告</li>
+</ul>
+<h3 id="📄-页面级别标签检查控制"><a href="#📄-页面级别标签检查控制" class="headerlink" title="📄 页面级别标签检查控制"></a>📄 页面级别标签检查控制</h3><h4 id="页表条目MTAG位"><a href="#页表条目MTAG位" class="headerlink" title="页表条目MTAG位"></a><strong>页表条目MTAG位</strong></h4><ul>
+<li><strong>启用检查</strong>: 数据页面MTAG&#x3D;1时强制标签检查</li>
+<li><strong>代码豁免</strong>: 代码页面MTAG&#x3D;1时豁免检查</li>
+<li><strong>权限限制</strong>: 某些页面配置（XWR&#x3D;111,010）下MTAG位保留,若被设置，引发页面异常。内存标签未启用，则MTAG位为保留位。</li>
+</ul>
+<h4 id="跨页面指令行为"><a href="#跨页面指令行为" class="headerlink" title="跨页面指令行为"></a><strong>跨页面指令行为</strong></h4><ul>
+<li>指令跨不同MTAG值页面边界时，视为MTAG&#x3D;0</li>
+<li>确保指令执行的确定性</li>
+</ul>
+<hr>
+<h2 id="🌐-第3章-虚拟索引标签存储-Svatag-Smvatag"><a href="#🌐-第3章-虚拟索引标签存储-Svatag-Smvatag" class="headerlink" title="🌐 第3章 - 虚拟索引标签存储 (Svatag&#x2F;Smvatag)"></a>🌐 第3章 - 虚拟索引标签存储 (Svatag&#x2F;Smvatag)</h2><h3 id="🗃️-虚拟标签表架构"><a href="#🗃️-虚拟标签表架构" class="headerlink" title="🗃️ 虚拟标签表架构"></a>🗃️ 虚拟标签表架构</h3><h4 id="地址计算模型"><a href="#地址计算模型" class="headerlink" title="地址计算模型"></a><strong>地址计算模型</strong></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mc_tag_va = VITT_BASE + (((va &gt;&gt; <span class="number">4</span>) * mc_tag_width) &gt;&gt; <span class="number">3</span>)</span><br></pre></td></tr></table></figure>
+
+<p>根据标签宽度的具体计算：</p>
+<ul>
+<li><strong>4位标签</strong>: <code>VITT_BASE + (va &gt;&gt; 5)</code></li>
+<li><strong>8位标签</strong>: <code>VITT_BASE + (va &gt;&gt; 4)</code></li>
+</ul>
+<h4 id="标签存储优化"><a href="#标签存储优化" class="headerlink" title="标签存储优化"></a><strong>标签存储优化</strong></h4><ul>
+<li><strong>4位模式</strong>: 每字节打包存储2个标签</li>
+<li><strong>8位模式</strong>: 标准一字节一标签存储</li>
+<li><strong>访问粒度</strong>: 支持不对齐访问</li>
+</ul>
+<h4 id="内存块-MC-到标签的映射关系"><a href="#内存块-MC-到标签的映射关系" class="headerlink" title="内存块(MC)到标签的映射关系"></a><strong>内存块(MC)到标签的映射关系</strong></h4><table>
+<thead>
+<tr>
+<th><strong>MC地址</strong></th>
+<th><strong>4位模式</strong></th>
+<th><strong>存储布局</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0x0000</td>
+<td>VITT_BASE[0][0:3]</td>
+<td>[MC0标签 &#124; MC1标签]</td>
+</tr>
+<tr>
+<td>0x0010</td>
+<td>VITT_BASE[0][4:7]</td>
+<td>[MC2标签 &#124; MC3标签]</td>
+</tr>
+<tr>
+<td>0x0020</td>
+<td>VITT_BASE[1][0:3]</td>
+<td>…</td>
+</tr>
+<tr>
+<td><strong>MC地址</strong></td>
+<td><strong>8位模式</strong></td>
+<td><strong>存储布局</strong></td>
+</tr>
+<tr>
+<td>0x0000</td>
+<td>VITT_BASE[0]</td>
+<td>[MC0标签]</td>
+</tr>
+<tr>
+<td>0x0010</td>
+<td>VITT_BASE[1]</td>
+<td>[MC1标签]</td>
+</tr>
+<tr>
+<td>0x0020</td>
+<td>VITT_BASE[2]</td>
+<td>…</td>
+</tr>
+</tbody></table>
+<p>假如内存为16GB，则，</p>
+<ul>
+<li>4位模式，mc_tag空间大小：16GB&#x2F;16 * 4&#x2F;8(B) &#x3D; 512M, 512M&#x2F;16GB &#x3D; 0.03125 &#x3D; 3.125%</li>
+<li>8位模式，mc_tag空间大小：16GB&#x2F;16 * 1B &#x3D; 1GB, 1GB&#x2F;16GB &#x3D; 0.0625 &#x3D; 6.25%</li>
+</ul>
+<p>开启内存标签后，内存开销增加<strong>3.125%<strong>或</strong>6.25%</strong>。</p>
+<h3 id="🔐-特权级基址寄存器"><a href="#🔐-特权级基址寄存器" class="headerlink" title="🔐 特权级基址寄存器"></a>🔐 特权级基址寄存器</h3><h4 id="标签表基址CSR分配"><a href="#标签表基址CSR分配" class="headerlink" title="标签表基址CSR分配"></a><strong>标签表基址CSR分配</strong></h4><table>
+<thead>
+<tr>
+<th>特权级别</th>
+<th>基址寄存器</th>
+<th>扩展</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>U模式</td>
+<td><code>svittu</code></td>
+<td>Svatag</td>
+</tr>
+<tr>
+<td>S&#x2F;HS模式</td>
+<td><code>svitts</code></td>
+<td>Svatag</td>
+</tr>
+<tr>
+<td>VS模式</td>
+<td><code>vsvitts</code></td>
+<td>Svatag</td>
+</tr>
+<tr>
+<td>M模式</td>
+<td><code>mvitt</code></td>
+<td>Smvatag</td>
+</tr>
+<tr>
+<td>基地址必须4KB对齐。</td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h4 id="存储保护机制"><a href="#存储保护机制" class="headerlink" title="存储保护机制"></a><strong>存储保护机制</strong></h4><ul>
+<li><strong>访问限制</strong>: 常规操作访问VITT范围会触发异常</li>
+<li><strong>边界计算</strong>: 基于当前特权级别的最低&#x2F;最高虚拟地址</li>
+<li><strong>地址空间划分</strong>: 用户空间正向，管理空间负向</li>
+</ul>
+<h4 id="保护范围计算"><a href="#保护范围计算" class="headerlink" title="保护范围计算"></a><strong>保护范围计算</strong></h4><p>根据文档3.3节，VITT保护范围由虚拟地址空间边界确定：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tag_memory_region_start = mc_tag_va(LOWEST_VADDR_CURR_PRIV)</span><br><span class="line">tag_memory_region_end = mc_tag_va(HIGHEST_VADDR_CURR_PRIV)</span><br></pre></td></tr></table></figure>
+
+<h4 id="特权级地址空间划分"><a href="#特权级地址空间划分" class="headerlink" title="特权级地址空间划分"></a><strong>特权级地址空间划分</strong></h4><table>
+<thead>
+<tr>
+<th>特权级别</th>
+<th>LOWEST_VADDR</th>
+<th>HIGHEST_VADDR</th>
+<th>地址空间特点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>U模式</strong></td>
+<td>0</td>
+<td>2^(VADDR_BITS-1)-1</td>
+<td>正地址空间</td>
+</tr>
+<tr>
+<td><strong>S&#x2F;HS&#x2F;VS模式</strong></td>
+<td>2^(VADDR_BITS-1)</td>
+<td>2^VADDR_BITS-1</td>
+<td>负地址空间</td>
+</tr>
+<tr>
+<td><strong>M模式</strong></td>
+<td>实现定义</td>
+<td>实现定义</td>
+<td>定制地址范围</td>
+</tr>
+<tr>
+<td>VADDR_BITS 代表虚拟寻址位数。根据 satp CSR 中的 Sv39、Sv48 或 Sv57 虚拟寻址模式，VADDR_BITS 可以是 39、48 或 57。在裸模式和 M 模式下，LOWEST_VADDR_CURR_PRIV 和 HIGHEST_VADDR_CURR_PRIV 由实现定义。实际的物理地址远小于虚拟地址范围，因此VITT范围要根据物理范围设定。另外，由于虚拟地址是任意可配置的，所以VITT基地址也是可配置的，从而保证所有虚拟地址都被保护。</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h4 id="保护机制实现细节"><a href="#保护机制实现细节" class="headerlink" title="保护机制实现细节"></a><strong>保护机制实现细节</strong></h4><h5 id="1-常规内存访问保护"><a href="#1-常规内存访问保护" class="headerlink" title="1. 常规内存访问保护"></a><strong>1. 常规内存访问保护</strong></h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># 以下操作触发访问异常</span><br><span class="line">lb t0, (vitt_address)      # 常规加载VITT区域</span><br><span class="line">sb t1, (vitt_address)      # 常规存储VITT区域</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>强制保护</strong>：任何常规Load&#x2F;Store到VITT范围都触发异常</li>
+<li><strong>硬件实现</strong>：通过地址比较器实时检测</li>
+</ul>
+<h5 id="2-标签操作保护"><a href="#2-标签操作保护" class="headerlink" title="2. 标签操作保护"></a><strong>2. 标签操作保护</strong></h5><p>当<code>settag</code>指令指定的内存块与VITT范围重叠时：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">settag s1, 1  # 如果s1指向VITT区域，触发异常</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>预检机制</strong>：在执行标签设置前验证地址有效性</li>
+<li><strong>范围重叠检测</strong>：确保不会意外修改标签元数据</li>
+</ul>
+<h5 id="3-特权级别保护"><a href="#3-特权级别保护" class="headerlink" title="3. 特权级别保护"></a><strong>3. 特权级别保护</strong></h5><p><strong>Svatag依赖关系</strong>：</p>
+<ul>
+<li>依赖<code>Svukte</code>扩展实现地址空间均分</li>
+<li>用户空间：0 → 最大正地址</li>
+<li>管理空间：最小负地址 → 最大负地址</li>
+</ul>
+<h4 id="内存页面对齐问题"><a href="#内存页面对齐问题" class="headerlink" title="内存页面对齐问题"></a><strong>内存页面对齐问题</strong></h4><p>由于VITT地址计算的非传统性，可能产生特殊的对齐问题：</p>
+<h4 id="跨页面边界处理"><a href="#跨页面边界处理" class="headerlink" title="跨页面边界处理"></a><strong>跨页面边界处理</strong></h4><ul>
+<li><strong>4位模式</strong>：由于打包存储，单个VITT条目可能跨页面边界</li>
+<li><strong>错误处理</strong>：硬件必须正确处理页面错误和访问权限</li>
+</ul>
+<hr>
+<h2 id="⚡-第4章-标签检查免除扩展"><a href="#⚡-第4章-标签检查免除扩展" class="headerlink" title="⚡ 第4章 - 标签检查免除扩展"></a>⚡ 第4章 - 标签检查免除扩展</h2><h3 id="🚀-瞬态检查禁用机制"><a href="#🚀-瞬态检查禁用机制" class="headerlink" title="🚀 瞬态检查禁用机制"></a>🚀 瞬态检查禁用机制</h3><h4 id="TTCD状态管理"><a href="#TTCD状态管理" class="headerlink" title="TTCD状态管理"></a><strong>TTCD状态管理</strong></h4><table>
+<thead>
+<tr>
+<th>状态值</th>
+<th>名称</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>TAG_CHECK_ENFORCED</td>
+<td>启用标签检查</td>
+</tr>
+<tr>
+<td>1</td>
+<td>TAG_CHECK_ELIDE</td>
+<td>免除标签检查</td>
+</tr>
+</tbody></table>
+<h4 id="免除检查指令-nietc"><a href="#免除检查指令-nietc" class="headerlink" title="免除检查指令 - nietc"></a><strong>免除检查指令 - <code>nietc</code></strong></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nietc      # 下一条指令免除标签检查</span><br><span class="line">lb t0, 16(sp)  # 此加载操作不检查标签</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>编码</strong>: 使用C.MOP.3编码，依赖C和Zcmop扩展</li>
+<li><strong>状态恢复</strong>: 后续内存访问自动恢复检查</li>
+<li><strong>陷阱处理</strong>: TTCD状态保存在*status寄存器中</li>
+</ul>
+<h3 id="💾-状态寄存器扩展"><a href="#💾-状态寄存器扩展" class="headerlink" title="💾 状态寄存器扩展"></a>💾 状态寄存器扩展</h3><h4 id="TTCD状态保存字段"><a href="#TTCD状态保存字段" class="headerlink" title="TTCD状态保存字段"></a><strong>TTCD状态保存字段</strong></h4><table>
+<thead>
+<tr>
+<th>特权级别</th>
+<th>状态寄存器</th>
+<th>保存字段</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>M模式</td>
+<td><code>mstatus</code></td>
+<td><code>MPTTCD</code>(位42)</td>
+</tr>
+<tr>
+<td>S模式</td>
+<td><code>sstatus</code></td>
+<td><code>SPTTCD</code>(位24)</td>
+</tr>
+<tr>
+<td>VS模式</td>
+<td><code>vsstatus</code></td>
+<td><code>SPTTCD</code>(位24)</td>
+</tr>
+</tbody></table>
+<h4 id="状态恢复机制"><a href="#状态恢复机制" class="headerlink" title="状态恢复机制"></a><strong>状态恢复机制</strong></h4><ul>
+<li><strong>陷阱进入</strong>: TTCD当前状态保存到对应PTTCD字段</li>
+<li><strong>陷阱返回</strong>: 从PTTCD字段恢复TTCD状态并清除PTTCD</li>
+</ul>
+<hr>
+<h2 id="🎯-应用示例与最佳实践"><a href="#🎯-应用示例与最佳实践" class="headerlink" title="🎯 应用示例与最佳实践"></a>🎯 应用示例与最佳实践</h2><h3 id="💡-栈标签代码生成示例"><a href="#💡-栈标签代码生成示例" class="headerlink" title="💡 栈标签代码生成示例"></a>💡 栈标签代码生成示例</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">function:</span><br><span class="line">    addi sp, sp, -512    # 栈帧分配</span><br><span class="line">    gentag t0, zero      # 生成基础标签</span><br><span class="line">    addi s1, sp, 16      # 第一个对象地址</span><br><span class="line">    addtag t1, t0, 1     # 派生标签+1</span><br><span class="line">    or s1, s1, t1        # 组合地址和标签</span><br><span class="line">    settag s1, 1         # 设置内存标签</span><br><span class="line">    # ... 对象使用 ...</span><br><span class="line">    addi s1, sp, 16      # 清除指针标签</span><br><span class="line">    settag s1, 1         # 重置内存标签</span><br></pre></td></tr></table></figure>
+
+<h3 id="🔧-性能优化策略"><a href="#🔧-性能优化策略" class="headerlink" title="🔧 性能优化策略"></a>🔧 性能优化策略</h3><ol>
+<li><strong>局部访问优化</strong>: 使用<code>nietc</code>免除可信局部访问检查</li>
+<li><strong>标签派生</strong>: 使用<code>addtag</code>高效管理相关对象标签</li>
+<li><strong>批量设置</strong>: 利用<code>settag</code>的连续块设置减少指令数</li>
+</ol>
+<hr>
+<h2 id="📊-总结要点"><a href="#📊-总结要点" class="headerlink" title="📊 总结要点"></a>📊 总结要点</h2><h3 id="🎯-核心价值"><a href="#🎯-核心价值" class="headerlink" title="🎯 核心价值"></a>🎯 核心价值</h3><ul>
+<li><strong>硬件加速</strong>: 相比纯软件方案显著降低性能开销</li>
+<li><strong>生产可用</strong>: 适合各种部署场景包括生产环境</li>
+<li><strong>灵活控制</strong>: 支持页面粒度和指令粒度的检查控制</li>
+</ul>
+<h3 id="🔍-关键特性"><a href="#🔍-关键特性" class="headerlink" title="🔍 关键特性"></a>🔍 关键特性</h3><ol>
+<li><strong>细粒度保护</strong>: 16字节内存块级别的安全保护</li>
+<li><strong>随机化安全</strong>: 伪随机标签防止攻击者预测</li>
+<li><strong>兼容性设计</strong>: 通过寄存器控制实现向后兼容</li>
+<li><strong>性能优化</strong>: 提供多种免除检查机制</li>
+</ol>
+<h3 id="📈-适用场景"><a href="#📈-适用场景" class="headerlink" title="📈 适用场景"></a>📈 适用场景</h3><ul>
+<li><strong>安全关键应用</strong>: 需要内存安全保证的生产系统</li>
+<li><strong>开发测试</strong>: 高效的单元测试和模糊测试</li>
+<li><strong>遗留代码</strong>: 对现有C&#x2F;C++代码的增量安全增强</li>
+</ul>
+<p>这份学习笔记涵盖了RISC-V MTE扩展的核心技术要点，为深入理解和实际应用提供了全面的参考框架。</p>
+<h2 id="Hello-World示例-标签使用全过程"><a href="#Hello-World示例-标签使用全过程" class="headerlink" title="Hello World示例 - 标签使用全过程"></a>Hello World示例 - 标签使用全过程</h2><h3 id="程序启动初始化-环境准备"><a href="#程序启动初始化-环境准备" class="headerlink" title="程序启动初始化 (环境准备)"></a>程序启动初始化 (环境准备)</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Hello World程序示例</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">char</span> greeting[<span class="number">32</span>] = <span class="string">&quot;Hello, World!&quot;</span>;</span><br><span class="line">    <span class="type">char</span>* heap_str = <span class="built_in">malloc</span>(<span class="number">64</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">strcpy</span>(heap_str, greeting);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>, heap_str);</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">free</span>(heap_str);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="栈内存标签设置过程"><a href="#栈内存标签设置过程" class="headerlink" title="栈内存标签设置过程"></a>栈内存标签设置过程</h3><h4 id="编译器生成的汇编代码示例："><a href="#编译器生成的汇编代码示例：" class="headerlink" title="编译器生成的汇编代码示例："></a>编译器生成的汇编代码示例：</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">main:</span><br><span class="line">    # 函数序言 - 栈帧设置</span><br><span class="line">    addi sp, sp, -64        # 分配64字节栈空间 (4个内存块)</span><br><span class="line">    </span><br><span class="line">    # 生成基础标签</span><br><span class="line">    gentag t0               # 生成随机标签，存储在t0的高位</span><br><span class="line">    </span><br><span class="line">    # 为栈对象设置标签</span><br><span class="line">    addi t1, sp, 16         # greeting数组地址</span><br><span class="line">    addtag t2, t0, 1        # 派生greeting标签 = base + 1</span><br><span class="line">    or t1, t1, t2           # 组合地址和标签</span><br><span class="line">    settag t1, 1            # 为greeting数组设置标签 (1个内存块)</span><br><span class="line">    </span><br><span class="line">    # 存储数据</span><br><span class="line">    la t3, hello_str</span><br><span class="line">    sd t3, 16(sp)           # 存储&quot;Hello, World!&quot;到栈</span><br></pre></td></tr></table></figure>
+
+<p><strong>标签存储布局：</strong></p>
+<ul>
+<li>内存块0 (sp+0~sp+15): 未使用，标签&#x3D;0</li>
+<li>内存块1 (sp+16~sp+31): greeting数组，标签&#x3D;base+1</li>
+<li>内存块2-3: 其他栈数据</li>
+</ul>
+<h3 id="堆内存标签设置过程"><a href="#堆内存标签设置过程" class="headerlink" title="堆内存标签设置过程"></a>堆内存标签设置过程</h3><h4 id="malloc实现示例："><a href="#malloc实现示例：" class="headerlink" title="malloc实现示例："></a>malloc实现示例：</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">malloc:</span><br><span class="line">    # ... 内存分配逻辑 ...</span><br><span class="line">    mv a0, allocated_addr   # 分配的内存地址</span><br><span class="line">    </span><br><span class="line">    # 生成堆对象标签</span><br><span class="line">    gentag t1               # 生成新随机标签</span><br><span class="line">    addtag a0, t1, 0        # 为指针设置标签</span><br><span class="line">    settag a0, 3            # 为4个连续内存块设置标签 (64字节)</span><br><span class="line">    </span><br><span class="line">    ret</span><br><span class="line">    </span><br><span class="line"># main函数中的堆分配调用</span><br><span class="line">    li a0, 64</span><br><span class="line">    call malloc             # 返回带标签的指针</span><br><span class="line">    mv s0, a0               # 堆字符串指针</span><br></pre></td></tr></table></figure>
+
+<h3 id="内存访问时的标签检查"><a href="#内存访问时的标签检查" class="headerlink" title="内存访问时的标签检查"></a>内存访问时的标签检查</h3><h4 id="编译器生成的访问代码："><a href="#编译器生成的访问代码：" class="headerlink" title="编译器生成的访问代码："></a>编译器生成的访问代码：</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"># strcpy(heap_str, greeting) 的实现</span><br><span class="line">strcpy_impl:</span><br><span class="line">    # 堆指针访问 - 触发标签检查</span><br><span class="line">    lb t0, 16(sp)           # 读取栈数据 (标签检查通过)</span><br><span class="line">    sb t0, 0(s0)            # 写入堆数据 (标签检查通过)</span><br><span class="line">    </span><br><span class="line">    # 每次内存访问都会：</span><br><span class="line">    # 1. 从指针提取pointer_tag</span><br><span class="line">    # 2. 根据有效地址计算mc_tag_va = VITT_BASE + (va &gt;&gt; 4)（8位标签）</span><br><span class="line">    # 3. 从标签存储区加载mc_tag</span><br><span class="line">    # 4. 比较pointer_tag == mc_tag</span><br></pre></td></tr></table></figure>
+
+<p><strong>标签检查流程：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">pointer_tag = s0[63:57]     # 从指针提取7位标签</span><br><span class="line">va = s0 &amp; 0x00FFFFFFFFFFFFFF # 清除标签位得到实际地址(用户空间mask)</span><br><span class="line">mc_tag_va = VITT_BASE + (va &gt;&gt; 4)  # 计算标签存储地址</span><br><span class="line">mc_tag = load_byte(mc_tag_va)      # 加载内存标签</span><br><span class="line">if pointer_tag != mc_tag: raise_exception()</span><br></pre></td></tr></table></figure>
+
+<h3 id="内存释放时的标签处理"><a href="#内存释放时的标签处理" class="headerlink" title="内存释放时的标签处理"></a>内存释放时的标签处理</h3><h4 id="free实现示例："><a href="#free实现示例：" class="headerlink" title="free实现示例："></a>free实现示例：</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">free:</span><br><span class="line">    # 清除内存标签 (防止UAF)</span><br><span class="line">    mv t0, a0</span><br><span class="line">    andi t0, t0, 0x00FFFFFFFFFFFFFF  # 清除指针标签</span><br><span class="line">    settag t0, 3             # 设置新标签(通常为0)</span><br><span class="line">    </span><br><span class="line">    # ... 实际内存释放逻辑 ...</span><br><span class="line">    ret</span><br><span class="line"></span><br><span class="line"># main函数中的释放调用</span><br><span class="line">    mv a0, s0</span><br><span class="line">    call free               # 清除堆内存标签</span><br></pre></td></tr></table></figure>
+
+<h3 id="虚拟索引标签表-VITT-操作"><a href="#虚拟索引标签表-VITT-操作" class="headerlink" title="虚拟索引标签表(VITT)操作"></a>虚拟索引标签表(VITT)操作</h3><p><strong>标签存储地址计算：</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 假设参数：</span></span><br><span class="line">VITT_BASE = <span class="number">0x80000000</span>      <span class="comment">// 标签表基地址</span></span><br><span class="line">pointer_tag_width = <span class="number">7</span>        <span class="comment">// 7位指针标签</span></span><br><span class="line">mc_tag_width = <span class="number">8</span>            <span class="comment">// 8位内存标签</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 对于地址0x1000：</span></span><br><span class="line">mc_tag_va = <span class="number">0x80000000</span> + (<span class="number">0x1000</span> &gt;&gt; <span class="number">4</span>) = <span class="number">0x80000100</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 对于地址0x1010：</span></span><br><span class="line">mc_tag_va = <span class="number">0x80000000</span> + (<span class="number">0x1010</span> &gt;&gt; <span class="number">4</span>) = <span class="number">0x80000101</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="异常处理场景"><a href="#异常处理场景" class="headerlink" title="异常处理场景"></a>异常处理场景</h3><h4 id="标签不匹配异常："><a href="#标签不匹配异常：" class="headerlink" title="标签不匹配异常："></a>标签不匹配异常：</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># 使用已释放内存 (UAF)</span><br><span class="line">mov a0, s0                  # s0指向已释放内存</span><br><span class="line">lb t0, 0(a0)                # 触发标签检查异常</span><br><span class="line"></span><br><span class="line"># 异常流程：</span><br><span class="line"># 1. 检测到pointer_tag != mc_tag</span><br><span class="line"># 2. 抛出software check exception (tval=4)</span><br><span class="line"># 3. 程序终止或进入异常处理</span><br></pre></td></tr></table></figure>
+
+<h4 id="缓冲区溢出检测："><a href="#缓冲区溢出检测：" class="headerlink" title="缓冲区溢出检测："></a>缓冲区溢出检测：</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 缓冲区溢出尝试</span><br><span class="line">addi t0, s0, 80             # 超出分配的64字节</span><br><span class="line">lb t1, 0(t0)                # 访问越界内存</span><br><span class="line"></span><br><span class="line"># 由于越界访问不同的内存块，标签不匹配</span><br><span class="line"># 触发异常防止内存破坏</span><br></pre></td></tr></table></figure>
+
+<h3 id="性能优化-标签检查免除"><a href="#性能优化-标签检查免除" class="headerlink" title="性能优化 - 标签检查免除"></a>性能优化 - 标签检查免除</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># 使用nietc指令免除局部访问的标签检查</span><br><span class="line">nietc                       # 下一条指令免除标签检查</span><br><span class="line">lb t0, 16(sp)               # 栈局部访问，免除检查</span><br><span class="line"># TTCD状态自动恢复</span><br><span class="line"></span><br><span class="line">nietc</span><br><span class="line">sb t0, 0(s0)                # 堆访问，免除检查</span><br></pre></td></tr></table></figure>
+
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>Hello World程序的标签使用流程：</p>
+<ol>
+<li><strong>初始化</strong>：栈和堆分配时生成随机标签</li>
+<li><strong>设置</strong>：使用<code>settag</code>为内存区域设置标签</li>
+<li><strong>访问</strong>：每次内存访问自动进行标签检查</li>
+<li><strong>释放</strong>：释放内存时重置标签防止UAF</li>
+<li><strong>保护</strong>：检测缓冲区溢出和use-after-free攻击</li>
+</ol>
+
+                
+                <hr>
+                <!-- Pager -->
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2025/10/30/Linux-tracing-追踪体系/" data-toggle="tooltip" data-placement="top" title="Linux tracing 追踪体系">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2025/09/19/Linux源码解读-OpenAI-：上下文切换/" data-toggle="tooltip" data-placement="top" title="Linux源码解读(OpenAI)：上下文切换">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- tip start -->
+                
+
+                
+                <!-- tip end -->
+
+                <!-- Music start-->
+                
+                <!-- Music end -->
+
+                <!-- Sharing -->
+                
+                <!-- Sharing -->
+
+                <!-- gitment start -->
+                
+                <!-- gitment end -->
+
+                <!-- 来必力City版安装代码 -->
+                
+                <!-- City版安装代码已完成 -->
+
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+    
+      
+        <aside id="sidebar">
+          <div id="toc" class="toc-article">
+          <strong class="toc-title">Contents</strong>
+          
+            
+              <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%F0%9F%93%8B-%E6%96%87%E6%A1%A3%E5%9F%BA%E6%9C%AC%E4%BF%A1%E6%81%AF"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">📋 文档基本信息</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%F0%9F%93%96-%E7%AC%AC1%E7%AB%A0-%E4%BB%8B%E7%BB%8D"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">📖 第1章 - 介绍</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%F0%9F%94%8D-%E8%83%8C%E6%99%AF%E4%B8%8E%E9%97%AE%E9%A2%98%E9%99%88%E8%BF%B0"><span class="toc-nav-number">2.1.</span> <span class="toc-nav-text">🔍 背景与问题陈述</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E5%86%85%E5%AD%98%E5%AE%89%E5%85%A8%E9%97%AE%E9%A2%98%E6%A0%B9%E6%BA%90"><span class="toc-nav-number">2.1.1.</span> <span class="toc-nav-text">内存安全问题根源</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E5%AF%B9%E8%B1%A1%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E7%AE%A1%E7%90%86"><span class="toc-nav-number">2.1.2.</span> <span class="toc-nav-text">对象生命周期管理</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E4%B8%BB%E8%A6%81%E5%86%85%E5%AD%98%E5%AE%89%E5%85%A8%E6%BC%8F%E6%B4%9E%E7%B1%BB%E5%9E%8B"><span class="toc-nav-number">2.1.3.</span> <span class="toc-nav-text">主要内存安全漏洞类型</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%F0%9F%9B%A1%EF%B8%8F-%E5%86%85%E5%AD%98%E6%A0%87%E7%AD%BE%E4%BF%9D%E6%8A%A4%E6%9C%BA%E5%88%B6"><span class="toc-nav-number">2.2.</span> <span class="toc-nav-text">🛡️ 内存标签保护机制</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E9%94%81%E9%92%A5%E6%A8%A1%E5%9E%8B-Lock-and-Key"><span class="toc-nav-number">2.2.1.</span> <span class="toc-nav-text">锁钥模型(Lock-and-Key)</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E7%AE%A1%E7%90%86%E6%B5%81%E7%A8%8B"><span class="toc-nav-number">2.2.2.</span> <span class="toc-nav-text">生命周期管理流程</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E7%8E%B0%E6%9C%89%E8%BD%AF%E4%BB%B6%E6%96%B9%E6%A1%88%E5%AF%B9%E6%AF%94"><span class="toc-nav-number">2.2.3.</span> <span class="toc-nav-text">现有软件方案对比</span></a></li></ol></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%F0%9F%8F%97%EF%B8%8F-%E7%AC%AC2%E7%AB%A0-%E5%86%85%E5%AD%98%E6%A0%87%E7%AD%BE%E6%89%A9%E5%B1%95-Zimt"><span class="toc-nav-number">3.</span> <span class="toc-nav-text">🏗️ 第2章 - 内存标签扩展 (Zimt)</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%F0%9F%94%AC-%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="toc-nav-number">3.1.</span> <span class="toc-nav-text">🔬 基础架构设计</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E6%A0%B8%E5%BF%83%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99"><span class="toc-nav-number">3.1.1.</span> <span class="toc-nav-text">核心设计原则</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E6%A0%87%E7%AD%BE%E9%85%8D%E7%BD%AE%E8%A7%84%E8%8C%83"><span class="toc-nav-number">3.1.2.</span> <span class="toc-nav-text">标签配置规范</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%F0%9F%92%BB-%E5%86%85%E5%AD%98%E6%93%8D%E4%BD%9C"><span class="toc-nav-number">3.2.</span> <span class="toc-nav-text">💻 内存操作</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E5%8A%A0%E8%BD%BD-%E5%AD%98%E5%82%A8%E6%93%8D%E4%BD%9C%E5%88%86%E7%B1%BB"><span class="toc-nav-number">3.2.1.</span> <span class="toc-nav-text">加载&#x2F;存储操作分类</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%F0%9F%8E%AF-%E6%A0%87%E7%AD%BE%E7%AE%A1%E7%90%86%E6%8C%87%E4%BB%A4%E9%9B%86"><span class="toc-nav-number">3.3.</span> <span class="toc-nav-text">🎯 标签管理指令集</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E6%A0%87%E7%AD%BE%E7%94%9F%E6%88%90%E6%8C%87%E4%BB%A4-gentag-rd"><span class="toc-nav-number">3.3.1.</span> <span class="toc-nav-text">标签生成指令 - gentag rd</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E6%A0%87%E7%AD%BE%E7%AE%97%E6%9C%AF%E6%8C%87%E4%BB%A4-addtag-rd-rs1-tag-imm4"><span class="toc-nav-number">3.3.2.</span> <span class="toc-nav-text">标签算术指令 - addtag rd, rs1, #tag_imm4</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E5%86%85%E5%AD%98%E6%A0%87%E7%AD%BE%E8%AE%BE%E7%BD%AE%E6%8C%87%E4%BB%A4-settag-rs1-chunk-count"><span class="toc-nav-number">3.3.3.</span> <span class="toc-nav-text">内存标签设置指令 - settag rs1, #chunk_count</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E2%9A%A1-%E6%A0%87%E7%AD%BE%E6%A3%80%E6%9F%A5%E6%9C%BA%E5%88%B6"><span class="toc-nav-number">3.4.</span> <span class="toc-nav-text">⚡ 标签检查机制</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E6%A3%80%E6%9F%A5%E8%A7%A6%E5%8F%91%E6%9D%A1%E4%BB%B6"><span class="toc-nav-number">3.4.1.</span> <span class="toc-nav-text">检查触发条件</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E6%A3%80%E6%9F%A5%E8%B1%81%E5%85%8D%E8%A7%84%E5%88%99"><span class="toc-nav-number">3.4.2.</span> <span class="toc-nav-text">检查豁免规则</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E6%98%BE%E5%BC%8F%E6%A3%80%E6%9F%A5%E6%8C%87%E4%BB%A4-checktag-rs1-chunk-count"><span class="toc-nav-number">3.4.3.</span> <span class="toc-nav-text">显式检查指令 - checktag rs1, #chunk_count</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%F0%9F%94%A7-%E6%8E%A7%E5%88%B6%E7%B3%BB%E7%BB%9F%E5%AF%84%E5%AD%98%E5%99%A8%E9%85%8D%E7%BD%AE"><span class="toc-nav-number">3.5.</span> <span class="toc-nav-text">🔧 控制系统寄存器配置</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#MT-MODE%E7%BC%96%E7%A0%81%E8%A7%84%E8%8C%83"><span class="toc-nav-number">3.5.1.</span> <span class="toc-nav-text">MT_MODE编码规范</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E7%89%B9%E6%9D%83%E7%BA%A7%E5%88%AB%E6%8E%A7%E5%88%B6%E5%AF%84%E5%AD%98%E5%99%A8"><span class="toc-nav-number">3.5.2.</span> <span class="toc-nav-text">特权级别控制寄存器</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E5%BC%82%E6%AD%A5%E6%8A%A5%E5%91%8A%E6%8E%A7%E5%88%B6"><span class="toc-nav-number">3.5.3.</span> <span class="toc-nav-text">异步报告控制</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%F0%9F%93%84-%E9%A1%B5%E9%9D%A2%E7%BA%A7%E5%88%AB%E6%A0%87%E7%AD%BE%E6%A3%80%E6%9F%A5%E6%8E%A7%E5%88%B6"><span class="toc-nav-number">3.6.</span> <span class="toc-nav-text">📄 页面级别标签检查控制</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E9%A1%B5%E8%A1%A8%E6%9D%A1%E7%9B%AEMTAG%E4%BD%8D"><span class="toc-nav-number">3.6.1.</span> <span class="toc-nav-text">页表条目MTAG位</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E8%B7%A8%E9%A1%B5%E9%9D%A2%E6%8C%87%E4%BB%A4%E8%A1%8C%E4%B8%BA"><span class="toc-nav-number">3.6.2.</span> <span class="toc-nav-text">跨页面指令行为</span></a></li></ol></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%F0%9F%8C%90-%E7%AC%AC3%E7%AB%A0-%E8%99%9A%E6%8B%9F%E7%B4%A2%E5%BC%95%E6%A0%87%E7%AD%BE%E5%AD%98%E5%82%A8-Svatag-Smvatag"><span class="toc-nav-number">4.</span> <span class="toc-nav-text">🌐 第3章 - 虚拟索引标签存储 (Svatag&#x2F;Smvatag)</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%F0%9F%97%83%EF%B8%8F-%E8%99%9A%E6%8B%9F%E6%A0%87%E7%AD%BE%E8%A1%A8%E6%9E%B6%E6%9E%84"><span class="toc-nav-number">4.1.</span> <span class="toc-nav-text">🗃️ 虚拟标签表架构</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E5%9C%B0%E5%9D%80%E8%AE%A1%E7%AE%97%E6%A8%A1%E5%9E%8B"><span class="toc-nav-number">4.1.1.</span> <span class="toc-nav-text">地址计算模型</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E6%A0%87%E7%AD%BE%E5%AD%98%E5%82%A8%E4%BC%98%E5%8C%96"><span class="toc-nav-number">4.1.2.</span> <span class="toc-nav-text">标签存储优化</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E5%86%85%E5%AD%98%E5%9D%97-MC-%E5%88%B0%E6%A0%87%E7%AD%BE%E7%9A%84%E6%98%A0%E5%B0%84%E5%85%B3%E7%B3%BB"><span class="toc-nav-number">4.1.3.</span> <span class="toc-nav-text">内存块(MC)到标签的映射关系</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%F0%9F%94%90-%E7%89%B9%E6%9D%83%E7%BA%A7%E5%9F%BA%E5%9D%80%E5%AF%84%E5%AD%98%E5%99%A8"><span class="toc-nav-number">4.2.</span> <span class="toc-nav-text">🔐 特权级基址寄存器</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E6%A0%87%E7%AD%BE%E8%A1%A8%E5%9F%BA%E5%9D%80CSR%E5%88%86%E9%85%8D"><span class="toc-nav-number">4.2.1.</span> <span class="toc-nav-text">标签表基址CSR分配</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E5%AD%98%E5%82%A8%E4%BF%9D%E6%8A%A4%E6%9C%BA%E5%88%B6"><span class="toc-nav-number">4.2.2.</span> <span class="toc-nav-text">存储保护机制</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E4%BF%9D%E6%8A%A4%E8%8C%83%E5%9B%B4%E8%AE%A1%E7%AE%97"><span class="toc-nav-number">4.2.3.</span> <span class="toc-nav-text">保护范围计算</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E7%89%B9%E6%9D%83%E7%BA%A7%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4%E5%88%92%E5%88%86"><span class="toc-nav-number">4.2.4.</span> <span class="toc-nav-text">特权级地址空间划分</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E4%BF%9D%E6%8A%A4%E6%9C%BA%E5%88%B6%E5%AE%9E%E7%8E%B0%E7%BB%86%E8%8A%82"><span class="toc-nav-number">4.2.5.</span> <span class="toc-nav-text">保护机制实现细节</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-5"><a class="toc-nav-link" href="#1-%E5%B8%B8%E8%A7%84%E5%86%85%E5%AD%98%E8%AE%BF%E9%97%AE%E4%BF%9D%E6%8A%A4"><span class="toc-nav-number">4.2.5.1.</span> <span class="toc-nav-text">1. 常规内存访问保护</span></a></li><li class="toc-nav-item toc-nav-level-5"><a class="toc-nav-link" href="#2-%E6%A0%87%E7%AD%BE%E6%93%8D%E4%BD%9C%E4%BF%9D%E6%8A%A4"><span class="toc-nav-number">4.2.5.2.</span> <span class="toc-nav-text">2. 标签操作保护</span></a></li><li class="toc-nav-item toc-nav-level-5"><a class="toc-nav-link" href="#3-%E7%89%B9%E6%9D%83%E7%BA%A7%E5%88%AB%E4%BF%9D%E6%8A%A4"><span class="toc-nav-number">4.2.5.3.</span> <span class="toc-nav-text">3. 特权级别保护</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E5%86%85%E5%AD%98%E9%A1%B5%E9%9D%A2%E5%AF%B9%E9%BD%90%E9%97%AE%E9%A2%98"><span class="toc-nav-number">4.2.6.</span> <span class="toc-nav-text">内存页面对齐问题</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E8%B7%A8%E9%A1%B5%E9%9D%A2%E8%BE%B9%E7%95%8C%E5%A4%84%E7%90%86"><span class="toc-nav-number">4.2.7.</span> <span class="toc-nav-text">跨页面边界处理</span></a></li></ol></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E2%9A%A1-%E7%AC%AC4%E7%AB%A0-%E6%A0%87%E7%AD%BE%E6%A3%80%E6%9F%A5%E5%85%8D%E9%99%A4%E6%89%A9%E5%B1%95"><span class="toc-nav-number">5.</span> <span class="toc-nav-text">⚡ 第4章 - 标签检查免除扩展</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%F0%9F%9A%80-%E7%9E%AC%E6%80%81%E6%A3%80%E6%9F%A5%E7%A6%81%E7%94%A8%E6%9C%BA%E5%88%B6"><span class="toc-nav-number">5.1.</span> <span class="toc-nav-text">🚀 瞬态检查禁用机制</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#TTCD%E7%8A%B6%E6%80%81%E7%AE%A1%E7%90%86"><span class="toc-nav-number">5.1.1.</span> <span class="toc-nav-text">TTCD状态管理</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E5%85%8D%E9%99%A4%E6%A3%80%E6%9F%A5%E6%8C%87%E4%BB%A4-nietc"><span class="toc-nav-number">5.1.2.</span> <span class="toc-nav-text">免除检查指令 - nietc</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%F0%9F%92%BE-%E7%8A%B6%E6%80%81%E5%AF%84%E5%AD%98%E5%99%A8%E6%89%A9%E5%B1%95"><span class="toc-nav-number">5.2.</span> <span class="toc-nav-text">💾 状态寄存器扩展</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#TTCD%E7%8A%B6%E6%80%81%E4%BF%9D%E5%AD%98%E5%AD%97%E6%AE%B5"><span class="toc-nav-number">5.2.1.</span> <span class="toc-nav-text">TTCD状态保存字段</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E7%8A%B6%E6%80%81%E6%81%A2%E5%A4%8D%E6%9C%BA%E5%88%B6"><span class="toc-nav-number">5.2.2.</span> <span class="toc-nav-text">状态恢复机制</span></a></li></ol></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%F0%9F%8E%AF-%E5%BA%94%E7%94%A8%E7%A4%BA%E4%BE%8B%E4%B8%8E%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="toc-nav-number">6.</span> <span class="toc-nav-text">🎯 应用示例与最佳实践</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%F0%9F%92%A1-%E6%A0%88%E6%A0%87%E7%AD%BE%E4%BB%A3%E7%A0%81%E7%94%9F%E6%88%90%E7%A4%BA%E4%BE%8B"><span class="toc-nav-number">6.1.</span> <span class="toc-nav-text">💡 栈标签代码生成示例</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%F0%9F%94%A7-%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E7%AD%96%E7%95%A5"><span class="toc-nav-number">6.2.</span> <span class="toc-nav-text">🔧 性能优化策略</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%F0%9F%93%8A-%E6%80%BB%E7%BB%93%E8%A6%81%E7%82%B9"><span class="toc-nav-number">7.</span> <span class="toc-nav-text">📊 总结要点</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%F0%9F%8E%AF-%E6%A0%B8%E5%BF%83%E4%BB%B7%E5%80%BC"><span class="toc-nav-number">7.1.</span> <span class="toc-nav-text">🎯 核心价值</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%F0%9F%94%8D-%E5%85%B3%E9%94%AE%E7%89%B9%E6%80%A7"><span class="toc-nav-number">7.2.</span> <span class="toc-nav-text">🔍 关键特性</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%F0%9F%93%88-%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-nav-number">7.3.</span> <span class="toc-nav-text">📈 适用场景</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Hello-World%E7%A4%BA%E4%BE%8B-%E6%A0%87%E7%AD%BE%E4%BD%BF%E7%94%A8%E5%85%A8%E8%BF%87%E7%A8%8B"><span class="toc-nav-number">8.</span> <span class="toc-nav-text">Hello World示例 - 标签使用全过程</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E7%A8%8B%E5%BA%8F%E5%90%AF%E5%8A%A8%E5%88%9D%E5%A7%8B%E5%8C%96-%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="toc-nav-number">8.1.</span> <span class="toc-nav-text">程序启动初始化 (环境准备)</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%A0%88%E5%86%85%E5%AD%98%E6%A0%87%E7%AD%BE%E8%AE%BE%E7%BD%AE%E8%BF%87%E7%A8%8B"><span class="toc-nav-number">8.2.</span> <span class="toc-nav-text">栈内存标签设置过程</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E7%BC%96%E8%AF%91%E5%99%A8%E7%94%9F%E6%88%90%E7%9A%84%E6%B1%87%E7%BC%96%E4%BB%A3%E7%A0%81%E7%A4%BA%E4%BE%8B%EF%BC%9A"><span class="toc-nav-number">8.2.1.</span> <span class="toc-nav-text">编译器生成的汇编代码示例：</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%A0%86%E5%86%85%E5%AD%98%E6%A0%87%E7%AD%BE%E8%AE%BE%E7%BD%AE%E8%BF%87%E7%A8%8B"><span class="toc-nav-number">8.3.</span> <span class="toc-nav-text">堆内存标签设置过程</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#malloc%E5%AE%9E%E7%8E%B0%E7%A4%BA%E4%BE%8B%EF%BC%9A"><span class="toc-nav-number">8.3.1.</span> <span class="toc-nav-text">malloc实现示例：</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%86%85%E5%AD%98%E8%AE%BF%E9%97%AE%E6%97%B6%E7%9A%84%E6%A0%87%E7%AD%BE%E6%A3%80%E6%9F%A5"><span class="toc-nav-number">8.4.</span> <span class="toc-nav-text">内存访问时的标签检查</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E7%BC%96%E8%AF%91%E5%99%A8%E7%94%9F%E6%88%90%E7%9A%84%E8%AE%BF%E9%97%AE%E4%BB%A3%E7%A0%81%EF%BC%9A"><span class="toc-nav-number">8.4.1.</span> <span class="toc-nav-text">编译器生成的访问代码：</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%86%85%E5%AD%98%E9%87%8A%E6%94%BE%E6%97%B6%E7%9A%84%E6%A0%87%E7%AD%BE%E5%A4%84%E7%90%86"><span class="toc-nav-number">8.5.</span> <span class="toc-nav-text">内存释放时的标签处理</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#free%E5%AE%9E%E7%8E%B0%E7%A4%BA%E4%BE%8B%EF%BC%9A"><span class="toc-nav-number">8.5.1.</span> <span class="toc-nav-text">free实现示例：</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E8%99%9A%E6%8B%9F%E7%B4%A2%E5%BC%95%E6%A0%87%E7%AD%BE%E8%A1%A8-VITT-%E6%93%8D%E4%BD%9C"><span class="toc-nav-number">8.6.</span> <span class="toc-nav-text">虚拟索引标签表(VITT)操作</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E5%9C%BA%E6%99%AF"><span class="toc-nav-number">8.7.</span> <span class="toc-nav-text">异常处理场景</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E6%A0%87%E7%AD%BE%E4%B8%8D%E5%8C%B9%E9%85%8D%E5%BC%82%E5%B8%B8%EF%BC%9A"><span class="toc-nav-number">8.7.1.</span> <span class="toc-nav-text">标签不匹配异常：</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E7%BC%93%E5%86%B2%E5%8C%BA%E6%BA%A2%E5%87%BA%E6%A3%80%E6%B5%8B%EF%BC%9A"><span class="toc-nav-number">8.7.2.</span> <span class="toc-nav-text">缓冲区溢出检测：</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96-%E6%A0%87%E7%AD%BE%E6%A3%80%E6%9F%A5%E5%85%8D%E9%99%A4"><span class="toc-nav-number">8.8.</span> <span class="toc-nav-text">性能优化 - 标签检查免除</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-nav-number">8.9.</span> <span class="toc-nav-text">总结</span></a></li></ol></li></ol>
+            
+          
+          </div>
+        </aside>
+      
+    
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <!-- <h5><a href="/tags/">FEATURED TAGS</a></h5> -->
+                    <h5><a href="/tags/"></a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#RISC-V" title="RISC-V">RISC-V</a>
+                        
+                          <a class="tag" href="/tags/#MTE" title="MTE">MTE</a>
+                        
+                          <a class="tag" href="/tags/#memory tagging" title="memory tagging">memory tagging</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                
+                <script src="https://giscus.app/client.js"
+                    data-repo="AllenZF/allenzf.github.io"
+                    data-repo-id="R_kgDOQMASLQ"
+                    data-category="General"
+                    data-category-id="DIC_kwDOQMASLc4CxR4Q"
+                    data-mapping="pathname"
+                    data-strict="0"
+                    data-reactions-enabled="1"
+                    data-emit-metadata="0"
+                    data-input-position="bottom"
+                    data-theme="preferred_color_scheme"
+                    data-lang="en"
+                    crossorigin="anonymous"
+                    async>
+                </script>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: 'ℬ'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+
+
+<style  type="text/css">
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/AllenZF">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://gitee.com/Sven">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-stack-1x fa-inverse">码</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/people/zhou-lang-jie-feng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; 周郎借风 2025 
+                    <br>
+                    Powered by 
+                    <a href="https://github.com/dusign/hexo-theme-snail">
+                        <i>hexo-theme-snail</i>
+                    </a> | 
+                    <iframe name="star" style="margin-left: 2px; margin-bottom:-5px;" frameborder="0" scrolling="0"
+                        width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=dusign&repo=hexo-theme-snail&type=star&count=true">
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+
+</footer>
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- Search -->
+
+<script src="/js/search.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://allenzf.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-XXXXXXXX-X';
+    var _gaDomain = 'yoursite';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+<!-- Search -->
+
+    <script type="text/javascript">      
+        var search_path = "search.xml";
+        if (search_path.length == 0) {
+            search_path = "search.xml";
+        }
+    var path = "/" + search_path;
+    searchFunc(path, 'local-search-input', 'local-search-result');
+    </script>
+
+
+<!-- busuanzi -->
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+
+    
+        <!-- background effects line -->
+        
+
+        
+            <script type="text/javascript" src="/js/mouse-click.js" content='[&quot;🌱&quot;,&quot;just do it&quot;,&quot;🍀&quot;]' color='[&quot;rgb(121,93,179)&quot; ,&quot;rgb(76,180,231)&quot; ,&quot;rgb(184,90,154)&quot;]'></script>
+        
+
+        <!-- background effects end -->
+    
+
+    <!--<script size="50" alpha='0.3' zIndex="-999" src="/js/ribbonStatic.js"></script>-->
+    
+        <script src="/js/ribbonDynamic.js"></script>
+    
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+
+</html>

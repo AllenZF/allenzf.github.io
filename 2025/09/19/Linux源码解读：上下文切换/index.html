@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="baidu-site-verification" content="093lY4ziMu" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="记录点滴">
+    <meta name="keyword"  content="加油, 个人博客">
+    <link rel="shortcut icon" href="/img/ironman-draw.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <!--<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
+    <title>
+        
+          Linux源码解读(灵码)：上下文切换 - Sven-Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://allenzf.github.io/2025/09/19/Linux源码解读：上下文切换/">
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+
+    <!-- Custom CSS --> 
+    
+        
+<link rel="stylesheet" href="/css/dusign-light.css">
+
+        
+<link rel="stylesheet" href="/css/dusign-common-light.css">
+
+        
+<link rel="stylesheet" href="/css/font-awesome.css">
+
+        
+<link rel="stylesheet" href="/css/toc.css">
+
+        <!-- background effects end -->
+    
+    
+    <!-- Pygments Highlight CSS -->
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+
+    
+<link rel="stylesheet" href="/css/widget.css">
+
+
+    
+<link rel="stylesheet" href="/css/rocket.css">
+
+
+    
+<link rel="stylesheet" href="/css/signature.css">
+
+
+    
+<link rel="stylesheet" href="/css/fonts.googleapis.css">
+
+
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+    <!-- photography -->
+    
+<link rel="stylesheet" href="/css/photography.css">
+
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+<meta name="generator" content="Hexo 8.1.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- background effects start -->
+    
+    <!-- background effects end -->
+
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            
+                background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('../../../../img/header_img/Iron-Man-3.jpg')
+                /*post*/
+            
+        
+    }
+    
+    #signature{
+        background-image: url('/img/signature/Just-do-it-white.png');
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#Linux" title="Linux">Linux</a>
+                            
+                              <a class="tag" href="/tags/#kernel" title="kernel">kernel</a>
+                            
+                        </div>
+                        <h1>Linux源码解读(灵码)：上下文切换</h1>
+                        <h2 class="subheading">Linux源码解读</h2>
+                        <span class="meta">
+                            Posted by 周郎借风 on
+                            2025-09-19
+                        </span>
+
+                        
+                            <div class="blank_box"></div>
+                            <span class="meta">
+                                Words <span class="post-count">1.3k</span> and
+                                Reading Time <span class="post-count">5</span> Minutes
+                            </span>
+                            <div class="blank_box"></div>
+                            <!-- 不蒜子统计 start -->
+                            <span class="meta">
+                                Viewed <span id="busuanzi_value_page_pv"><i class="fa fa-spinner fa-spin"></i></span> Times
+                            </span>
+                            <!-- 不蒜子统计 end -->
+                        
+
+                    </div>
+                
+
+                </div>
+            </div>
+        </div>      
+    </div>
+
+    
+    <div class="waveWrapper">
+        <div class="wave wave_before" style="background-image: url('/img/wave-light.png')"></div>
+        <div class="wave wave_after" style="background-image: url('/img/wave-light.png')"></div>
+    </div>
+    
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">周郎借风</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">主页</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/categories/">分类</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">关于</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">归档</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/photography/">摄影</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">标签</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+                    
+                    
+                    <li>
+                        <a href="https://allenzf.github.io" target="_blank">中文博客</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="Linux内核context-switch函数详解"><a href="#Linux内核context-switch函数详解" class="headerlink" title="Linux内核context_switch函数详解"></a>Linux内核context_switch函数详解</h1><ul>
+<li>linux v6.17-rc6 master 8b789f2b7602a818e7c7488c74414fae21392b63 2025-09-18</li>
+<li>generated by 通义灵码</li>
+</ul>
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p><code>context_switch</code>函数是Linux内核调度器的核心组件之一，负责在进程或线程之间切换CPU执行上下文。当调度器决定切换当前运行的任务时，该函数会保存当前任务的状态并恢复下一个任务的状态。</p>
+<h2 id="函数定义和位置"><a href="#函数定义和位置" class="headerlink" title="函数定义和位置"></a>函数定义和位置</h2><p>函数位于<code>kernel/sched/core.c</code>文件中，从第5301行开始：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> __always_inline <span class="keyword">struct</span> rq *</span><br><span class="line"><span class="title function_">context_switch</span><span class="params">(<span class="keyword">struct</span> rq *rq, <span class="keyword">struct</span> task_struct *prev,</span></span><br><span class="line"><span class="params">               <span class="keyword">struct</span> task_struct *next, <span class="keyword">struct</span> rq_flags *rf)</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="函数参数"><a href="#函数参数" class="headerlink" title="函数参数"></a>函数参数</h2><ul>
+<li><code>rq</code>: 当前CPU的运行队列</li>
+<li><code>prev</code>: 当前正在运行的任务（将被切换出去）</li>
+<li><code>next</code>: 下一个将要运行的任务（将被切换进来）</li>
+<li><code>rf</code>: 运行队列标志</li>
+</ul>
+<h2 id="函数详细分析"><a href="#函数详细分析" class="headerlink" title="函数详细分析"></a>函数详细分析</h2><h3 id="1-准备阶段"><a href="#1-准备阶段" class="headerlink" title="1. 准备阶段"></a>1. 准备阶段</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">prepare_task_switch(rq, prev, next);</span><br></pre></td></tr></table></figure>
+
+<p>该函数执行上下文切换前的准备工作：</p>
+<ul>
+<li>处理KCOV（内核代码覆盖率）相关准备</li>
+<li>更新调度信息</li>
+<li>处理性能事件</li>
+<li>通知抢占相关的回调函数</li>
+<li>处理本地kmap映射</li>
+<li>准备任务和架构特定的切换操作</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">arch_start_context_switch(prev);</span><br></pre></td></tr></table></figure>
+
+<p>架构特定的上下文切换起始操作。在虚拟化环境中，这可能与<code>switch_to</code>中的退出操作结合，将页表重新加载和切换后端合并为一个超级调用。</p>
+<h3 id="2-内存管理上下文切换"><a href="#2-内存管理上下文切换" class="headerlink" title="2. 内存管理上下文切换"></a>2. 内存管理上下文切换</h3><p>这是上下文切换中最复杂的部分，处理不同类型的内存管理上下文之间的切换：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (!next-&gt;mm) &#123;                                <span class="comment">// to kernel</span></span><br><span class="line">    enter_lazy_tlb(prev-&gt;active_mm, next);</span><br><span class="line"></span><br><span class="line">    next-&gt;active_mm = prev-&gt;active_mm;</span><br><span class="line">    <span class="keyword">if</span> (prev-&gt;mm)                           <span class="comment">// from user</span></span><br><span class="line">        mmgrab_lazy_tlb(prev-&gt;active_mm);</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        prev-&gt;active_mm = <span class="literal">NULL</span>;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;                                        <span class="comment">// to user</span></span><br><span class="line">    membarrier_switch_mm(rq, prev-&gt;active_mm, next-&gt;mm);</span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     * sys_membarrier() requires an smp_mb() between setting</span></span><br><span class="line"><span class="comment">     * rq-&gt;curr / membarrier_switch_mm() and returning to userspace.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * The below provides this either through switch_mm(), or in</span></span><br><span class="line"><span class="comment">     * case &#x27;prev-&gt;active_mm == next-&gt;mm&#x27; through</span></span><br><span class="line"><span class="comment">     * finish_task_switch()&#x27;s mmdrop().</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    switch_mm_irqs_off(prev-&gt;active_mm, next-&gt;mm, next);</span><br><span class="line">    lru_gen_use_mm(next-&gt;mm);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!prev-&gt;mm) &#123;                        <span class="comment">// from kernel</span></span><br><span class="line">        <span class="comment">/* will mmdrop_lazy_tlb() in finish_task_switch(). */</span></span><br><span class="line">        rq-&gt;prev_mm = prev-&gt;active_mm;</span><br><span class="line">        prev-&gt;active_mm = <span class="literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>存在四种主要场景：</p>
+<ol>
+<li><p><strong>内核到内核切换</strong> (<code>!next-&gt;mm</code> 且 <code>!prev-&gt;mm</code>)：</p>
+<ul>
+<li>下一个任务是内核线程</li>
+<li>进入懒惰TLB模式并传递活动的内存管理结构</li>
+</ul>
+</li>
+<li><p><strong>用户到内核切换</strong> (<code>!next-&gt;mm</code> 且 <code>prev-&gt;mm</code>)：</p>
+<ul>
+<li>从用户进程切换到内核线程</li>
+<li>获取前一个内存管理结构的懒惰引用</li>
+</ul>
+</li>
+<li><p><strong>内核到用户切换</strong> (<code>next-&gt;mm</code> 且 <code>!prev-&gt;mm</code>)：</p>
+<ul>
+<li>从内核线程切换到用户进程</li>
+<li>切换内存映射并为新内存管理结构设置LRU生成器</li>
+<li>前一个活动内存管理结构将在<code>finish_task_switch()</code>中被释放</li>
+</ul>
+</li>
+<li><p><strong>用户到用户切换</strong> (<code>next-&gt;mm</code> 且 <code>prev-&gt;mm</code>)：</p>
+<ul>
+<li>在两个用户进程之间切换</li>
+<li>切换内存映射并适当处理内存管理引用</li>
+</ul>
+</li>
+</ol>
+<h3 id="3-CPU-ID管理"><a href="#3-CPU-ID管理" class="headerlink" title="3. CPU ID管理"></a>3. CPU ID管理</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">switch_mm_cid(rq, prev, next);</span><br></pre></td></tr></table></figure>
+
+<p>处理内存管理上下文的CPU ID管理，这对NUMA感知的内存管理很重要。</p>
+<h3 id="4-锁准备"><a href="#4-锁准备" class="headerlink" title="4. 锁准备"></a>4. 锁准备</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">prepare_lock_switch(rq, next, rf);</span><br></pre></td></tr></table></figure>
+
+<p>为锁切换做准备：</p>
+<ul>
+<li>提前释放运行队列锁（因为下一个任务将释放它）</li>
+<li>处理用于调试的锁依赖跟踪</li>
+</ul>
+<h3 id="5-处理器状态切换"><a href="#5-处理器状态切换" class="headerlink" title="5. 处理器状态切换"></a>5. 处理器状态切换</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">switch_to(prev, next, prev);</span><br><span class="line">barrier();</span><br></pre></td></tr></table></figure>
+
+<p>这是实际进行处理器状态切换的地方：</p>
+<ul>
+<li><code>switch_to</code>是一个宏，会展开为特定架构的代码</li>
+<li>它保存当前处理器状态并恢复下一个任务的状态</li>
+<li><a href="file:///home/zhouf/wks/tools/linux/tools/virtio/asm/barrier.h#L3-L4">barrier()</a>确保内存排序</li>
+</ul>
+<h3 id="6-清理阶段"><a href="#6-清理阶段" class="headerlink" title="6. 清理阶段"></a>6. 清理阶段</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> finish_task_switch(prev);</span><br></pre></td></tr></table></figure>
+
+<p>最后，完成上下文切换后的清理操作。</p>
+<h2 id="关键概念"><a href="#关键概念" class="headerlink" title="关键概念"></a>关键概念</h2><h3 id="内存管理上下文"><a href="#内存管理上下文" class="headerlink" title="内存管理上下文"></a>内存管理上下文</h3><p>在Linux中，任务可以有不同类型的内存管理上下文：</p>
+<ul>
+<li><strong>用户进程</strong>：拥有自己的<code>mm_struct</code>结构，存储在<code>task_struct-&gt;mm</code>中</li>
+<li><strong>内核线程</strong>：没有自己的地址空间，所以<code>task_struct-&gt;mm</code>为NULL，但它们会继承之前运行任务的<code>active_mm</code></li>
+</ul>
+<h3 id="懒惰TLB处理"><a href="#懒惰TLB处理" class="headerlink" title="懒惰TLB处理"></a>懒惰TLB处理</h3><p>内核使用懒惰TLB（Translation Lookaside Buffer）处理来优化上下文切换。不是立即切换TLB条目，而是将之前的TLB标记为”懒惰”，只在必要时才切换。</p>
+<h3 id="内存屏障"><a href="#内存屏障" class="headerlink" title="内存屏障"></a>内存屏障</h3><p>内存屏障在上下文切换中广泛使用，以确保操作的正确排序，特别是对于内存管理和同步原语。</p>
+<h2 id="架构特定实现"><a href="#架构特定实现" class="headerlink" title="架构特定实现"></a>架构特定实现</h2><p><code>context_switch</code>函数严重依赖于架构特定的实现：</p>
+<ol>
+<li><code>switch_to</code> - 每个架构都用汇编语言实现</li>
+<li><code>arch_start_context_switch</code> - 架构特定的准备操作</li>
+<li><code>switch_mm_irqs_off</code> - 架构特定的内存管理切换</li>
+<li>各种内存管理函数都有架构特定的实现</li>
+</ol>
+<h2 id="性能考虑"><a href="#性能考虑" class="headerlink" title="性能考虑"></a>性能考虑</h2><p>上下文切换是昂贵的操作，因为它涉及：</p>
+<ol>
+<li>保存和恢复处理器状态</li>
+<li>切换内存管理上下文</li>
+<li>缓存和TLB刷新</li>
+<li>各种簿记操作</li>
+</ol>
+<p>内核通过以下方式优化：</p>
+<ul>
+<li>使用懒惰TLB处理</li>
+<li>在可能的地方最小化内存屏障</li>
+<li>为常见情况（如内核线程到内核线程切换）提供快速路径</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><code>context_switch</code>函数是Linux内核调度器中复杂但关键的组成部分。它处理在任务之间切换的复杂细节，同时保持系统完整性、性能和适当的内存管理。理解这个函数对于理解Linux内核如何进行多任务处理和管理系统资源至关重要。</p>
+
+                
+                <hr>
+                <!-- Pager -->
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2025/09/19/Linux源码解读-OpenAI-：上下文切换/" data-toggle="tooltip" data-placement="top" title="Linux源码解读(OpenAI)：上下文切换">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2025/09/17/uprobe使用：tracefs-perf/" data-toggle="tooltip" data-placement="top" title="uprobe使用：tracefs/perf">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- tip start -->
+                
+
+                
+                <!-- tip end -->
+
+                <!-- Music start-->
+                
+                <!-- Music end -->
+
+                <!-- Sharing -->
+                
+                <!-- Sharing -->
+
+                <!-- gitment start -->
+                
+                <!-- gitment end -->
+
+                <!-- 来必力City版安装代码 -->
+                
+                <!-- City版安装代码已完成 -->
+
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+    
+      
+        <aside id="sidebar">
+          <div id="toc" class="toc-article">
+          <strong class="toc-title">Contents</strong>
+          
+            
+              <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#Linux%E5%86%85%E6%A0%B8context-switch%E5%87%BD%E6%95%B0%E8%AF%A6%E8%A7%A3"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">Linux内核context_switch函数详解</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-nav-number">1.1.</span> <span class="toc-nav-text">概述</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%87%BD%E6%95%B0%E5%AE%9A%E4%B9%89%E5%92%8C%E4%BD%8D%E7%BD%AE"><span class="toc-nav-number">1.2.</span> <span class="toc-nav-text">函数定义和位置</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%87%BD%E6%95%B0%E5%8F%82%E6%95%B0"><span class="toc-nav-number">1.3.</span> <span class="toc-nav-text">函数参数</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%87%BD%E6%95%B0%E8%AF%A6%E7%BB%86%E5%88%86%E6%9E%90"><span class="toc-nav-number">1.4.</span> <span class="toc-nav-text">函数详细分析</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#1-%E5%87%86%E5%A4%87%E9%98%B6%E6%AE%B5"><span class="toc-nav-number">1.4.1.</span> <span class="toc-nav-text">1. 准备阶段</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#2-%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%87%E6%8D%A2"><span class="toc-nav-number">1.4.2.</span> <span class="toc-nav-text">2. 内存管理上下文切换</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#3-CPU-ID%E7%AE%A1%E7%90%86"><span class="toc-nav-number">1.4.3.</span> <span class="toc-nav-text">3. CPU ID管理</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#4-%E9%94%81%E5%87%86%E5%A4%87"><span class="toc-nav-number">1.4.4.</span> <span class="toc-nav-text">4. 锁准备</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#5-%E5%A4%84%E7%90%86%E5%99%A8%E7%8A%B6%E6%80%81%E5%88%87%E6%8D%A2"><span class="toc-nav-number">1.4.5.</span> <span class="toc-nav-text">5. 处理器状态切换</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#6-%E6%B8%85%E7%90%86%E9%98%B6%E6%AE%B5"><span class="toc-nav-number">1.4.6.</span> <span class="toc-nav-text">6. 清理阶段</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5"><span class="toc-nav-number">1.5.</span> <span class="toc-nav-text">关键概念</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E4%B8%8A%E4%B8%8B%E6%96%87"><span class="toc-nav-number">1.5.1.</span> <span class="toc-nav-text">内存管理上下文</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%87%92%E6%83%B0TLB%E5%A4%84%E7%90%86"><span class="toc-nav-number">1.5.2.</span> <span class="toc-nav-text">懒惰TLB处理</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%86%85%E5%AD%98%E5%B1%8F%E9%9A%9C"><span class="toc-nav-number">1.5.3.</span> <span class="toc-nav-text">内存屏障</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%9E%B6%E6%9E%84%E7%89%B9%E5%AE%9A%E5%AE%9E%E7%8E%B0"><span class="toc-nav-number">1.6.</span> <span class="toc-nav-text">架构特定实现</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%80%A7%E8%83%BD%E8%80%83%E8%99%91"><span class="toc-nav-number">1.7.</span> <span class="toc-nav-text">性能考虑</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-nav-number">1.8.</span> <span class="toc-nav-text">总结</span></a></li></ol></li></ol>
+            
+          
+          </div>
+        </aside>
+      
+    
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <!-- <h5><a href="/tags/">FEATURED TAGS</a></h5> -->
+                    <h5><a href="/tags/"></a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#Linux" title="Linux">Linux</a>
+                        
+                          <a class="tag" href="/tags/#kernel" title="kernel">kernel</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                
+                <script src="https://giscus.app/client.js"
+                    data-repo="AllenZF/allenzf.github.io"
+                    data-repo-id="R_kgDOQMASLQ"
+                    data-category="General"
+                    data-category-id="DIC_kwDOQMASLc4CxR4Q"
+                    data-mapping="pathname"
+                    data-strict="0"
+                    data-reactions-enabled="1"
+                    data-emit-metadata="0"
+                    data-input-position="bottom"
+                    data-theme="preferred_color_scheme"
+                    data-lang="en"
+                    crossorigin="anonymous"
+                    async>
+                </script>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: 'ℬ'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+
+
+<style  type="text/css">
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/AllenZF">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://gitee.com/Sven">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-stack-1x fa-inverse">码</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/people/zhou-lang-jie-feng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; 周郎借风 2025 
+                    <br>
+                    Powered by 
+                    <a href="https://github.com/dusign/hexo-theme-snail">
+                        <i>hexo-theme-snail</i>
+                    </a> | 
+                    <iframe name="star" style="margin-left: 2px; margin-bottom:-5px;" frameborder="0" scrolling="0"
+                        width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=dusign&repo=hexo-theme-snail&type=star&count=true">
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+
+</footer>
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- Search -->
+
+<script src="/js/search.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://allenzf.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-XXXXXXXX-X';
+    var _gaDomain = 'yoursite';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+<!-- Search -->
+
+    <script type="text/javascript">      
+        var search_path = "search.xml";
+        if (search_path.length == 0) {
+            search_path = "search.xml";
+        }
+    var path = "/" + search_path;
+    searchFunc(path, 'local-search-input', 'local-search-result');
+    </script>
+
+
+<!-- busuanzi -->
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+
+    
+        <!-- background effects line -->
+        
+
+        
+            <script type="text/javascript" src="/js/mouse-click.js" content='[&quot;🌱&quot;,&quot;just do it&quot;,&quot;🍀&quot;]' color='[&quot;rgb(121,93,179)&quot; ,&quot;rgb(76,180,231)&quot; ,&quot;rgb(184,90,154)&quot;]'></script>
+        
+
+        <!-- background effects end -->
+    
+
+    <!--<script size="50" alpha='0.3' zIndex="-999" src="/js/ribbonStatic.js"></script>-->
+    
+        <script src="/js/ribbonDynamic.js"></script>
+    
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+
+</html>

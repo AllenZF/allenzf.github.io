@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="baidu-site-verification" content="093lY4ziMu" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="记录点滴">
+    <meta name="keyword"  content="加油, 个人博客">
+    <link rel="shortcut icon" href="/img/ironman-draw.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <!--<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
+    <title>
+        
+          Linux Perf 介绍 —— Perf 示例 - Sven-Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://allenzf.github.io/2025/08/28/Linux-Perf-介绍-——-Perf-示例/">
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+
+    <!-- Custom CSS --> 
+    
+        
+<link rel="stylesheet" href="/css/dusign-light.css">
+
+        
+<link rel="stylesheet" href="/css/dusign-common-light.css">
+
+        
+<link rel="stylesheet" href="/css/font-awesome.css">
+
+        
+<link rel="stylesheet" href="/css/toc.css">
+
+        <!-- background effects end -->
+    
+    
+    <!-- Pygments Highlight CSS -->
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+
+    
+<link rel="stylesheet" href="/css/widget.css">
+
+
+    
+<link rel="stylesheet" href="/css/rocket.css">
+
+
+    
+<link rel="stylesheet" href="/css/signature.css">
+
+
+    
+<link rel="stylesheet" href="/css/fonts.googleapis.css">
+
+
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+    <!-- photography -->
+    
+<link rel="stylesheet" href="/css/photography.css">
+
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+<meta name="generator" content="Hexo 8.1.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- background effects start -->
+    
+    <!-- background effects end -->
+
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            
+                background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('../../../../img/header_img/Iron-Man-3.jpg')
+                /*post*/
+            
+        
+    }
+    
+    #signature{
+        background-image: url('/img/signature/Just-do-it-white.png');
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#RISC-V" title="RISC-V">RISC-V</a>
+                            
+                              <a class="tag" href="/tags/#Perf" title="Perf">Perf</a>
+                            
+                              <a class="tag" href="/tags/#Linux" title="Linux">Linux</a>
+                            
+                        </div>
+                        <h1>Linux Perf 介绍 —— Perf 示例</h1>
+                        <h2 class="subheading"></h2>
+                        <span class="meta">
+                            Posted by 周郎借风 on
+                            2025-08-28
+                        </span>
+
+                        
+                            <div class="blank_box"></div>
+                            <span class="meta">
+                                Words <span class="post-count">3.7k</span> and
+                                Reading Time <span class="post-count">20</span> Minutes
+                            </span>
+                            <div class="blank_box"></div>
+                            <!-- 不蒜子统计 start -->
+                            <span class="meta">
+                                Viewed <span id="busuanzi_value_page_pv"><i class="fa fa-spinner fa-spin"></i></span> Times
+                            </span>
+                            <!-- 不蒜子统计 end -->
+                        
+
+                    </div>
+                
+
+                </div>
+            </div>
+        </div>      
+    </div>
+
+    
+    <div class="waveWrapper">
+        <div class="wave wave_before" style="background-image: url('/img/wave-light.png')"></div>
+        <div class="wave wave_after" style="background-image: url('/img/wave-light.png')"></div>
+    </div>
+    
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">周郎借风</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">主页</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/categories/">分类</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">关于</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">归档</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/photography/">摄影</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">标签</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+                    
+                    
+                    <li>
+                        <a href="https://allenzf.github.io" target="_blank">中文博客</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="示例说明"><a href="#示例说明" class="headerlink" title="示例说明"></a>示例说明</h1><hr>
+<p>后续示例完全按照<a href="https://www.brendangregg.com/perf.html">perf 示例</a>执行一遍。</p>
+<p>Perf Linux 性能分析器也被称作 Performance Counters for Linux (PCL)、Linux perf events (LPE) 或 perf_events。后续用 perf_events 描述。</p>
+<h1 id="Perf-events-功能"><a href="#Perf-events-功能" class="headerlink" title="Perf_events 功能"></a>Perf_events 功能</h1><hr>
+<p>perf_events 是一个事件导向的可观测性工具，可以帮助你解决高级性能和故障排除问题。可以回答的问题包括：</p>
+<ul>
+<li>Why is the kernel on-CPU so much? What code-paths? 内核在 CPU 上花费的时间为什么这么多？哪些代码路径？</li>
+<li>Which code-paths are causing CPU level 2 cache misses? 哪些代码路径导致了 CPU 二级缓存缺失？</li>
+<li>Are the CPUs stalled on memory I&#x2F;O? CPU 在进行内存 I&#x2F;O 操作吗？</li>
+<li>Which code-paths are allocating memory, and how much? 哪些代码路径在分配内存，分配了多少？</li>
+<li>What is triggering TCP retransmits? 是什么触发了 TCP 重传？</li>
+<li>Is a certain kernel function being called, and how often? 某个内核函数是否被调用，以及调用的频率是多少？</li>
+<li>What reasons are threads leaving the CPU? 线程离开 CPU 的原因是什么？</li>
+</ul>
+<h1 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h1><p>示例在root下执行。</p>
+<h2 id="1-Screenshot"><a href="#1-Screenshot" class="headerlink" title="1. Screenshot"></a>1. Screenshot</h2><hr>
+<p>这是perf跟踪磁盘I&#x2F;O的例子：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"># perf record -e block:block_rq_issue -ag</span><br><span class="line">^C</span><br><span class="line">[ perf record: Woken up 1 times to write data ]</span><br><span class="line">[ perf record: Captured and wrote 0.022 MB perf.data ]</span><br><span class="line"># perf report</span><br><span class="line">Samples: 4  of event &#x27;block:block_rq_issue&#x27;, Event count (approx.): 4</span><br><span class="line">  Children      Self  Command          Shared Object      Symbol</span><br><span class="line">+   75.00%    75.00%  kworker/0:1H-kb  [kernel.kallsyms]  [k] __traceiter_block_rq_issue</span><br><span class="line">+   75.00%     0.00%  kworker/0:1H-kb  [kernel.kallsyms]  [k] ret_from_fork</span><br><span class="line">+   75.00%     0.00%  kworker/0:1H-kb  [kernel.kallsyms]  [k] kthread</span><br><span class="line">+   75.00%     0.00%  kworker/0:1H-kb  [kernel.kallsyms]  [k] worker_thread</span><br><span class="line">+   75.00%     0.00%  kworker/0:1H-kb  [kernel.kallsyms]  [k] process_one_work</span><br><span class="line">+   75.00%     0.00%  kworker/0:1H-kb  [kernel.kallsyms]  [k] blk_mq_requeue_work</span><br><span class="line">+   75.00%     0.00%  kworker/0:1H-kb  [kernel.kallsyms]  [k] blk_mq_run_hw_queues</span><br><span class="line">+   75.00%     0.00%  kworker/0:1H-kb  [kernel.kallsyms]  [k] blk_mq_run_hw_queue</span><br><span class="line">+   75.00%     0.00%  kworker/0:1H-kb  [kernel.kallsyms]  [k] blk_mq_sched_dispatch_requests</span><br><span class="line">+   75.00%     0.00%  kworker/0:1H-kb  [kernel.kallsyms]  [k] __blk_mq_sched_dispatch_requests</span><br><span class="line">+   75.00%     0.00%  kworker/0:1H-kb  [kernel.kallsyms]  [k] blk_mq_dispatch_rq_list</span><br><span class="line">+   75.00%     0.00%  kworker/0:1H-kb  [kernel.kallsyms]  [k] virtio_queue_rq</span><br><span class="line">+   75.00%     0.00%  kworker/0:1H-kb  [kernel.kallsyms]  [k] virtblk_prep_rq.isra.0</span><br><span class="line">+   75.00%     0.00%  kworker/0:1H-kb  [kernel.kallsyms]  [k] blk_mq_start_request</span><br><span class="line">+   25.00%    25.00%  jbd2/vda-8       [kernel.kallsyms]  [k] __traceiter_block_rq_issue</span><br><span class="line">+   25.00%     0.00%  jbd2/vda-8       [kernel.kallsyms]  [k] ret_from_fork</span><br><span class="line">+   25.00%     0.00%  jbd2/vda-8       [kernel.kallsyms]  [k] kthread</span><br><span class="line">+   25.00%     0.00%  jbd2/vda-8       [kernel.kallsyms]  [k] kjournald2</span><br><span class="line">+   25.00%     0.00%  jbd2/vda-8       [kernel.kallsyms]  [k] jbd2_journal_commit_transaction</span><br><span class="line">+   25.00%     0.00%  jbd2/vda-8       [kernel.kallsyms]  [k] blk_finish_plug</span><br><span class="line">+   25.00%     0.00%  jbd2/vda-8       [kernel.kallsyms]  [k] __blk_flush_plug</span><br><span class="line">+   25.00%     0.00%  jbd2/vda-8       [kernel.kallsyms]  [k] blk_mq_flush_plug_list</span><br><span class="line">+   25.00%     0.00%  jbd2/vda-8       [kernel.kallsyms]  [k] blk_mq_flush_plug_list.part.0</span><br><span class="line">+   25.00%     0.00%  jbd2/vda-8       [kernel.kallsyms]  [k] blk_mq_run_hw_queue</span><br><span class="line">+   25.00%     0.00%  jbd2/vda-8       [kernel.kallsyms]  [k] blk_mq_sched_dispatch_requests</span><br><span class="line">+   25.00%     0.00%  jbd2/vda-8       [kernel.kallsyms]  [k] __blk_mq_sched_dispatch_requests</span><br><span class="line">+   25.00%     0.00%  jbd2/vda-8       [kernel.kallsyms]  [k] blk_mq_dispatch_rq_list</span><br><span class="line">+   25.00%     0.00%  jbd2/vda-8       [kernel.kallsyms]  [k] virtio_queue_rq</span><br><span class="line">+   25.00%     0.00%  jbd2/vda-8       [kernel.kallsyms]  [k] virtblk_prep_rq.isra.0</span><br><span class="line">[...]</span><br></pre></td></tr></table></figure>
+<p>使用 perf record 命令跟踪了 block:block_rq_issue 探针，当块设备 I&#x2F;O 请求发出时（磁盘 I&#x2F;O）触发。选项包括 -a 跟踪所有 CPU，和 -g 捕获调用图（堆栈跟踪）。跟踪数据写入到 perf.data 文件，当按下 Ctrl-C 时停止跟踪。使用 perf report 命令打印 perf.data 文件的摘要，该命令从堆栈跟踪构建一棵树，合并常见路径，并显示每个路径的百分比。</p>
+<p>perf 报告输出显示，跟踪了 4 个事件（磁盘 I&#x2F;O），其中 75% 来自 kworker&#x2F;0:1H-kb 命令。这些事件是由内核函数 __traceiter_block_rq_issue() 发出的，最左边的 + 表示该命令可以继续展开，更多调用栈细节可以被追踪显示。通过 ？可以查看帮助文档，了解快捷键使用。</p>
+<h2 id="2-命令示例表"><a href="#2-命令示例表" class="headerlink" title="2. 命令示例表"></a>2. 命令示例表</h2><hr>
+<p>一些有用的单行命令，开销从最低到最高：</p>
+<ul>
+<li>statistics&#x2F;count: increment an integer counter on events 统计&#x2F;计数: 在事件上增加一个整数计数器</li>
+<li>sample: collect details (eg, instruction pointer or stack) from a subset of events (once every …) 抽样: 从事件的子集中收集详细信息（例如，指令指针或堆栈）（每隔…）</li>
+<li>trace: collect details from every event 跟踪: 从每个事件收集详细信息</li>
+</ul>
+<h3 id="2-1-列出事件表"><a href="#2-1-列出事件表" class="headerlink" title="2.1 列出事件表"></a>2.1 列出事件表</h3><hr>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Listing all currently known events:</span></span><br><span class="line">perf list</span><br><span class="line"></span><br><span class="line"><span class="comment"># Listing sched tracepoints:</span></span><br><span class="line">perf list <span class="string">&#x27;sched:*&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-计数一个事件"><a href="#2-2-计数一个事件" class="headerlink" title="2.2 计数一个事件"></a>2.2 计数一个事件</h3><hr>
+<p>可以随时通过 <code>Perf stat -h</code> 查看选项帮助信息。下述命令中 <code>command</code> 需要用具体命令替换。这是计数型命令，对系统干扰最小。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># CPU counter statistics(统计) for the specified command:</span></span><br><span class="line">perf <span class="built_in">stat</span> <span class="built_in">command</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Detailed CPU counter statistics (includes extras) for the specified command: -d --detailed</span></span><br><span class="line">perf <span class="built_in">stat</span> -d <span class="built_in">command</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># CPU counter statistics for the specified PID, until Ctrl-C:</span></span><br><span class="line">perf <span class="built_in">stat</span> -p PID</span><br><span class="line"></span><br><span class="line"><span class="comment"># CPU counter statistics for the entire system, for 5 seconds: -a --all-cpus</span></span><br><span class="line">perf <span class="built_in">stat</span> -a <span class="built_in">sleep</span> 5</span><br><span class="line"></span><br><span class="line"><span class="comment"># Various basic CPU statistics, system wide, for 10 seconds: 通过 perf list 可以查看 -e 支持的事件</span></span><br><span class="line">perf <span class="built_in">stat</span> -e cycles,instructions,cache-references,cache-misses,bus-cycles -a <span class="built_in">sleep</span> 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># Various CPU level 1 data cache statistics for the specified command:</span></span><br><span class="line">perf <span class="built_in">stat</span> -e L1-dcache-loads,L1-dcache-load-misses,L1-dcache-stores <span class="built_in">command</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Various CPU data TLB statistics for the specified command:</span></span><br><span class="line">perf <span class="built_in">stat</span> -e dTLB-loads,dTLB-load-misses,dTLB-prefetch-misses <span class="built_in">command</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Various CPU last level cache statistics for the specified command:</span></span><br><span class="line">perf <span class="built_in">stat</span> -e LLC-loads,LLC-load-misses,LLC-stores,LLC-prefetches <span class="built_in">command</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># X86 AMD :</span></span><br><span class="line"><span class="comment"># Using raw PMC counters, eg, counting retired instructions:</span></span><br><span class="line"><span class="comment">#  &#123;</span></span><br><span class="line"><span class="comment">#    &quot;EventName&quot;: &quot;ex_ret_instr&quot;,</span></span><br><span class="line"><span class="comment">#    &quot;EventCode&quot;: &quot;0xc0&quot;,</span></span><br><span class="line"><span class="comment">#    &quot;BriefDescription&quot;: &quot;Retired Instructions.&quot;</span></span><br><span class="line"><span class="comment">#  &#125;</span></span><br><span class="line">perf <span class="built_in">stat</span> -e ex_ret_instr <span class="built_in">sleep</span> 5</span><br><span class="line">perf <span class="built_in">stat</span> -e r0c0 <span class="built_in">sleep</span> 5</span><br><span class="line">perf <span class="built_in">stat</span> -e cpu/event=0xc0/ <span class="built_in">sleep</span> 5</span><br><span class="line"></span><br><span class="line"><span class="comment"># X86 AMD :</span></span><br><span class="line"><span class="comment"># PMCs: counting cycles and frontend stalls via raw specification:</span></span><br><span class="line"><span class="comment">#  &#123;</span></span><br><span class="line"><span class="comment">#    &quot;EventName&quot;: &quot;fp_disp_faults.x87_fill_fault&quot;,</span></span><br><span class="line"><span class="comment">#    &quot;EventCode&quot;: &quot;0x0e&quot;,</span></span><br><span class="line"><span class="comment">#    &quot;BriefDescription&quot;: &quot;Floating Point Dispatch Faults. x87 fill fault.&quot;,</span></span><br><span class="line"><span class="comment">#    &quot;UMask&quot;: &quot;0x01&quot;</span></span><br><span class="line"><span class="comment">#  &#125;</span></span><br><span class="line"><span class="comment"># 通过查看json代码或ppr文档可以解析如下命令。inv 表示反向计数，即如果0x0e是记录发生的，那么inv就是计数未发生事件</span></span><br><span class="line">perf <span class="built_in">stat</span> -e cycles -e cpu/event=0x0e,<span class="built_in">umask</span>=0x01,inv,cmask=0x01/ -a <span class="built_in">sleep</span> 5</span><br><span class="line"></span><br><span class="line"><span class="comment"># RISC-V T-head:</span></span><br><span class="line"><span class="comment">#   &#123;</span></span><br><span class="line"><span class="comment">#    &quot;EventName&quot;: &quot;L1_ICACHE_ACCESS&quot;,</span></span><br><span class="line"><span class="comment">#    &quot;EventCode&quot;: &quot;0x00000001&quot;,</span></span><br><span class="line"><span class="comment">#    &quot;BriefDescription&quot;: &quot;L1 instruction cache access&quot;</span></span><br><span class="line"><span class="comment">#   &#125;</span></span><br><span class="line"><span class="comment"># Perf list:</span></span><br><span class="line"><span class="comment">#  L1-icache-loads OR cpu/L1-icache-loads/</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">perf <span class="built_in">stat</span> -e L1-icache-loads <span class="built_in">sleep</span> 3</span><br><span class="line">perf <span class="built_in">stat</span> -e r01 <span class="built_in">sleep</span> 3</span><br><span class="line">perf <span class="built_in">stat</span> -e  cpu/L1-icache-loads/ <span class="built_in">sleep</span> 3</span><br><span class="line"></span><br><span class="line"><span class="comment"># Count syscalls per-second system-wide: -I 1000, 以1000毫秒为周期打印系统调用的次数</span></span><br><span class="line">perf <span class="built_in">stat</span> -e raw_syscalls:sys_enter -I 1000 -a</span><br><span class="line"></span><br><span class="line"><span class="comment"># Count system calls by type for the specified PID, until Ctrl-C:</span></span><br><span class="line">perf <span class="built_in">stat</span> -e <span class="string">&#x27;syscalls:sys_enter_*&#x27;</span> -p PID</span><br><span class="line"></span><br><span class="line"><span class="comment"># Count system calls by type for the entire system, for 5 seconds:</span></span><br><span class="line">perf <span class="built_in">stat</span> -e <span class="string">&#x27;syscalls:sys_enter_*&#x27;</span> -a <span class="built_in">sleep</span> 5</span><br><span class="line"></span><br><span class="line"><span class="comment"># Count scheduler events for the specified PID, until Ctrl-C:</span></span><br><span class="line">perf <span class="built_in">stat</span> -e <span class="string">&#x27;sched:*&#x27;</span> -p PID</span><br><span class="line"></span><br><span class="line"><span class="comment"># Count scheduler events for the specified PID, for 10 seconds:</span></span><br><span class="line">perf <span class="built_in">stat</span> -e <span class="string">&#x27;sched:*&#x27;</span> -p PID <span class="built_in">sleep</span> 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># Count ext4 events for the entire system, for 10 seconds:</span></span><br><span class="line">perf <span class="built_in">stat</span> -e <span class="string">&#x27;ext4:*&#x27;</span> -a <span class="built_in">sleep</span> 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># Count block device I/O events for the entire system, for 10 seconds:</span></span><br><span class="line">perf <span class="built_in">stat</span> -e <span class="string">&#x27;block:*&#x27;</span> -a <span class="built_in">sleep</span> 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># Count all vmscan events, printing a report every second:</span></span><br><span class="line">perf <span class="built_in">stat</span> -e <span class="string">&#x27;vmscan:*&#x27;</span> -a -I 1000</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-3-采样分析"><a href="#2-3-采样分析" class="headerlink" title="2.3 采样分析"></a>2.3 采样分析</h3><hr>
+<p>使用 perf 工具对系统或应用程序的性能进行采样和分析的过程，如函数调用栈、CPU 使用情况等，从而帮助开发者或系统管理员了解程序的性能瓶颈。<code>Perf record</code> 命令默认采样周期率 1000 Hertz，当没有 -F 参数时使用默认值。使用 <code>perf record</code> 的采样模式时，需要注意开销问题，因为捕获文件可能会迅速达到数百兆字节。</p>
+<p><code>Perf top</code> 是实时采集并显示，不会保存 Perf.data 文件。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Sample on-CPU functions for the specified command, at 99 Hertz: -F 99 表示采样频率</span></span><br><span class="line">perf record -F 99 <span class="built_in">command</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Sample on-CPU functions for the specified PID, at 99 Hertz, until Ctrl-C:</span></span><br><span class="line">perf record -F 99 -p PID</span><br><span class="line"></span><br><span class="line"><span class="comment"># Sample on-CPU functions for the specified PID, at 99 Hertz, for 10 seconds:</span></span><br><span class="line">perf record -F 99 -p PID <span class="built_in">sleep</span> 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># Sample CPU stack traces (via frame pointers) for the specified PID, at 99 Hertz, for 10 seconds: -g 表示收集调用栈</span></span><br><span class="line">perf record -F 99 -p PID -g -- <span class="built_in">sleep</span> 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># Sample CPU stack traces for the PID, using dwarf (dbg info) to unwind stacks, at 99 Hertz, for 10 seconds:</span></span><br><span class="line">perf record -F 99 -p PID --call-graph dwarf <span class="built_in">sleep</span> 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># Sample CPU stack traces for the entire system, at 99 Hertz, for 10 seconds (&lt; Linux 4.11):</span></span><br><span class="line">perf record -F 99 -ag -- <span class="built_in">sleep</span> 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># Sample CPU stack traces for the entire system, at 99 Hertz, for 10 seconds (&gt;= Linux 4.11):</span></span><br><span class="line">perf record -F 99 -g -- <span class="built_in">sleep</span> 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># If the previous command didn&#x27;t work, try forcing perf to use the cpu-clock event:</span></span><br><span class="line">perf record -F 99 -e cpu-clock -ag -- <span class="built_in">sleep</span> 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># Sample CPU stack traces for a container identified by its /sys/fs/cgroup/perf_event cgroup:</span></span><br><span class="line">perf record -F 99 -e cpu-clock --cgroup=docker/1d567f4393190204...etc... -a -- <span class="built_in">sleep</span> 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># Sample CPU stack traces for the entire system, with dwarf stacks, at 99 Hertz, for 10 seconds:</span></span><br><span class="line">perf record -F 99 -a --call-graph dwarf <span class="built_in">sleep</span> 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># Sample CPU stack traces for the entire system, using last branch record for stacks, ... (&gt;= Linux 4.?):</span></span><br><span class="line">perf record -F 99 -a --call-graph lbr <span class="built_in">sleep</span> 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># Sample CPU stack traces, once every 10,000 Level 1 data cache misses, for 5 seconds:</span></span><br><span class="line">perf record -e L1-dcache-load-misses -c 10000 -ag -- <span class="built_in">sleep</span> 5</span><br><span class="line"></span><br><span class="line"><span class="comment"># Sample CPU stack traces, once every 100 last level cache misses, for 5 seconds:</span></span><br><span class="line">perf record -e LLC-load-misses -c 100 -ag -- <span class="built_in">sleep</span> 5</span><br><span class="line"></span><br><span class="line"><span class="comment"># Sample on-CPU kernel instructions, for 5 seconds:</span></span><br><span class="line">perf record -e cycles:k -a -- <span class="built_in">sleep</span> 5</span><br><span class="line"></span><br><span class="line"><span class="comment"># Sample on-CPU user instructions, for 5 seconds:</span></span><br><span class="line">perf record -e cycles:u -a -- <span class="built_in">sleep</span> 5</span><br><span class="line"></span><br><span class="line"><span class="comment"># Sample on-CPU user instructions precisely (using PEBS), for 5 seconds:</span></span><br><span class="line">perf record -e cycles:up -a -- <span class="built_in">sleep</span> 5</span><br><span class="line"></span><br><span class="line"><span class="comment"># Perform branch tracing (needs HW support), for 1 second: -b 表示对预测为 taken 的分支采样</span></span><br><span class="line">perf record -b -a <span class="built_in">sleep</span> 1</span><br><span class="line"></span><br><span class="line"><span class="comment"># Sample CPUs at 49 Hertz, and show top addresses and symbols, live (no perf.data file):</span></span><br><span class="line">perf top -F 49</span><br><span class="line"></span><br><span class="line"><span class="comment"># Sample CPUs at 49 Hertz, and show top process names and segments, live:</span></span><br><span class="line">perf top -F 49 -ns <span class="built_in">comm</span>,dso</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-4-静态跟踪"><a href="#2-4-静态跟踪" class="headerlink" title="2.4 静态跟踪"></a>2.4 静态跟踪</h3><hr>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Trace new processes, until Ctrl-C:</span></span><br><span class="line">perf record -e <span class="built_in">sched</span>:sched_process_exec -a</span><br><span class="line"></span><br><span class="line"><span class="comment"># Sample (take a subset of) context-switches, until Ctrl-C:</span></span><br><span class="line">perf record -e context-switches -a</span><br><span class="line"></span><br><span class="line"><span class="comment"># Trace all context-switches, until Ctrl-C:</span></span><br><span class="line">perf record -e context-switches -c 1 -a</span><br><span class="line"></span><br><span class="line"><span class="comment"># Include raw settings used (see: man perf_event_open): 使用 -vv 表示更详细的输出</span></span><br><span class="line">perf record -vv -e context-switches -a</span><br><span class="line"></span><br><span class="line"><span class="comment"># Trace all context-switches via sched tracepoint, until Ctrl-C:</span></span><br><span class="line">perf record -e <span class="built_in">sched</span>:sched_switch -a</span><br><span class="line"></span><br><span class="line"><span class="comment"># Sample context-switches with stack traces, until Ctrl-C:</span></span><br><span class="line">perf record -e context-switches -ag</span><br><span class="line"></span><br><span class="line"><span class="comment"># Sample context-switches with stack traces, for 10 seconds:</span></span><br><span class="line">perf record -e context-switches -ag -- <span class="built_in">sleep</span> 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># Sample CS, stack traces, and with timestamps (&lt; Linux 3.17, -T now default): -T：表示记录时间戳, 默认带时间戳</span></span><br><span class="line">perf record -e context-switches -ag -T</span><br><span class="line"></span><br><span class="line"><span class="comment"># Sample CPU migrations, for 10 seconds:</span></span><br><span class="line">perf record -e migrations -a -- <span class="built_in">sleep</span> 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># Trace all connect()s with stack traces (outbound connections), until Ctrl-C:</span></span><br><span class="line">perf record -e syscalls:sys_enter_connect -ag</span><br><span class="line"></span><br><span class="line"><span class="comment"># Trace all accepts()s with stack traces (inbound connections), until Ctrl-C:</span></span><br><span class="line">perf record -e syscalls:sys_enter_accept* -ag</span><br><span class="line"></span><br><span class="line"><span class="comment"># Trace all block device (disk I/O) requests with stack traces, until Ctrl-C:</span></span><br><span class="line">perf record -e block:block_rq_insert -ag</span><br><span class="line"></span><br><span class="line"><span class="comment"># Sample at most 100 block device requests per second, until Ctrl-C:</span></span><br><span class="line">perf record -F 100 -e block:block_rq_insert -a</span><br><span class="line"></span><br><span class="line"><span class="comment"># Trace all block device issues and completions (has timestamps), until Ctrl-C:</span></span><br><span class="line">perf record -e block:block_rq_issue -e block:block_rq_complete -a</span><br><span class="line"></span><br><span class="line"><span class="comment"># Trace all block completions, of size at least 100 Kbytes, until Ctrl-C:</span></span><br><span class="line"><span class="comment"># nr_sector &gt; 200表示请求的大小大于200个扇区，换算成字节就是200 * 512 = 100 KB</span></span><br><span class="line">perf record -e block:block_rq_complete --filter <span class="string">&#x27;nr_sector &gt; 200&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Trace all block completions, synchronous writes only, until Ctrl-C:</span></span><br><span class="line"><span class="comment"># 筛选出rwbs字段等于&quot;WS&quot;的事件。rwbs字段表示I/O操作的类型和方向，&quot;WS&quot;表示同步写入操作。</span></span><br><span class="line">perf record -e block:block_rq_complete --filter <span class="string">&#x27;rwbs == &quot;WS&quot;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Trace all block completions, all types of writes, until Ctrl-C:</span></span><br><span class="line"><span class="comment">#  &#x27;rwbs ~ &quot;*W*&#x27;&quot; 是rwbs 是一个字段，表示请求的读写类型和块大小等信息。~ 是一个正则表达式匹配操作符，&quot;*W*&quot; 表示匹配包含“W”（表示写操作）的字符串。所以，这个过滤条件的作用是只记录包含写操作的块设备请求完成事件，从而实现追踪所有类型的写操作完成情况。</span></span><br><span class="line">perf record -e block:block_rq_complete --filter <span class="string">&#x27;rwbs ~ &quot;*W*&quot;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Sample minor faults (RSS growth) with stack traces, until Ctrl-C:</span></span><br><span class="line">perf record -e minor-faults -ag</span><br><span class="line"></span><br><span class="line"><span class="comment"># Trace all minor faults with stack traces, until Ctrl-C:</span></span><br><span class="line">perf record -e minor-faults -c 1 -ag</span><br><span class="line"></span><br><span class="line"><span class="comment"># Sample page faults with stack traces, until Ctrl-C:</span></span><br><span class="line">perf record -e page-faults -ag</span><br><span class="line"></span><br><span class="line"><span class="comment"># Trace all ext4 calls, and write to a non-ext4 location, until Ctrl-C:</span></span><br><span class="line">perf record -e <span class="string">&#x27;ext4:*&#x27;</span> -o /tmp/perf.data -a</span><br><span class="line"></span><br><span class="line"><span class="comment"># Trace kswapd wakeup events, until Ctrl-C:</span></span><br><span class="line">perf record -e vmscan:mm_vmscan_wakeup_kswapd -ag</span><br><span class="line"></span><br><span class="line"><span class="comment"># Add Node.js USDT probes (Linux 4.10+):</span></span><br><span class="line">perf buildid-cache --add `<span class="built_in">which</span> node`</span><br><span class="line"></span><br><span class="line"><span class="comment"># Trace the node http__server__request USDT event (Linux 4.10+):</span></span><br><span class="line">perf record -e sdt_node:http__server__request -a</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-5-动态跟踪"><a href="#2-5-动态跟踪" class="headerlink" title="2.5 动态跟踪"></a>2.5 动态跟踪</h3><hr>
+<p>“perf probe” 是 Linux 系统中 perf 工具的一个子命令，用于在内核或用户空间程序中添加动态追踪点（tracepoint），需要内核编译时支持kprobe&#x2F;uprobe。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Add a tracepoint for the kernel tcp_sendmsg() function entry (&quot;--add&quot; is optional):</span></span><br><span class="line">perf probe --add tcp_sendmsg</span><br><span class="line"></span><br><span class="line"><span class="comment"># Remove the tcp_sendmsg() tracepoint (or use &quot;--del&quot;):</span></span><br><span class="line">perf probe -d tcp_sendmsg</span><br><span class="line"></span><br><span class="line"><span class="comment"># Add a tracepoint for the kernel tcp_sendmsg() function return:</span></span><br><span class="line">perf probe <span class="string">&#x27;tcp_sendmsg%return&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Show available variables for the kernel tcp_sendmsg() function (needs debuginfo):</span></span><br><span class="line">perf probe -V tcp_sendmsg</span><br><span class="line"></span><br><span class="line"><span class="comment"># Show available variables for the kernel tcp_sendmsg() function, plus external vars (needs debuginfo):</span></span><br><span class="line">perf probe -V tcp_sendmsg --externs</span><br><span class="line"></span><br><span class="line"><span class="comment"># Show available line probes for tcp_sendmsg() (needs debuginfo):</span></span><br><span class="line">perf probe -L tcp_sendmsg</span><br><span class="line"></span><br><span class="line"><span class="comment"># Show available variables for tcp_sendmsg() at line number 81 (needs debuginfo):</span></span><br><span class="line">perf probe -V tcp_sendmsg:81</span><br><span class="line"></span><br><span class="line"><span class="comment"># Add a tracepoint for tcp_sendmsg(), with three entry argument registers (platform specific):</span></span><br><span class="line">perf probe <span class="string">&#x27;tcp_sendmsg %ax %dx %cx&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Add a tracepoint for tcp_sendmsg(), with an alias (&quot;bytes&quot;) for the %cx register (platform specific):</span></span><br><span class="line">perf probe <span class="string">&#x27;tcp_sendmsg bytes=%cx&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Trace previously created probe when the bytes (alias) variable is greater than 100:</span></span><br><span class="line">perf record -e probe:tcp_sendmsg --filter <span class="string">&#x27;bytes &gt; 100&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Add a tracepoint for tcp_sendmsg() return, and capture the return value:</span></span><br><span class="line">perf probe <span class="string">&#x27;tcp_sendmsg%return $retval&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Add a tracepoint for tcp_sendmsg(), and &quot;size&quot; entry argument (reliable, but needs debuginfo):</span></span><br><span class="line">perf probe <span class="string">&#x27;tcp_sendmsg size&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Add a tracepoint for tcp_sendmsg(), with size and socket state (needs debuginfo):</span></span><br><span class="line">perf probe <span class="string">&#x27;tcp_sendmsg size sk-&gt;__sk_common.skc_state&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Tell me how on Earth you would do this, but don&#x27;t actually do it (needs debuginfo):</span></span><br><span class="line">perf probe -nv <span class="string">&#x27;tcp_sendmsg size sk-&gt;__sk_common.skc_state&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Trace previous probe when size is non-zero, and state is not TCP_ESTABLISHED(1) (needs debuginfo):</span></span><br><span class="line">perf record -e probe:tcp_sendmsg --filter <span class="string">&#x27;size &gt; 0 &amp;&amp; skc_state != 1&#x27;</span> -a</span><br><span class="line"></span><br><span class="line"><span class="comment"># Add a tracepoint for tcp_sendmsg() line 81 with local variable seglen (needs debuginfo):</span></span><br><span class="line">perf probe <span class="string">&#x27;tcp_sendmsg:81 seglen&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Add a tracepoint for do_sys_open() with the filename as a string (needs debuginfo):</span></span><br><span class="line">perf probe <span class="string">&#x27;do_sys_open filename:string&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Add a tracepoint for myfunc() return, and include the retval as a string:</span></span><br><span class="line">perf probe <span class="string">&#x27;myfunc%return +0($retval):string&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Add a tracepoint for the user-level malloc() function from libc:</span></span><br><span class="line">perf probe -x /lib64/libc.so.6 malloc</span><br><span class="line"></span><br><span class="line"><span class="comment"># Add a tracepoint for this user-level static probe (USDT, aka SDT event):</span></span><br><span class="line">perf probe -x /usr/lib64/libpthread-2.24.so %sdt_libpthread:mutex_entry</span><br><span class="line"></span><br><span class="line"><span class="comment"># List currently available dynamic probes:</span></span><br><span class="line">perf probe -l</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-6-杂项"><a href="#2-6-杂项" class="headerlink" title="2.6 杂项"></a>2.6 杂项</h3><hr>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Trace system calls by process, showing a summary refreshing every 2 seconds:</span></span><br><span class="line">perf top -e raw_syscalls:sys_enter -ns <span class="built_in">comm</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Trace sent network packets by on-CPU process, rolling output (no clear):</span></span><br><span class="line"><span class="built_in">stdbuf</span> -oL perf top -e net:net_dev_xmit -ns <span class="built_in">comm</span> | strings</span><br><span class="line"></span><br><span class="line"><span class="comment"># Sample stacks at 99 Hertz, and, context switches:</span></span><br><span class="line">perf record -F99 -e cpu-clock -e cs -a -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># Sample stacks to 2 levels deep, and, context switch stacks to 5 levels (needs 4.8):</span></span><br><span class="line">perf record -F99 -e cpu-clock/max-stack=2/ -e cs/max-stack=5/ -a -g</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-7-cacheline"><a href="#2-7-cacheline" class="headerlink" title="2.7 cacheline"></a>2.7 cacheline</h3><hr>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Record cacheline events (Linux 4.10+):</span></span><br><span class="line">perf c2c record -a -- <span class="built_in">sleep</span> 10</span><br><span class="line"></span><br><span class="line"><span class="comment"># Report cacheline events from previous recording (Linux 4.10+):</span></span><br><span class="line">perf c2c report</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-8-解析生成报告"><a href="#2-8-解析生成报告" class="headerlink" title="2.8 解析生成报告"></a>2.8 解析生成报告</h3><hr>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Show perf.data in an ncurses browser (TUI) if possible:</span></span><br><span class="line">perf report</span><br><span class="line"></span><br><span class="line"><span class="comment"># Show perf.data with a column for sample count:</span></span><br><span class="line">perf report -n</span><br><span class="line"></span><br><span class="line"><span class="comment"># Show perf.data as a text report, with data coalesced and percentages:</span></span><br><span class="line">perf report --stdio</span><br><span class="line"></span><br><span class="line"><span class="comment"># Report, with stacks in folded format: one line per stack (needs 4.4):</span></span><br><span class="line">perf report --stdio -n -g folded</span><br><span class="line"></span><br><span class="line"><span class="comment"># List all events from perf.data:</span></span><br><span class="line">perf script</span><br><span class="line"></span><br><span class="line"><span class="comment"># List all perf.data events, with data header (newer kernels; was previously default):</span></span><br><span class="line">perf script --header</span><br><span class="line"></span><br><span class="line"><span class="comment"># List all perf.data events, with customized fields (&lt; Linux 4.1):</span></span><br><span class="line">perf script -f <span class="keyword">time</span>,event,trace</span><br><span class="line"></span><br><span class="line"><span class="comment"># List all perf.data events, with customized fields (&gt;= Linux 4.1):</span></span><br><span class="line">perf script -F <span class="keyword">time</span>,event,trace</span><br><span class="line"></span><br><span class="line"><span class="comment"># List all perf.data events, with my recommended fields (needs record -a; newer kernels):</span></span><br><span class="line">perf script --header -F <span class="built_in">comm</span>,pid,tid,cpu,<span class="keyword">time</span>,event,ip,sym,dso</span><br><span class="line"></span><br><span class="line"><span class="comment"># List all perf.data events, with my recommended fields (needs record -a; older kernels):</span></span><br><span class="line">perf script -f <span class="built_in">comm</span>,pid,tid,cpu,<span class="keyword">time</span>,event,ip,sym,dso</span><br><span class="line"></span><br><span class="line"><span class="comment"># Dump raw contents from perf.data as hex (for debugging):</span></span><br><span class="line">perf script -D</span><br><span class="line"></span><br><span class="line"><span class="comment"># Disassemble and annotate instructions with percentages (needs some debuginfo):</span></span><br><span class="line">perf annotate --stdio</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-9-总结"><a href="#2-9-总结" class="headerlink" title="2.9 总结"></a>2.9 总结</h3><hr>
+<p>尽管上述列举了很多命令，但随着工具的迭代，命令的种类和功能在不断增加。使用 <code>perf help</code> 命令可以查看所有可用的命令。</p>
+
+                
+                <hr>
+                <!-- Pager -->
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2025/09/05/制作-ubuntu-base-文件系统/" data-toggle="tooltip" data-placement="top" title="制作 ubuntu-base 文件系统">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2025/08/26/Linux-Perf-介绍-——-Perf-总结/" data-toggle="tooltip" data-placement="top" title="Linux Perf 介绍 —— Perf 总结">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- tip start -->
+                
+
+                
+                <!-- tip end -->
+
+                <!-- Music start-->
+                
+                <!-- Music end -->
+
+                <!-- Sharing -->
+                
+                <!-- Sharing -->
+
+                <!-- gitment start -->
+                
+                <!-- gitment end -->
+
+                <!-- 来必力City版安装代码 -->
+                
+                <!-- City版安装代码已完成 -->
+
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+    
+      
+        <aside id="sidebar">
+          <div id="toc" class="toc-article">
+          <strong class="toc-title">Contents</strong>
+          
+            
+              <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E7%A4%BA%E4%BE%8B%E8%AF%B4%E6%98%8E"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">示例说明</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#Perf-events-%E5%8A%9F%E8%83%BD"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">Perf_events 功能</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E7%A4%BA%E4%BE%8B"><span class="toc-nav-number">3.</span> <span class="toc-nav-text">示例</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#1-Screenshot"><span class="toc-nav-number">3.1.</span> <span class="toc-nav-text">1. Screenshot</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#2-%E5%91%BD%E4%BB%A4%E7%A4%BA%E4%BE%8B%E8%A1%A8"><span class="toc-nav-number">3.2.</span> <span class="toc-nav-text">2. 命令示例表</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#2-1-%E5%88%97%E5%87%BA%E4%BA%8B%E4%BB%B6%E8%A1%A8"><span class="toc-nav-number">3.2.1.</span> <span class="toc-nav-text">2.1 列出事件表</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#2-2-%E8%AE%A1%E6%95%B0%E4%B8%80%E4%B8%AA%E4%BA%8B%E4%BB%B6"><span class="toc-nav-number">3.2.2.</span> <span class="toc-nav-text">2.2 计数一个事件</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#2-3-%E9%87%87%E6%A0%B7%E5%88%86%E6%9E%90"><span class="toc-nav-number">3.2.3.</span> <span class="toc-nav-text">2.3 采样分析</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#2-4-%E9%9D%99%E6%80%81%E8%B7%9F%E8%B8%AA"><span class="toc-nav-number">3.2.4.</span> <span class="toc-nav-text">2.4 静态跟踪</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#2-5-%E5%8A%A8%E6%80%81%E8%B7%9F%E8%B8%AA"><span class="toc-nav-number">3.2.5.</span> <span class="toc-nav-text">2.5 动态跟踪</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#2-6-%E6%9D%82%E9%A1%B9"><span class="toc-nav-number">3.2.6.</span> <span class="toc-nav-text">2.6 杂项</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#2-7-cacheline"><span class="toc-nav-number">3.2.7.</span> <span class="toc-nav-text">2.7 cacheline</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#2-8-%E8%A7%A3%E6%9E%90%E7%94%9F%E6%88%90%E6%8A%A5%E5%91%8A"><span class="toc-nav-number">3.2.8.</span> <span class="toc-nav-text">2.8 解析生成报告</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#2-9-%E6%80%BB%E7%BB%93"><span class="toc-nav-number">3.2.9.</span> <span class="toc-nav-text">2.9 总结</span></a></li></ol></li></ol></li></ol>
+            
+          
+          </div>
+        </aside>
+      
+    
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <!-- <h5><a href="/tags/">FEATURED TAGS</a></h5> -->
+                    <h5><a href="/tags/"></a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#RISC-V" title="RISC-V">RISC-V</a>
+                        
+                          <a class="tag" href="/tags/#Perf" title="Perf">Perf</a>
+                        
+                          <a class="tag" href="/tags/#Linux" title="Linux">Linux</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                
+                <script src="https://giscus.app/client.js"
+                    data-repo="AllenZF/allenzf.github.io"
+                    data-repo-id="R_kgDOQMASLQ"
+                    data-category="General"
+                    data-category-id="DIC_kwDOQMASLc4CxR4Q"
+                    data-mapping="pathname"
+                    data-strict="0"
+                    data-reactions-enabled="1"
+                    data-emit-metadata="0"
+                    data-input-position="bottom"
+                    data-theme="preferred_color_scheme"
+                    data-lang="en"
+                    crossorigin="anonymous"
+                    async>
+                </script>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: 'ℬ'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+
+
+<style  type="text/css">
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/AllenZF">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://gitee.com/Sven">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-stack-1x fa-inverse">码</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/people/zhou-lang-jie-feng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; 周郎借风 2025 
+                    <br>
+                    Powered by 
+                    <a href="https://github.com/dusign/hexo-theme-snail">
+                        <i>hexo-theme-snail</i>
+                    </a> | 
+                    <iframe name="star" style="margin-left: 2px; margin-bottom:-5px;" frameborder="0" scrolling="0"
+                        width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=dusign&repo=hexo-theme-snail&type=star&count=true">
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+
+</footer>
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- Search -->
+
+<script src="/js/search.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://allenzf.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-XXXXXXXX-X';
+    var _gaDomain = 'yoursite';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+<!-- Search -->
+
+    <script type="text/javascript">      
+        var search_path = "search.xml";
+        if (search_path.length == 0) {
+            search_path = "search.xml";
+        }
+    var path = "/" + search_path;
+    searchFunc(path, 'local-search-input', 'local-search-result');
+    </script>
+
+
+<!-- busuanzi -->
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+
+    
+        <!-- background effects line -->
+        
+
+        
+            <script type="text/javascript" src="/js/mouse-click.js" content='[&quot;🌱&quot;,&quot;just do it&quot;,&quot;🍀&quot;]' color='[&quot;rgb(121,93,179)&quot; ,&quot;rgb(76,180,231)&quot; ,&quot;rgb(184,90,154)&quot;]'></script>
+        
+
+        <!-- background effects end -->
+    
+
+    <!--<script size="50" alpha='0.3' zIndex="-999" src="/js/ribbonStatic.js"></script>-->
+    
+        <script src="/js/ribbonDynamic.js"></script>
+    
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+
+</html>

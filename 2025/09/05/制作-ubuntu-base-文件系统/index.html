@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="baidu-site-verification" content="093lY4ziMu" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="记录点滴">
+    <meta name="keyword"  content="加油, 个人博客">
+    <link rel="shortcut icon" href="/img/ironman-draw.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <!--<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
+    <title>
+        
+          制作 ubuntu-base 文件系统 - Sven-Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://allenzf.github.io/2025/09/05/制作-ubuntu-base-文件系统/">
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+
+    <!-- Custom CSS --> 
+    
+        
+<link rel="stylesheet" href="/css/dusign-light.css">
+
+        
+<link rel="stylesheet" href="/css/dusign-common-light.css">
+
+        
+<link rel="stylesheet" href="/css/font-awesome.css">
+
+        
+<link rel="stylesheet" href="/css/toc.css">
+
+        <!-- background effects end -->
+    
+    
+    <!-- Pygments Highlight CSS -->
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+
+    
+<link rel="stylesheet" href="/css/widget.css">
+
+
+    
+<link rel="stylesheet" href="/css/rocket.css">
+
+
+    
+<link rel="stylesheet" href="/css/signature.css">
+
+
+    
+<link rel="stylesheet" href="/css/fonts.googleapis.css">
+
+
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+    <!-- photography -->
+    
+<link rel="stylesheet" href="/css/photography.css">
+
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+<meta name="generator" content="Hexo 8.1.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- background effects start -->
+    
+    <!-- background effects end -->
+
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            
+                background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('../../../../img/header_img/Iron-Man-3.jpg')
+                /*post*/
+            
+        
+    }
+    
+    #signature{
+        background-image: url('/img/signature/Just-do-it-white.png');
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#Linux" title="Linux">Linux</a>
+                            
+                              <a class="tag" href="/tags/#rootfs" title="rootfs">rootfs</a>
+                            
+                              <a class="tag" href="/tags/#ubuntu" title="ubuntu">ubuntu</a>
+                            
+                        </div>
+                        <h1>制作 ubuntu-base 文件系统</h1>
+                        <h2 class="subheading">可访问网络的文件系统</h2>
+                        <span class="meta">
+                            Posted by 周郎借风 on
+                            2025-09-05
+                        </span>
+
+                        
+                            <div class="blank_box"></div>
+                            <span class="meta">
+                                Words <span class="post-count">1.8k</span> and
+                                Reading Time <span class="post-count">8</span> Minutes
+                            </span>
+                            <div class="blank_box"></div>
+                            <!-- 不蒜子统计 start -->
+                            <span class="meta">
+                                Viewed <span id="busuanzi_value_page_pv"><i class="fa fa-spinner fa-spin"></i></span> Times
+                            </span>
+                            <!-- 不蒜子统计 end -->
+                        
+
+                    </div>
+                
+
+                </div>
+            </div>
+        </div>      
+    </div>
+
+    
+    <div class="waveWrapper">
+        <div class="wave wave_before" style="background-image: url('/img/wave-light.png')"></div>
+        <div class="wave wave_after" style="background-image: url('/img/wave-light.png')"></div>
+    </div>
+    
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">周郎借风</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">主页</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/categories/">分类</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">关于</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">归档</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/photography/">摄影</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">标签</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+                    
+                    
+                    <li>
+                        <a href="https://allenzf.github.io" target="_blank">中文博客</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><hr>
+<p><a href="https://www.cnblogs.com/phoebus-ma/p/17436089.html">https://www.cnblogs.com/phoebus-ma/p/17436089.html</a><br><a href="https://cloud.tencent.com/developer/article/2565632">https://cloud.tencent.com/developer/article/2565632</a><br><a href="https://blog.csdn.net/jingyu_1/article/details/135822574">https://blog.csdn.net/jingyu_1/article/details/135822574</a></p>
+<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><hr>
+<p>为了学习 Linux kernel，在 qemu 模拟时通过加载源码编译的 kernel 来启动 os. 而文件系统采用 busybox。这样的好处是 kernel 可以自由控制编译选项。坏处是无法安装软件。网上搜索了一下，没有相关方法，于是转而采用 Ubuntu 来制作文件系统，并支持联网，注意，这里不是带 kernel 的发行版，而是干净的文件系统。</p>
+<p>通过检索制作方法，搜集到了2种方式：</p>
+<ul>
+<li>使用 debootstrap 制作，该方法能制作一个比较完整的 ubuntu 文件系统，特点是简单、臃肿。弃用。</li>
+<li>使用 ubuntu base 制作，这是一个最小 ubuntu 文件系统，由官方发布。采用。</li>
+</ul>
+<h1 id="环境和目标"><a href="#环境和目标" class="headerlink" title="环境和目标"></a>环境和目标</h1><hr>
+<ul>
+<li>环境：x86 wsl ubuntu</li>
+<li>目标：在 wsl 环境上通过 qemu 来加载文件系统并运行自定义 riscv 内核，方便调试、研究。</li>
+</ul>
+<h1 id="过程"><a href="#过程" class="headerlink" title="过程"></a>过程</h1><hr>
+<h2 id="Qemu-和-Linux"><a href="#Qemu-和-Linux" class="headerlink" title="Qemu 和 Linux"></a>Qemu 和 Linux</h2><hr>
+<p>参考<a href="https://zhuanlan.zhihu.com/p/258394849">在 QEMU 上运行 RISC-V 64 位版本的 Linux</a>。</p>
+<h2 id="ubuntu-base-根文件系统"><a href="#ubuntu-base-根文件系统" class="headerlink" title="ubuntu-base 根文件系统"></a>ubuntu-base 根文件系统</h2><hr>
+<ul>
+<li>官方的文件系统包<a href="https://cdimage.ubuntu.com/ubuntu-base/releases/24.04.3/release/ubuntu-base-24.04.3-base-riscv64.tar.gz">ubuntu-base-24.04.3-base-riscv64.tar.gz</a></li>
+</ul>
+<p>这个包可以理解为安装的 busybox _install 目录。在制作 busybox 文件系统时，直接替换 _install 目录即可。但是这样的文件系统还是不支持网络。</p>
+<ul>
+<li>软件安装</li>
+</ul>
+<p>在 x86 wsl ubuntu 上安装如下软件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install -y qemu-user-static</span><br></pre></td></tr></table></figure>
+<p>安装这个软件后会在 wsl ubuntu 的 &#x2F;usr&#x2F;bin 目录下生成 qemu-riscv64-static 命令，这个命令可以在 x86 架构下运行 riscv64 架构的二进制文件。</p>
+<ul>
+<li>创建磁盘</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">qemu-img create ubuntu_base.img 4g <span class="comment"># 4GB 空间</span></span><br><span class="line">mkfs.ext4 ubuntu_base.img</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>挂载磁盘</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p ./rootfs</span><br><span class="line">mount -o loop ubuntu_base.img ./rootfs</span><br></pre></td></tr></table></figure>
+<ul>
+<li>构建文件系统</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">tar xzf ubuntu-base-24.04.3-base-riscv64.tar.gz -C ./rootfs</span><br><span class="line"><span class="built_in">cd</span> linux &amp;&amp; <span class="built_in">sudo</span> CROSS_COMPILE=riscv64-unknown-linux-gnu- ARCH=riscv make modules_install INSTALL_MOD_PATH=../rootfs/</span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">cp</span> /usr/bin/qemu-riscv64-static ./rootfs/usr/bin/ <span class="comment"># riscv64 架构下的命令都是通过qemu转译成 x86 的命令被执行的</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">cp</span> /etc/resolv.conf ./rootfs/etc/resolv.conf <span class="comment"># 针对 riscv64 环境提供 wsl 网络</span></span><br><span class="line"><span class="comment"># https://mirror.tuna.tsinghua.edu.cn/help/ubuntu-ports/,  注意，这个 ubuntu ports 源才是正确的</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">echo</span> <span class="string">&quot;deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ noble main restricted universe multiverse</span></span><br><span class="line"><span class="string">deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ noble main restricted universe multiverse</span></span><br><span class="line"><span class="string">deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ noble-updates main restricted universe multiverse</span></span><br><span class="line"><span class="string">deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ noble-updates main restricted universe multiverse</span></span><br><span class="line"><span class="string">deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ noble-backports main restricted universe multiverse</span></span><br><span class="line"><span class="string">deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports/ noble-backports main restricted universe multiverse</span></span><br><span class="line"><span class="string">deb http://ports.ubuntu.com/ubuntu-ports/ noble-security main restricted universe multiverse</span></span><br><span class="line"><span class="string">deb-src http://ports.ubuntu.com/ubuntu-ports/ noble-security main restricted universe multiverse&quot;</span> &gt; ./rootfs/etc/apt/sources.list</span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">chmod</span> 1777 /tmp  <span class="comment"># 属性不对，apt update 报错</span></span><br><span class="line"><span class="comment"># 当二次挂载文件系统，安装其他工具时，只需从以下步骤开始执行即可</span></span><br><span class="line"><span class="built_in">sudo</span> mount -t proc /proc ./rootfs/proc</span><br><span class="line"><span class="built_in">sudo</span> mount -t sysfs /sys ./rootfs/sys</span><br><span class="line"><span class="built_in">sudo</span> mount -o <span class="built_in">bind</span> /dev ./rootfs/dev</span><br><span class="line"><span class="built_in">sudo</span> mount -o <span class="built_in">bind</span> /dev/pts ./rootfs/dev/pts</span><br><span class="line"><span class="built_in">sudo</span> mount --<span class="built_in">bind</span> linux ./rootfs/mnt/ <span class="comment"># 目的是在 chroot 下直接编译安装perf工具（主要是和kernel源码匹配）</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">chroot</span> ./rootfs <span class="comment"># 这个步骤非常重要</span></span><br></pre></td></tr></table></figure>
+<p><code>chroot</code> 执行后就像是切换到 riscv64 架构环境了，后续执行的所有命令都是基于 riscv64 架构的。当前还是 wsl 下，但是却像是 x86 架构换成了 riscv64 架构，并且根目录变成了.&#x2F;rootfs, 后续的软件安装都是安装在这里。</p>
+<ul>
+<li>riscv64 网络工具安装</li>
+</ul>
+<p>由于 ubuntu base 包里面没有网络工具，所以需要安装。这里 wsl riscv4 下使用的是 wsl 的网络。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt update</span><br><span class="line"><span class="comment"># 安装网络工具包</span></span><br><span class="line"><span class="built_in">sudo</span> apt install -y \</span><br><span class="line">    net-tools   \    <span class="comment"># ifconfig, netstat</span></span><br><span class="line">    isc-dhcp-client \  <span class="comment"># dhcp 客户端</span></span><br><span class="line">    iputils-ping \   <span class="comment"># ping</span></span><br><span class="line">    ifupdown</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>配置</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">chsh -s /bin/bash root</span><br><span class="line"><span class="comment"># 启动后使用 dhclient 自动联网，不需要其他配置</span></span><br><span class="line"><span class="comment"># tee /etc/network/interfaces &lt;&lt; EOF</span></span><br><span class="line"><span class="comment"># auto lo</span></span><br><span class="line"><span class="comment"># iface lo inet loopback</span></span><br><span class="line"><span class="comment"># auto eth0</span></span><br><span class="line"><span class="comment"># iface eth0 inet dhcp</span></span><br><span class="line"><span class="comment"># EOF</span></span><br><span class="line"></span><br><span class="line">* 卸载</span><br><span class="line"></span><br><span class="line">```bash</span><br><span class="line"><span class="built_in">exit</span> <span class="comment"># 由于当前还在 chroot 状态，所以需要先退出</span></span><br><span class="line"><span class="built_in">sudo</span> umount rootfs/proc rootfs/sys rootfs/dev/pts rootfs/dev rootfs</span><br></pre></td></tr></table></figure>
+
+<p>至此，文件系统已经制作完毕，并且附带网络配置工具。</p>
+<h2 id="启用-qemu-仿真"><a href="#启用-qemu-仿真" class="headerlink" title="启用 qemu 仿真"></a>启用 qemu 仿真</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># x86 wsl ubuntu</span></span><br><span class="line">qemu-system-riscv64 -smp 2 -cpu max -M virt -m 512M -nographic \</span><br><span class="line">-kernel linux/arch/riscv/boot/Image \</span><br><span class="line">-bios opensbi/build/platform/generic/firmware/fw_jump.bin \</span><br><span class="line">-drive file=ubuntu_base.img,format=raw,<span class="built_in">id</span>=hd0,<span class="keyword">if</span>=none \     <span class="comment">#制作的文件系统</span></span><br><span class="line">-device virtio-blk-device,drive=hd0 \</span><br><span class="line">-append <span class="string">&quot;root=/dev/vda rw console=ttyS0 init=/bin/bash ip=dhcp&quot;</span> \  <span class="comment"># dhcp 获取 ip, 以 bash 启动</span></span><br><span class="line">-fsdev <span class="built_in">local</span>,security_model=mapped-xattr,<span class="built_in">id</span>=fsdev0,path=./share \  <span class="comment"># 共享目录, 假设host下已有</span></span><br><span class="line">-device virtio-9p-pci,<span class="built_in">id</span>=fs0,fsdev=fsdev0,mount_tag=hostshare \</span><br><span class="line">-device virtio-net-device,netdev=net0 -netdev user,<span class="built_in">id</span>=net0 \ <span class="comment"># 启动网卡</span></span><br></pre></td></tr></table></figure>
+<p>进入客户机后需要挂载 proc 和 sys 文件系统。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">bash</span><br><span class="line">mount -t proc none /proc</span><br><span class="line">mount -t sysfs none /sys</span><br><span class="line"><span class="built_in">mkdir</span> -p /dev/pts</span><br><span class="line">mount -t devpts none /dev/pts</span><br><span class="line"><span class="comment"># 挂载共享目录</span></span><br><span class="line"><span class="built_in">mkdir</span> -p /mnt/share</span><br><span class="line">mount -t 9p -o trans=virtio hostshare /mnt/share</span><br><span class="line"><span class="comment"># mount -t 9p -o trans=virtio,version=9p2000.L hostshare /mnt/share # 备选</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;nameserver 10.0.2.3&#x27;</span> &gt; /etc/resolv.conf <span class="comment"># 这是qemu的默认NDS</span></span><br><span class="line">dhclient <span class="comment"># 自动联网</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="网络配置（以下是参考，但未使用）"><a href="#网络配置（以下是参考，但未使用）" class="headerlink" title="网络配置（以下是参考，但未使用）"></a>网络配置（以下是参考，但未使用）</h2><ul>
+<li>方案一(Ubuntu 默认方案，未尝试)</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装 netplan</span></span><br><span class="line"><span class="built_in">sudo</span> apt update</span><br><span class="line"><span class="built_in">sudo</span> apt install -y netplan.io</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建配置文件</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">tee</span> /etc/netplan/01-network.yaml &lt;&lt; <span class="string">EOF</span></span><br><span class="line"><span class="string">network:</span></span><br><span class="line"><span class="string">  version: 2</span></span><br><span class="line"><span class="string">  renderer: networkd</span></span><br><span class="line"><span class="string">  ethernets:</span></span><br><span class="line"><span class="string">    eth0:</span></span><br><span class="line"><span class="string">      dhcp4: true</span></span><br><span class="line"><span class="string">      # 静态IP配置示例:</span></span><br><span class="line"><span class="string">      # addresses:</span></span><br><span class="line"><span class="string">      #   - 192.168.1.100/24</span></span><br><span class="line"><span class="string">      # routes:</span></span><br><span class="line"><span class="string">      #   - to: default</span></span><br><span class="line"><span class="string">      #     via: 192.168.1.1</span></span><br><span class="line"><span class="string">      # nameservers:</span></span><br><span class="line"><span class="string">      #   addresses: [8.8.8.8, 1.1.1.1]</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 应用配置</span></span><br><span class="line"><span class="built_in">sudo</span> netplan generate</span><br><span class="line"><span class="built_in">sudo</span> netplan apply</span><br></pre></td></tr></table></figure>
+<ul>
+<li>方案二（可用）</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装必要工具</span></span><br><span class="line"><span class="comment"># 目前还没有网络，需要提前安装</span></span><br><span class="line"><span class="comment"># sudo apt update</span></span><br><span class="line"><span class="comment"># sudo apt install -y iproute2 ifupdown isc-dhcp-client</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建网络接口配置</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">tee</span> /etc/network/interfaces &lt;&lt; <span class="string">EOF</span></span><br><span class="line"><span class="string"># 环回接口</span></span><br><span class="line"><span class="string">auto lo</span></span><br><span class="line"><span class="string">iface lo inet loopback</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"># 主网络接口 - 使用 DHCP</span></span><br><span class="line"><span class="string">auto eth0</span></span><br><span class="line"><span class="string">iface eth0 inet dhcp</span></span><br><span class="line"><span class="string">    dns-nameservers 8.8.8.8 1.1.1.1</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"># 如果需要静态IP</span></span><br><span class="line"><span class="string"># iface eth0 inet static</span></span><br><span class="line"><span class="string">#   address 192.168.1.100/24</span></span><br><span class="line"><span class="string">#   gateway 192.168.1.1</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 启用服务</span></span><br><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> networking</span><br><span class="line"><span class="built_in">sudo</span> systemctl start networking</span><br><span class="line"></span><br><span class="line"><span class="comment"># 手动启动接口</span></span><br><span class="line"><span class="comment"># ip link show 可以查看是否有 eth0</span></span><br><span class="line"><span class="comment"># 编译 kernel 源码时，需要打开网络</span></span><br><span class="line"><span class="built_in">sudo</span> ifup eth0</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>方案三(现代方案, 未尝试)</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装 systemd-networkd (通常已包含在基础系统中)</span></span><br><span class="line"><span class="built_in">sudo</span> apt install -y systemd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建网络配置</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">tee</span> /etc/systemd/network/20-wired.network &lt;&lt; <span class="string">EOF</span></span><br><span class="line"><span class="string">[Match]</span></span><br><span class="line"><span class="string">Name=eth0</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">[Network]</span></span><br><span class="line"><span class="string">DHCP=ipv4</span></span><br><span class="line"><span class="string"># 静态IP配置示例</span></span><br><span class="line"><span class="string"># Address=192.168.1.100/24</span></span><br><span class="line"><span class="string"># Gateway=192.168.1.1</span></span><br><span class="line"><span class="string"># DNS=8.8.8.8</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置DNS解析</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">tee</span> /etc/resolv.conf &lt;&lt; <span class="string">EOF</span></span><br><span class="line"><span class="string">nameserver 8.8.8.8</span></span><br><span class="line"><span class="string">nameserver 1.1.1.1</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 启用并启动服务</span></span><br><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> systemd-networkd</span><br><span class="line"><span class="built_in">sudo</span> systemctl start systemd-networkd</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>DNS 配置</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装基础工具</span></span><br><span class="line"><span class="built_in">sudo</span> apt install -y dnsutils</span><br><span class="line"></span><br><span class="line"><span class="comment"># 手动配置 DNS</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">tee</span> /etc/resolv.conf &lt;&lt; <span class="string">EOF</span></span><br><span class="line"><span class="string">nameserver 8.8.8.8</span></span><br><span class="line"><span class="string">nameserver 1.1.1.1</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 防止配置被覆盖</span></span><br><span class="line"><span class="built_in">sudo</span> chattr +i /etc/resolv.conf</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>配置静态 IP（未尝试）</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">ifconfig eth0 10.0.2.15</span><br><span class="line">route add default gw 10.0.2.2</span><br><span class="line"><span class="comment"># 或</span></span><br><span class="line"><span class="comment"># 为 eth0 添加 IP 地址 10.0.2.15，子网掩码为 24 位 (即 255.255.255.0)</span></span><br><span class="line"><span class="built_in">sudo</span> ip addr add 10.0.2.15/24 dev eth0</span><br><span class="line"><span class="comment"># 验证配置</span></span><br><span class="line">ip addr show dev eth0</span><br><span class="line"><span class="comment"># 添加默认路由，网关为 10.0.2.2，出站设备为 eth0</span></span><br><span class="line"><span class="built_in">sudo</span> ip route add default via 10.0.2.2 dev eth0</span><br><span class="line"><span class="comment"># 验证路由</span></span><br><span class="line">ip route show</span><br></pre></td></tr></table></figure>
+
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>制作可以访问网络的文件系统，关键是通过 <code>chroot</code> 安装各种网络工具。</p>
+
+                
+                <hr>
+                <!-- Pager -->
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2025/09/16/kprobe使用：模块加载方式/" data-toggle="tooltip" data-placement="top" title="kprobe使用：内核模块加载">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2025/08/28/Linux-Perf-介绍-——-Perf-示例/" data-toggle="tooltip" data-placement="top" title="Linux Perf 介绍 —— Perf 示例">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- tip start -->
+                
+
+                
+                <!-- tip end -->
+
+                <!-- Music start-->
+                
+                <!-- Music end -->
+
+                <!-- Sharing -->
+                
+                <!-- Sharing -->
+
+                <!-- gitment start -->
+                
+                <!-- gitment end -->
+
+                <!-- 来必力City版安装代码 -->
+                
+                <!-- City版安装代码已完成 -->
+
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+    
+      
+        <aside id="sidebar">
+          <div id="toc" class="toc-article">
+          <strong class="toc-title">Contents</strong>
+          
+            
+              <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E5%8F%82%E8%80%83"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">参考</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">背景</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E7%8E%AF%E5%A2%83%E5%92%8C%E7%9B%AE%E6%A0%87"><span class="toc-nav-number">3.</span> <span class="toc-nav-text">环境和目标</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E8%BF%87%E7%A8%8B"><span class="toc-nav-number">4.</span> <span class="toc-nav-text">过程</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Qemu-%E5%92%8C-Linux"><span class="toc-nav-number">4.1.</span> <span class="toc-nav-text">Qemu 和 Linux</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#ubuntu-base-%E6%A0%B9%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F"><span class="toc-nav-number">4.2.</span> <span class="toc-nav-text">ubuntu-base 根文件系统</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%90%AF%E7%94%A8-qemu-%E4%BB%BF%E7%9C%9F"><span class="toc-nav-number">4.3.</span> <span class="toc-nav-text">启用 qemu 仿真</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE%EF%BC%88%E4%BB%A5%E4%B8%8B%E6%98%AF%E5%8F%82%E8%80%83%EF%BC%8C%E4%BD%86%E6%9C%AA%E4%BD%BF%E7%94%A8%EF%BC%89"><span class="toc-nav-number">4.4.</span> <span class="toc-nav-text">网络配置（以下是参考，但未使用）</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-nav-number">5.</span> <span class="toc-nav-text">总结</span></a></li></ol>
+            
+          
+          </div>
+        </aside>
+      
+    
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <!-- <h5><a href="/tags/">FEATURED TAGS</a></h5> -->
+                    <h5><a href="/tags/"></a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#Linux" title="Linux">Linux</a>
+                        
+                          <a class="tag" href="/tags/#rootfs" title="rootfs">rootfs</a>
+                        
+                          <a class="tag" href="/tags/#ubuntu" title="ubuntu">ubuntu</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                
+                <script src="https://giscus.app/client.js"
+                    data-repo="AllenZF/allenzf.github.io"
+                    data-repo-id="R_kgDOQMASLQ"
+                    data-category="General"
+                    data-category-id="DIC_kwDOQMASLc4CxR4Q"
+                    data-mapping="pathname"
+                    data-strict="0"
+                    data-reactions-enabled="1"
+                    data-emit-metadata="0"
+                    data-input-position="bottom"
+                    data-theme="preferred_color_scheme"
+                    data-lang="en"
+                    crossorigin="anonymous"
+                    async>
+                </script>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: 'ℬ'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+
+
+<style  type="text/css">
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/AllenZF">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://gitee.com/Sven">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-stack-1x fa-inverse">码</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/people/zhou-lang-jie-feng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; 周郎借风 2025 
+                    <br>
+                    Powered by 
+                    <a href="https://github.com/dusign/hexo-theme-snail">
+                        <i>hexo-theme-snail</i>
+                    </a> | 
+                    <iframe name="star" style="margin-left: 2px; margin-bottom:-5px;" frameborder="0" scrolling="0"
+                        width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=dusign&repo=hexo-theme-snail&type=star&count=true">
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+
+</footer>
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- Search -->
+
+<script src="/js/search.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://allenzf.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-XXXXXXXX-X';
+    var _gaDomain = 'yoursite';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+<!-- Search -->
+
+    <script type="text/javascript">      
+        var search_path = "search.xml";
+        if (search_path.length == 0) {
+            search_path = "search.xml";
+        }
+    var path = "/" + search_path;
+    searchFunc(path, 'local-search-input', 'local-search-result');
+    </script>
+
+
+<!-- busuanzi -->
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+
+    
+        <!-- background effects line -->
+        
+
+        
+            <script type="text/javascript" src="/js/mouse-click.js" content='[&quot;🌱&quot;,&quot;just do it&quot;,&quot;🍀&quot;]' color='[&quot;rgb(121,93,179)&quot; ,&quot;rgb(76,180,231)&quot; ,&quot;rgb(184,90,154)&quot;]'></script>
+        
+
+        <!-- background effects end -->
+    
+
+    <!--<script size="50" alpha='0.3' zIndex="-999" src="/js/ribbonStatic.js"></script>-->
+    
+        <script src="/js/ribbonDynamic.js"></script>
+    
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+
+</html>

@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="baidu-site-verification" content="093lY4ziMu" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="记录点滴">
+    <meta name="keyword"  content="加油, 个人博客">
+    <link rel="shortcut icon" href="/img/ironman-draw.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <!--<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
+    <title>
+        
+          QEMU自制操作系统 - Sven-Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://allenzf.github.io/2023/01/19/qemu自制操作系统/">
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+
+    <!-- Custom CSS --> 
+    
+        
+<link rel="stylesheet" href="/css/dusign-light.css">
+
+        
+<link rel="stylesheet" href="/css/dusign-common-light.css">
+
+        
+<link rel="stylesheet" href="/css/font-awesome.css">
+
+        
+<link rel="stylesheet" href="/css/toc.css">
+
+        <!-- background effects end -->
+    
+    
+    <!-- Pygments Highlight CSS -->
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+
+    
+<link rel="stylesheet" href="/css/widget.css">
+
+
+    
+<link rel="stylesheet" href="/css/rocket.css">
+
+
+    
+<link rel="stylesheet" href="/css/signature.css">
+
+
+    
+<link rel="stylesheet" href="/css/fonts.googleapis.css">
+
+
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+    <!-- photography -->
+    
+<link rel="stylesheet" href="/css/photography.css">
+
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+<meta name="generator" content="Hexo 8.1.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- background effects start -->
+    
+    <!-- background effects end -->
+
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            
+                background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('../../../../img/default.jpg')
+                /*post*/
+            
+        
+    }
+    
+    #signature{
+        background-image: url('/img/signature/Just-do-it-white.png');
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#qemu" title="qemu">qemu</a>
+                            
+                        </div>
+                        <h1>QEMU自制操作系统</h1>
+                        <h2 class="subheading">Hello, world!</h2>
+                        <span class="meta">
+                            Posted by 周郎借风 on
+                            2023-01-19
+                        </span>
+
+                        
+                            <div class="blank_box"></div>
+                            <span class="meta">
+                                Words <span class="post-count">830</span> and
+                                Reading Time <span class="post-count">4</span> Minutes
+                            </span>
+                            <div class="blank_box"></div>
+                            <!-- 不蒜子统计 start -->
+                            <span class="meta">
+                                Viewed <span id="busuanzi_value_page_pv"><i class="fa fa-spinner fa-spin"></i></span> Times
+                            </span>
+                            <!-- 不蒜子统计 end -->
+                        
+
+                    </div>
+                
+
+                </div>
+            </div>
+        </div>      
+    </div>
+
+    
+    <div class="waveWrapper">
+        <div class="wave wave_before" style="background-image: url('/img/wave-light.png')"></div>
+        <div class="wave wave_after" style="background-image: url('/img/wave-light.png')"></div>
+    </div>
+    
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">周郎借风</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">主页</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/categories/">分类</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">关于</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">归档</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/photography/">摄影</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">标签</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+                    
+                    
+                    <li>
+                        <a href="https://allenzf.github.io" target="_blank">中文博客</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="关于操作系统的优秀教程"><a href="#关于操作系统的优秀教程" class="headerlink" title="关于操作系统的优秀教程"></a>关于操作系统的优秀教程</h1><p>MIT课程<a href="https://pdos.csail.mit.edu/6.828/2022/schedule.html">https://pdos.csail.mit.edu/6.828/2022/schedule.html</a><br>针对上述课程的博文<a href="https://zhuanlan.zhihu.com/p/74028717">MIT6.828-神级OS课程-要是早遇到，我还会是这种 five 系列</a>，注意博文对象是2018年版本，上述课程是2022年版本，针对riscv.<br>上述课程提供的书籍<a href="https://pdos.csail.mit.edu/6.828/2018/xv6/book-rev10.pdf">“book-rev10.pdf,2017,x86”</a>,  <a href="https://pdos.csail.mit.edu/6.828/2022/xv6/book-riscv-rev3.pdf">“book-riscv-rev3.pdf,2022”</a><br>中文译本<a href="https://th0ar.gitbooks.io/xv6-chinese/content/">xv6 中文文档, x86.</a>  </p>
+<h1 id="查看qemu支持的平台"><a href="#查看qemu支持的平台" class="headerlink" title="查看qemu支持的平台"></a>查看qemu支持的平台</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">qemu-system-riscv64 -M <span class="built_in">help</span></span>                                    </span><br><span class="line">Supported machines are:</span><br><span class="line">microchip-icicle-kit Microchip PolarFire SoC Icicle Kit</span><br><span class="line">none                 empty machine</span><br><span class="line">shakti_c             RISC-V Board compatible with Shakti SDK</span><br><span class="line">sifive_e             RISC-V Board compatible with SiFive E SDK</span><br><span class="line">sifive_u             RISC-V Board compatible with SiFive U SDK</span><br><span class="line">spike                RISC-V Spike board (default)</span><br><span class="line">virt                 RISC-V VirtIO board</span><br></pre></td></tr></table></figure>
+
+<h1 id="获取平台信息"><a href="#获取平台信息" class="headerlink" title="获取平台信息"></a>获取平台信息</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">qemu-system-riscv64 -machine virt,dumpdtb=qemu-riscv64-virt.dtb</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">dtc -I dtb -O dts -o qemu-riscv64-virt.dts qemu-riscv64-virt.dtb</span></span><br></pre></td></tr></table></figure>
+<p>第一条命令是将 virt board 的设备树dump下来，第二条命令是将输入类型dtb输出为dts的设备树文件。修改dts后可以通过dtc命令生成dtb文件，可通过<code>dtdiff file1 file2</code>查看差异。  </p>
+<p>安装dtc命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> apt install device-tree-compiler</span></span><br></pre></td></tr></table></figure>
+
+<p>查看内存布局，方便修改链接文件：</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">memory@80000000</span> <span class="punctuation">&#123;</span></span><br><span class="line">	device_<span class="attr">type</span> <span class="operator">=</span> <span class="string">&quot;memory&quot;</span><span class="punctuation">;</span></span><br><span class="line">	<span class="attr">reg</span> <span class="operator">=</span> <span class="params">&lt;<span class="number">0x00</span> <span class="number">0x80000000</span> <span class="number">0x00</span> <span class="number">0x8000000</span>&gt;</span><span class="punctuation">;</span></span><br><span class="line"><span class="punctuation">&#125;;</span></span><br></pre></td></tr></table></figure>
+<p>查看uart布局，方便打印：</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">uart@10000000</span> <span class="punctuation">&#123;</span></span><br><span class="line">	<span class="attr">interrupts</span> <span class="operator">=</span> <span class="params">&lt;<span class="number">0x0a</span>&gt;</span><span class="punctuation">;</span></span><br><span class="line">	<span class="attr">interrupt-parent</span> <span class="operator">=</span> <span class="params">&lt;<span class="number">0x03</span>&gt;</span><span class="punctuation">;</span></span><br><span class="line">	<span class="attr">clock-frequency</span> <span class="operator">=</span> <span class="string">&quot;\08@&quot;</span><span class="punctuation">;</span></span><br><span class="line">	<span class="attr">reg</span> <span class="operator">=</span> <span class="params">&lt;<span class="number">0x00</span> <span class="number">0x10000000</span> <span class="number">0x00</span> <span class="number">0x100</span>&gt;</span><span class="punctuation">;</span></span><br><span class="line">	<span class="attr">compatible</span> <span class="operator">=</span> <span class="string">&quot;ns16550a&quot;</span><span class="punctuation">;</span></span><br><span class="line"><span class="punctuation">&#125;;</span></span><br></pre></td></tr></table></figure>
+<p>可见，将字符输出到0x10000000的内存地址就可以在串口看到信息。  </p>
+<p>源代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">.section .text.boot  #指定此文件编译出的代码在.text.boot段</span><br><span class="line"></span><br><span class="line">.globl _start</span><br><span class="line">_start:</span><br><span class="line">    li s1, 0x10000000 # s1寄存器赋值为uart内存的地址</span><br><span class="line">    la s2, message    # s2寄存器赋值为message的首地址</span><br><span class="line">    addi s3, s2, 14   # s3寄存器赋值为message的结束地址</span><br><span class="line">1:</span><br><span class="line">    lb s4, 0(s2)      # s4赋值为s2内存中的值</span><br><span class="line">    sb s4, 0(s1)      # s4寄存器内的值输出到s1(uart)内存中</span><br><span class="line">    addi s2, s2, 1    # s2 := s2 + 1</span><br><span class="line">    blt s2, s3, 1b    # if s2 &lt; s3, branch back to 1</span><br><span class="line"></span><br><span class="line">.section .data</span><br><span class="line">message:</span><br><span class="line">  .string &quot;Hello, world!\n&quot;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>链接文件：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">OUTPUT_ARCH( <span class="string">&quot;riscv&quot;</span> )</span><br><span class="line">ENTRY( _start )</span><br><span class="line"></span><br><span class="line">SECTIONS</span><br><span class="line">&#123;</span><br><span class="line">	. = <span class="number">0x80000000</span>, <span class="comment">//代码启动的地方</span></span><br><span class="line">	_text_boot = .;</span><br><span class="line">	.text.boot : &#123; *(.text.boot) &#125; <span class="comment">// boot代码存放的地方</span></span><br><span class="line">	_etext_boot = .;</span><br><span class="line">	</span><br><span class="line">	. = ALIGN(<span class="number">4096</span>);</span><br><span class="line">	_text = .;</span><br><span class="line">	.text :</span><br><span class="line">	&#123; </span><br><span class="line">		*(.text)    <span class="comment">// 应用代码存放的地方</span></span><br><span class="line">	&#125;</span><br><span class="line">	_etext = .;</span><br><span class="line"></span><br><span class="line">	. = ALIGN(<span class="number">4096</span>);</span><br><span class="line">	_rodata = .;</span><br><span class="line">	.rodata :</span><br><span class="line">	&#123; </span><br><span class="line">		*(.rodata)  <span class="comment">// 全局变量，只读变量</span></span><br><span class="line">	&#125;</span><br><span class="line">	_erodata = .;</span><br><span class="line">    </span><br><span class="line">    . = ALIGN(<span class="number">4096</span>);</span><br><span class="line">	_data = .;</span><br><span class="line">	.data : &#123; *(.data) &#125; <span class="comment">// .data 存放的地方</span></span><br><span class="line">	_edata = .;</span><br><span class="line"></span><br><span class="line">	. = ALIGN(<span class="number">0x8</span>);</span><br><span class="line">	bss_begin = .;</span><br><span class="line">	.bss : &#123; *(.bss*) &#125; </span><br><span class="line">	bss_end = .;</span><br><span class="line"></span><br><span class="line">	_end = .;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h1><p>commit 0a9faa86e6d7d538ac61 <a href="https://github.com/AllenZF/risc-v-bm">源码地址</a><br>编译运行：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">➜  risc-v-bm git:(0a9faa8) make                                       </span><br><span class="line">rm -rf build *.img kernel.map</span><br><span class="line">mkdir -p build</span><br><span class="line">riscv64-linux-gnu-gcc -g -Wall -nostdlib  -Iinclude  -MMD -c src/start.c -o build/start_c.o</span><br><span class="line">riscv64-linux-gnu-gcc -g -Iinclude  -MMD -c -D__ASSEMBLY__ src/startup.S -o build/startup_s.o</span><br><span class="line">riscv64-linux-gnu-ld -T src/linker.ld -Map kernel.map -o build/kernel.elf  build/start_c.o build/startup_s.o</span><br><span class="line">riscv64-linux-gnu-objcopy build/kernel.elf -O binary kernel.img</span><br><span class="line">➜  risc-v-bm git:(0a9faa8) make run</span><br><span class="line">qemu-system-riscv64 -machine virt -bios none -kernel build/kernel.elf  -nographic</span><br><span class="line">Hello, world!</span><br></pre></td></tr></table></figure>
+<p><code>Ctrl + A X </code>退出qemu.</p>
+<h1 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h1><p>运行virt并在startup停住  </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">qemu-system-riscv64 -M virt -bios none -nographic -kernel build/kernel.elf -S -s</span></span><br></pre></td></tr></table></figure>
+<p>参数说明</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-S              freeze CPU at startup (use &#x27;c&#x27; to start execution)</span><br><span class="line">-s              shorthand for -gdb tcp::1234</span><br></pre></td></tr></table></figure>
+
+<p>另外打开终端开始调试：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gdb-multiarch --tui ./build/kernel.elf</span><br></pre></td></tr></table></figure>
+<p>gdb-multiarch是GDB针对多种架构的调试器，与默认的gdb不同，gdb只支持x86&#x2F;x64架构。<br>执行效果如下：</p>
+<img src="/2023/01/19/qemu%E8%87%AA%E5%88%B6%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/gdb-multiarch%20--tui%20kernel.elf.png" class="">
+
+<p>输入<code>c</code>进入，  </p>
+<p>连接到qemu<code>$ target remote :1234</code><br>打断点：<code>b _start</code><br>继续执行：<code>c</code></p>
+<img src="/2023/01/19/qemu%E8%87%AA%E5%88%B6%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/gdb_2.png" class="">
+
+<p>显示所有寄存器</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(gdb) layout regs</span><br></pre></td></tr></table></figure>
+
+<p>查看寄存器<code>i r s1</code></p>
+<img src="/2023/01/19/qemu%E8%87%AA%E5%88%B6%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/gdb_3.png" class="">
+                
+                <hr>
+                <!-- Pager -->
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2023/01/19/Hexo常用命令/" data-toggle="tooltip" data-placement="top" title="Hexo常用命令">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2023/01/08/WSL连接USB设备/" data-toggle="tooltip" data-placement="top" title="WSL连接USB设备">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- tip start -->
+                
+
+                
+                <!-- tip end -->
+
+                <!-- Music start-->
+                
+                <!-- Music end -->
+
+                <!-- Sharing -->
+                
+                <!-- Sharing -->
+
+                <!-- gitment start -->
+                
+                <!-- gitment end -->
+
+                <!-- 来必力City版安装代码 -->
+                
+                <!-- City版安装代码已完成 -->
+
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+    
+      
+        <aside id="sidebar">
+          <div id="toc" class="toc-article">
+          <strong class="toc-title">Contents</strong>
+          
+            
+              <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E5%85%B3%E4%BA%8E%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9A%84%E4%BC%98%E7%A7%80%E6%95%99%E7%A8%8B"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">关于操作系统的优秀教程</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E6%9F%A5%E7%9C%8Bqemu%E6%94%AF%E6%8C%81%E7%9A%84%E5%B9%B3%E5%8F%B0"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">查看qemu支持的平台</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E8%8E%B7%E5%8F%96%E5%B9%B3%E5%8F%B0%E4%BF%A1%E6%81%AF"><span class="toc-nav-number">3.</span> <span class="toc-nav-text">获取平台信息</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E6%B5%8B%E8%AF%95"><span class="toc-nav-number">4.</span> <span class="toc-nav-text">测试</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E8%B0%83%E8%AF%95"><span class="toc-nav-number">5.</span> <span class="toc-nav-text">调试</span></a></li></ol>
+            
+          
+          </div>
+        </aside>
+      
+    
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <!-- <h5><a href="/tags/">FEATURED TAGS</a></h5> -->
+                    <h5><a href="/tags/"></a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#qemu" title="qemu">qemu</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                
+                <script src="https://giscus.app/client.js"
+                    data-repo="AllenZF/allenzf.github.io"
+                    data-repo-id="R_kgDOQMASLQ"
+                    data-category="General"
+                    data-category-id="DIC_kwDOQMASLc4CxR4Q"
+                    data-mapping="pathname"
+                    data-strict="0"
+                    data-reactions-enabled="1"
+                    data-emit-metadata="0"
+                    data-input-position="bottom"
+                    data-theme="preferred_color_scheme"
+                    data-lang="en"
+                    crossorigin="anonymous"
+                    async>
+                </script>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: 'ℬ'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+
+
+<style  type="text/css">
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/AllenZF">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://gitee.com/Sven">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-stack-1x fa-inverse">码</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/people/zhou-lang-jie-feng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; 周郎借风 2025 
+                    <br>
+                    Powered by 
+                    <a href="https://github.com/dusign/hexo-theme-snail">
+                        <i>hexo-theme-snail</i>
+                    </a> | 
+                    <iframe name="star" style="margin-left: 2px; margin-bottom:-5px;" frameborder="0" scrolling="0"
+                        width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=dusign&repo=hexo-theme-snail&type=star&count=true">
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+
+</footer>
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- Search -->
+
+<script src="/js/search.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://allenzf.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-XXXXXXXX-X';
+    var _gaDomain = 'yoursite';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+<!-- Search -->
+
+    <script type="text/javascript">      
+        var search_path = "search.xml";
+        if (search_path.length == 0) {
+            search_path = "search.xml";
+        }
+    var path = "/" + search_path;
+    searchFunc(path, 'local-search-input', 'local-search-result');
+    </script>
+
+
+<!-- busuanzi -->
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+
+    
+        <!-- background effects line -->
+        
+
+        
+            <script type="text/javascript" src="/js/mouse-click.js" content='[&quot;🌱&quot;,&quot;just do it&quot;,&quot;🍀&quot;]' color='[&quot;rgb(121,93,179)&quot; ,&quot;rgb(76,180,231)&quot; ,&quot;rgb(184,90,154)&quot;]'></script>
+        
+
+        <!-- background effects end -->
+    
+
+    <!--<script size="50" alpha='0.3' zIndex="-999" src="/js/ribbonStatic.js"></script>-->
+    
+        <script src="/js/ribbonDynamic.js"></script>
+    
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+
+</html>

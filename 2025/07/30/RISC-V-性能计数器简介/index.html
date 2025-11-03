@@ -1,0 +1,3451 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="baidu-site-verification" content="093lY4ziMu" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="记录点滴">
+    <meta name="keyword"  content="加油, 个人博客">
+    <link rel="shortcut icon" href="/img/ironman-draw.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <!--<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
+    <title>
+        
+          RISC-V 性能计数器简介 - Sven-Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://allenzf.github.io/2025/07/30/RISC-V-性能计数器简介/">
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+
+    <!-- Custom CSS --> 
+    
+        
+<link rel="stylesheet" href="/css/dusign-light.css">
+
+        
+<link rel="stylesheet" href="/css/dusign-common-light.css">
+
+        
+<link rel="stylesheet" href="/css/font-awesome.css">
+
+        
+<link rel="stylesheet" href="/css/toc.css">
+
+        <!-- background effects end -->
+    
+    
+    <!-- Pygments Highlight CSS -->
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+
+    
+<link rel="stylesheet" href="/css/widget.css">
+
+
+    
+<link rel="stylesheet" href="/css/rocket.css">
+
+
+    
+<link rel="stylesheet" href="/css/signature.css">
+
+
+    
+<link rel="stylesheet" href="/css/fonts.googleapis.css">
+
+
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+    <!-- photography -->
+    
+<link rel="stylesheet" href="/css/photography.css">
+
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+<meta name="generator" content="Hexo 8.1.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- background effects start -->
+    
+    <!-- background effects end -->
+
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            
+                background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('../../../../img/header_img/Iron-Man-3.jpg')
+                /*post*/
+            
+        
+    }
+    
+    #signature{
+        background-image: url('/img/signature/Just-do-it-white.png');
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#Zihpm" title="Zihpm">Zihpm</a>
+                            
+                              <a class="tag" href="/tags/#HPE" title="HPE">HPE</a>
+                            
+                        </div>
+                        <h1>RISC-V 性能计数器简介</h1>
+                        <h2 class="subheading"></h2>
+                        <span class="meta">
+                            Posted by 周郎借风 on
+                            2025-07-30
+                        </span>
+
+                        
+                            <div class="blank_box"></div>
+                            <span class="meta">
+                                Words <span class="post-count">11.6k</span> and
+                                Reading Time <span class="post-count">61</span> Minutes
+                            </span>
+                            <div class="blank_box"></div>
+                            <!-- 不蒜子统计 start -->
+                            <span class="meta">
+                                Viewed <span id="busuanzi_value_page_pv"><i class="fa fa-spinner fa-spin"></i></span> Times
+                            </span>
+                            <!-- 不蒜子统计 end -->
+                        
+
+                    </div>
+                
+
+                </div>
+            </div>
+        </div>      
+    </div>
+
+    
+    <div class="waveWrapper">
+        <div class="wave wave_before" style="background-image: url('/img/wave-light.png')"></div>
+        <div class="wave wave_after" style="background-image: url('/img/wave-light.png')"></div>
+    </div>
+    
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">周郎借风</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">主页</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/categories/">分类</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">关于</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">归档</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/photography/">摄影</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">标签</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+                    
+                    
+                    <li>
+                        <a href="https://allenzf.github.io" target="_blank">中文博客</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><hr>
+<p>Zihpm 扩展提供了29个标准的性能事件计数器。HPE(Hart performance events)扩展定义了一组标准性能事件，用于与 Zihpm 计数器配合使用。对于每种标准事件，都指定了名称及其与之关联的精确硬件行为。对于少数标准事件，指定了标准事件选择编码，而对于其他事件，则由实现定义编码。</p>
+<h1 id="事件"><a href="#事件" class="headerlink" title="事件"></a>事件</h1><hr>
+<p><strong>事件</strong> <strong>event</strong> 被定义组织成<strong>组</strong> <strong>group</strong> 形式。<strong>组</strong>中定义了<strong>子事件</strong> <strong>sub-events</strong>. 这些子事件限制了计数的内容。</p>
+<p>事件被分为推测性（speculative）和非推测性（non-speculative）的，分别用<code>.RET</code>和<code>.SPEC</code>表示。<code>.RET</code>事件在退休时进行计数，而<code>.SPEC</code>事件可能包括由不退休指令引发的事件。非推测性事件<code>.RET</code>被定义如下。</p>
+<h2 id="INST-Events"><a href="#INST-Events" class="headerlink" title="INST Events"></a>INST Events</h2><hr>
+<p>指令事件是顶层级别的事件，包含子事件类别，当指令事件名称不包含子事件类别（<code>INST.RET</code>）时表示统计所有指令事件。</p>
+<table>
+<thead>
+<tr>
+<th>指令事件分类</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>BRJMP</td>
+<td>分支和跳转指令。包括所有 BRANCH, JAL, 和 JALR 操作码，包括压缩版本</td>
+</tr>
+<tr>
+<td>MISPRED</td>
+<td>分支和跳转指令的预测错误</td>
+</tr>
+<tr>
+<td>LOAD</td>
+<td>内存加载指令。包括所有执行<strong>内存读操作</strong>的指令</td>
+</tr>
+<tr>
+<td>STORE</td>
+<td>内存存储指令。包括所有执行<strong>内存写操作</strong>的指令</td>
+</tr>
+<tr>
+<td>LDST</td>
+<td>内存加载和存储指令。代表 LOAD 和 STORE 类别的并集</td>
+</tr>
+<tr>
+<td>MO</td>
+<td>内存排序指令。包括 FENCE 和 FENCE.TSO 指令</td>
+</tr>
+<tr>
+<td>INT</td>
+<td>整数计算指令。包括所有来自 RVxI 的整数计算指令，包括压缩版本。还包括来自 M 扩展和 A 扩展（AMO*）的所有计算指令。是否将 NOP 指令计入其中由实现定义</td>
+</tr>
+<tr>
+<td>FP</td>
+<td>浮点指令。包括来自 F、D、Q 和 Zfa 扩展的所有指令。</td>
+</tr>
+<tr>
+<td>RVV</td>
+<td>向量指令。包括来自 V 扩展的所有指令</td>
+</tr>
+<tr>
+<td>RVC</td>
+<td>压缩指令。包括来自 C 扩展的所有指令</td>
+</tr>
+</tbody></table>
+<h3 id="控制转移指令事件"><a href="#控制转移指令事件" class="headerlink" title="控制转移指令事件"></a>控制转移指令事件</h3><hr>
+<p>控制转移(control transfer)指令类别 <strong>BRJMP</strong> 和 <strong>MISPRED</strong> 包括额外的层次结构，允许按转移指令类型进行计数。当事件名称中未包含类型（例如：INST.BRJMP.RET）时，所有类型都会被计数。</p>
+<table>
+<thead>
+<tr>
+<th>控制转移事件分类</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>BRANCH</td>
+<td>分支指令</td>
+</tr>
+<tr>
+<td>BRANCH.TK</td>
+<td>分支被执行（taken），跳转条件为真的指令，这是一个预测结果</td>
+</tr>
+<tr>
+<td>BRANCH.NT</td>
+<td>分支不被执行 (no-taken)，跳转条件为假的指令，这是一个预测结果</td>
+</tr>
+<tr>
+<td>IND</td>
+<td>间接（无法推断的）跳转和调用指令</td>
+</tr>
+<tr>
+<td>IND.CALL</td>
+<td>间接（无法推断）调用指令</td>
+</tr>
+<tr>
+<td>IND.JUMP</td>
+<td>无链接的(不需要返回地址)间接（无法推断）跳转指令</td>
+</tr>
+<tr>
+<td>IND.LJUMP</td>
+<td>其他有链接的间接（无法推断）跳转指令</td>
+</tr>
+<tr>
+<td>DIR</td>
+<td>直接（可推断）跳转和调用指令。仅适用于 BRJMP，不适用于 MISPRED</td>
+</tr>
+<tr>
+<td>DIR.CALL</td>
+<td>直接（可推断）的调用指令。仅适用于 BRJMP，不适用于 MISPRED</td>
+</tr>
+<tr>
+<td>DIR.JUMP</td>
+<td>直接（可推断）的无链接跳转指令。仅适用于 BRJMP，不适用于 MISPRED</td>
+</tr>
+<tr>
+<td>DIR.LJUMP</td>
+<td>其他直接（可推断）的带有链接的跳转指令。仅适用于 BRJMP，不适用于 MISPRED</td>
+</tr>
+<tr>
+<td>CORSWAP</td>
+<td>Co-routine swap instructions.协程交换指令</td>
+</tr>
+<tr>
+<td>RETURN</td>
+<td>函数返回指令</td>
+</tr>
+<tr>
+<td>TRAPRET</td>
+<td>陷阱返回指令</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>控制转移组合事件类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TK</td>
+<td>JAL, JALR, MRET, SRET, and taken branch instructions</td>
+</tr>
+<tr>
+<td>PRED</td>
+<td>预测分支和跳转指令。BRANCH、IND、CORSWAP 和 RETURN 类型的并集, 仅适用于 BRJMP</td>
+</tr>
+<tr>
+<td>JUMP</td>
+<td>间接和直接跳转指令。包括带有链接的跳转指令，但不包括调用或返回</td>
+</tr>
+<tr>
+<td>CALL</td>
+<td>Indirect and direct call instructions</td>
+</tr>
+<tr>
+<td>RETALL</td>
+<td>所有函数返回指令，RETURN 和 CORSWAP 类型的并集</td>
+</tr>
+<tr>
+<td>CALLALL</td>
+<td>所有函数调用指令，CALL 和 CORSWAP 的并集</td>
+</tr>
+<tr>
+<td>UNCOND</td>
+<td>JAL, JALR, MRET, and SRET instructions</td>
+</tr>
+</tbody></table>
+<p>上述所有类型由trace和Smctr&#x2F;Ssctr扩展定义，摘录如下：控制转移类型定义</p>
+<table>
+<header>
+<tr>
+<th class="head"><p>Transfer Type Name</p></th>
+<th class="head"><p>相关操作</p></th>
+</tr>
+<tr>
+<td rowspan='3'>Indirect call</td>
+<td>JALR x5, rs where rs != x1</td>
+</tr>
+<tr><td>JALR x1, rs where rs != x5</td></tr>
+<tr><td>C.JALR rs1 where rs1 != x5l</td></tr>
+<tr>
+<td rowspan='4'>Direct call</td>
+<td>JAL x1</td>
+</tr>
+<tr><td>JAL x5</td></tr>
+<tr><td>C.JAL</td></tr>
+<tr><td>CM.JALT index</td></tr>
+<tr>
+<td rowspan='2'>Indirect jump (without linkage)</td>
+<td>JALR x0, rs where rs != (x1 or x5)</td>
+</tr>
+<tr><td>C.JR rs1 where rs1 != (x1 or x5)</td></tr>
+<tr>
+<td rowspan='3'>Direct jump (without linkage)</td>
+<td>JAL x0</td>
+</tr>
+<tr><td>C.J</td></tr>
+<tr><td>CM.JT index</td></tr>
+<tr>
+<td rowspan='3'>Co-routine swap</td>
+<td>JALR x1, x5</td>
+</tr>
+<tr><td>JALR x5, x1</td></tr>
+<tr><td>C.JALR x5</td></tr>
+<tr>
+<td rowspan='3'>Function return</td>
+<td>JALR rd, rs where rs == (x1 or x5) and rd != (x1 or x5)</td>
+</tr>
+<tr><td>C.JR rs1 where rs1 == (x1 or x5)</td></tr>
+<tr><td>CM.POPRET(Z)</td></tr>
+<tr>
+<td>Other indirect jump (with linkage)</td>
+<td>JALR rd, rs where rs != (x1 or x5) and rd != (x0, x1, or x5)</td>
+</tr>
+<tr>
+<td>Other direct jump (with linkage)</td>
+<td>JAL rd where rd != (x0, x1, or x5)</td>
+</tr>
+<tr>
+<td rowspan='2'>Trap returns</td>
+<td>MRET</td>
+</tr>
+<tr><td>SRET</td></tr>
+</table>
+
+<h3 id="内存访问指令事件"><a href="#内存访问指令事件" class="headerlink" title="内存访问指令事件"></a>内存访问指令事件</h3><hr>
+<p>内存访问指令类别 LOAD、STORE 和 LDST 包括额外的层次结构，允许按数据源、地址源或缓存性进行计数。当事件名称中不包括额外的限定符（例如，INST.LOAD.RET）时，所有类型都会被计数。</p>
+<table>
+<thead>
+<tr>
+<th><strong>LOAD、STORE、LDST</strong></th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>UC</td>
+<td>执行对不可缓存内存区域的数据访问的指令</td>
+</tr>
+<tr>
+<td>DSRC.*</td>
+<td><strong>Instructions</strong> that accessed data from the specified source$^\color{teal}{[1]}$</td>
+</tr>
+<tr>
+<td>ASRC.*</td>
+<td><strong>Instructions</strong> whose data address translation came from the specified source$^\color{teal}{[2]}$</td>
+</tr>
+</tbody></table>
+<p>[1] the specified source is one of the following: L1D, LL. 强调 Data Cache.<br>[2] the specified source is one of the following: L1D TLB, LL TLB. 强调 Data TLB.</p>
+<p>注意，这里针对 load&#x2F;store 指令。</p>
+<table>
+<thead>
+<tr>
+<th><strong>DSRC 事件数据源</strong></th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>STLF</td>
+<td>store-to-load forwarding. <strong>Load instructions</strong>，由于store到内存较慢，流水线在执行load时会先检测存储队列，如果发现有未完成的store操作时直接将数据转发给load.</td>
+</tr>
+<tr>
+<td><code>&lt;cache&gt;</code></td>
+<td><strong>Instructions</strong> for which the <strong>data</strong> access hit in the selected cache.</td>
+</tr>
+<tr>
+<td><code>&lt;cache&gt;</code>.MISS</td>
+<td><strong>Instructions</strong> for which the <strong>data</strong> access missed in the selected cache.</td>
+</tr>
+<tr>
+<td><code>&lt;cache&gt;</code>.MERGE</td>
+<td><strong>Instructions</strong> for which the <strong>data</strong> access merged with an outstanding miss in the selected cache.</td>
+</tr>
+<tr>
+<td>LOCAL.MEM</td>
+<td><strong>Instructions</strong> for which the <strong>data</strong> access hit in local$^\color{teal}{[1]}$ memory.</td>
+</tr>
+<tr>
+<td>REMOTE.MEM</td>
+<td><strong>Instructions</strong> for which the <strong>data</strong> access hit in remote$^\color{teal}{[2]}$ memory.</td>
+</tr>
+<tr>
+<td>REMOTE.CACHE</td>
+<td><strong>Instructions</strong> for which the <strong>data</strong> access hit in a remote cache.</td>
+</tr>
+<tr>
+<td>REMOTE.HITM</td>
+<td><strong>Instructions</strong> for which the <strong>data</strong> access hit modified data$^\color{teal}{[3]}$ in a remote cache.</td>
+</tr>
+</tbody></table>
+<p>[1] local: 访问同一NUMA节点的内存。<br>[2] remote: 访问不同NUMA节点的内存或缓存。<br>[3] modified data: 此处的修改是指缓存行。如相同缓存行不同地址的数据，其中一个被修改过，访问没被修改的地址，还是HITM事件。</p>
+<table>
+<thead>
+<tr>
+<th><strong>ASRC 事件地址翻译来源</strong></th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>&lt;tlb&gt;</code></td>
+<td>指令的数据地址转换在指定的 TLB 中命中</td>
+</tr>
+<tr>
+<td><code>&lt;tlb&gt;</code>.MISS</td>
+<td>指令的数据地址转换在指定的 TLB 中未命中</td>
+</tr>
+</tbody></table>
+<h3 id="向量指令事件"><a href="#向量指令事件" class="headerlink" title="向量指令事件"></a>向量指令事件</h3><hr>
+<p>RVV 事件包括额外的层次结构，允许按向量指令类型进行计数。当事件名称中未包含类型（例如：INST.RVV.RET）时，所有类型都会被计数。</p>
+<table>
+<thead>
+<tr>
+<th>RVV 事件指令类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>LOAD</td>
+<td>Vector load instructions</td>
+</tr>
+<tr>
+<td>STORE</td>
+<td>Vector store instructions</td>
+</tr>
+<tr>
+<td>LDST</td>
+<td>向量内存指令，LOAD 和 STORE 类型的联合</td>
+</tr>
+<tr>
+<td>CFG</td>
+<td>Vector configuration (VSET{I}VL{I}) instructions</td>
+</tr>
+<tr>
+<td>ARITH</td>
+<td>向量算术指令</td>
+</tr>
+<tr>
+<td>ARITH.INT</td>
+<td>向量整数算术指令</td>
+</tr>
+<tr>
+<td>ARITH.FP</td>
+<td>向量浮点数算术指令</td>
+</tr>
+</tbody></table>
+<p>LOAD、STORE 和 LDST 类型包括额外的层次结构，允许按寻址模式计数。当事件名称中未包含寻址模式（例如：INST.RVV.LOAD.RET）时，所有模式都会被计数。</p>
+<table>
+<thead>
+<tr>
+<th>RVV 内存指令寻址模式</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>UNIT</td>
+<td>Vector unit-stride access instructions</td>
+</tr>
+<tr>
+<td>IDXU</td>
+<td>Vector indexed-unordered access instructions</td>
+</tr>
+<tr>
+<td>STRD</td>
+<td>Vector strided access instructions</td>
+</tr>
+<tr>
+<td>IDXO</td>
+<td>Vector indexed-ordered access instructions</td>
+</tr>
+</tbody></table>
+<h3 id="指令事件总表"><a href="#指令事件总表" class="headerlink" title="指令事件总表"></a>指令事件总表</h3><hr>
+<table>
+<thead>
+<tr>
+<th>指令事件名称</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>INST.RET</td>
+<td>Instruction Retired. 所有指令</td>
+</tr>
+<tr>
+<td>INST.BRJMP.RET</td>
+<td>Branches and jumps retired. 所有分支跳转指令</td>
+</tr>
+<tr>
+<td>INST.BRJMP.BRANCH.RET</td>
+<td>条件分支</td>
+</tr>
+<tr>
+<td>INST.BRJMP.BRANCH.TK.RET</td>
+<td>Taken conditional branches retired.</td>
+</tr>
+<tr>
+<td>INST.BRJMP.BRANCH.NT.RET</td>
+<td>Not taken conditional branches retired.</td>
+</tr>
+<tr>
+<td>INST.BRJMP.IND.RET</td>
+<td>Indirect jumps, with and without linkage, and calls retired.</td>
+</tr>
+<tr>
+<td>INST.BRJMP.IND.CALL.RET</td>
+<td>Indirect calls retired.</td>
+</tr>
+<tr>
+<td>INST.BRJMP.IND.JUMP.RET</td>
+<td>Indirect jumps without linkage retired.</td>
+</tr>
+<tr>
+<td>INST.BRJMP.IND.LJUMP.RET</td>
+<td>Other indirect jumps with linkage retired.</td>
+</tr>
+<tr>
+<td>INST.BRJMP.DIR.RET</td>
+<td>Direct jumps, with and without linkage, and calls retired.</td>
+</tr>
+<tr>
+<td>INST.BRJMP.DIR.CALL.RET</td>
+<td>Direct calls retired.</td>
+</tr>
+<tr>
+<td>INST.BRJMP.DIR.JUMP.RET</td>
+<td>Direct jumps without linkage retired.</td>
+</tr>
+<tr>
+<td>INST.BRJMP.DIR.LJUMP.RET</td>
+<td>Other direct jumps with linkage retired.</td>
+</tr>
+<tr>
+<td>INST.BRJMP.CORSWAP.RET</td>
+<td>Co-routine swaps retired.</td>
+</tr>
+<tr>
+<td>INST.BRJMP.RETURN.RET</td>
+<td>Function returns retired.</td>
+</tr>
+<tr>
+<td>INST.BRJMP.TK.RET</td>
+<td>Retired instructions that changed control flow. Includes taken branches and all jumps.</td>
+</tr>
+<tr>
+<td>INST.BRJMP.PRED.RET</td>
+<td>Branches and predicted (indirect) jumps retired. Includes calls and returns.</td>
+</tr>
+<tr>
+<td>INST.MISPRED.RET</td>
+<td>Mispredicted control flow instructions retired.</td>
+</tr>
+<tr>
+<td>INST.MISPRED.BRANCH.RET</td>
+<td>Mispredicted conditional branches retired.</td>
+</tr>
+<tr>
+<td>INST.MISPRED.BRANCH.TK.RET</td>
+<td>Taken conditional branches retired.</td>
+</tr>
+<tr>
+<td>INST.MISPRED.BRANCH.NT.RET</td>
+<td>Not-taken conditional branches retired.</td>
+</tr>
+<tr>
+<td>INST.MISPRED.IND.RET</td>
+<td>Mispredicted indirect jumps, with and without linkage, and calls retired. Does not include function returns.</td>
+</tr>
+<tr>
+<td>INST.MISPRED.IND.CALL.RET</td>
+<td>Mispredicted indirect calls retired.</td>
+</tr>
+<tr>
+<td>INST.MISPRED.IND.JUMP.RET</td>
+<td>Mispredicted indirect jumps without linkage retired.</td>
+</tr>
+<tr>
+<td>INST.MISPRED.IND.LJUMP.RET</td>
+<td>Mispredicted other indirect jumps with linkage retired.</td>
+</tr>
+<tr>
+<td>INST.MISPRED.CORSWAP.RET</td>
+<td>Mispredicted co-routine swaps retired.</td>
+</tr>
+<tr>
+<td>INST.MISPRED.RETURN.RET</td>
+<td>Mispredicted function returns retired.</td>
+</tr>
+<tr>
+<td>INST.MISPRED.IND.LJUMP.RET</td>
+<td>Mispredicted other indirect jumps with linkage retired.</td>
+</tr>
+<tr>
+<td>INST.MISPRED.TK.RET</td>
+<td>Retired instructions that changed control flow and were mispredicted. Includes taken branches and all jumps. Includes the following encodings: FIXME</td>
+</tr>
+<tr>
+<td>INST.TRETURN.RET</td>
+<td>Trap return instructions retired.</td>
+</tr>
+<tr>
+<td>INST.LOAD.RET</td>
+<td>Memory load instructions retired.</td>
+</tr>
+<tr>
+<td>INST.LOAD.UC.RET</td>
+<td>Memory load instructions retired that accessed uncacheable memory.</td>
+</tr>
+<tr>
+<td>INST.LOAD.DSRC.L1D.RET</td>
+<td>Memory load instructions retired that hit in the L1D cache.</td>
+</tr>
+<tr>
+<td>INST.LOAD.DSRC.L1D.MISS.RET</td>
+<td>Memory load instructions retired that missed in the L1D cache.</td>
+</tr>
+<tr>
+<td>INST.LOAD.DSRC.L1D.MERGE.RET</td>
+<td>Memory load instructions retired that merged into an outstanding L1D cache miss request.</td>
+</tr>
+<tr>
+<td>INST.LOAD.DSRC.LL.RET</td>
+<td>Memory load instructions retired that hit in the last level cache.</td>
+</tr>
+<tr>
+<td>INST.LOAD.DSRC.LL.MISS.RET</td>
+<td>Memory load instructions retired that missed in the last level cache.</td>
+</tr>
+<tr>
+<td>INST.LOAD.DSRC.LL.MERGE.RET</td>
+<td>Memory load instructions retired that merged into an outstanding last level cache miss request.</td>
+</tr>
+<tr>
+<td>INST.LOAD.DSRC.STLF.RET</td>
+<td>Memory load instructions retired that had data forwarded from an older store.</td>
+</tr>
+<tr>
+<td>INST.LOAD.DSRC.LOCAL.MEM.RET</td>
+<td>Memory load instructions retired that hit in local memory.</td>
+</tr>
+<tr>
+<td>INST.LOAD.DSRC.REMOTE.MEM.RET</td>
+<td>Memory load instructions retired that hit in remote memory.</td>
+</tr>
+<tr>
+<td>INST.LOAD.DSRC.REMOTE.CACHE.RET</td>
+<td>Memory load instructions retired that hit in a remote cache.</td>
+</tr>
+<tr>
+<td>INST.LOAD.DSRC.REMOTE.HITM.RET</td>
+<td>Memory load instructions retired that hit a modified line in a remote cache.</td>
+</tr>
+<tr>
+<td>INST.LOAD.ASRC.L1.RET</td>
+<td>Memory load instructions retired that hit in the L1 TLB.</td>
+</tr>
+<tr>
+<td>INST.LOAD.ASRC.L1.MISS.RET</td>
+<td>Memory load instructions retired that missed in the L1 TLB.</td>
+</tr>
+<tr>
+<td>INST.LOAD.ASRC.L1.MERGE.RET</td>
+<td>Memory load instructions retired that merged into an outstanding L1 TLB miss request.</td>
+</tr>
+<tr>
+<td>INST.LOAD.ASRC.LL.RET</td>
+<td>Memory load instructions retired that hit in the last level TLB.</td>
+</tr>
+<tr>
+<td>INST.LOAD.ASRC.LL.MISS.RET</td>
+<td>Memory load instructions retired that missed in the last level TLB.</td>
+</tr>
+<tr>
+<td>INST.LOAD.ASRC.LL.MERGE.RET</td>
+<td>Memory load instructions retired that merged into an outstanding last level TLB miss request.</td>
+</tr>
+<tr>
+<td>INST.STORE.RET</td>
+<td>Memory store instructions retired.</td>
+</tr>
+<tr>
+<td>INST.STORE.UC.RET</td>
+<td>Memory store instructions retired that accessed uncacheable memory.</td>
+</tr>
+<tr>
+<td>INST.STORE.DSRC.L1D.RET</td>
+<td>Cacheable memory store instructions retired whose read for ownership hit in the L1D cache.</td>
+</tr>
+<tr>
+<td>INST.STORE.DSRC.L1D.MISS.RET</td>
+<td>Cacheable memory store instructions retired whose read for ownership missed in the L1D cache.</td>
+</tr>
+<tr>
+<td>INST.STORE.DSRC.L1D.MERGE.RET</td>
+<td>Cacheable memory store instructions retired whose read for ownership merged into an outstanding L1D cache miss request.</td>
+</tr>
+<tr>
+<td>INST.STORE.DSRC.LL.RET</td>
+<td>Cacheable memory store instructions retired whose read for ownership hit in the last level cache.</td>
+</tr>
+<tr>
+<td>INST.STORE.DSRC.LL.MISS.RET</td>
+<td>Cacheable memory store instructions retired whose read for ownership missed in the last level cache.</td>
+</tr>
+<tr>
+<td>INST.STORE.DSRC.LL.MERGE.RET</td>
+<td>Cacheable memory store instructions retired whose read for ownership merged into an outstanding last level cache miss request.</td>
+</tr>
+<tr>
+<td>INST.STORE.DSRC.LOCAL.MEM.RET</td>
+<td>Cacheable memory store instructions retired whose read for ownership hit in local memory.</td>
+</tr>
+<tr>
+<td>INST.STORE.DSRC.REMOTE.MEM.RET</td>
+<td>Cacheable memory store instructions retired whose read for ownership hit in remote memory.</td>
+</tr>
+<tr>
+<td>INST.STORE.DSRC.REMOTE.CACHE.RET</td>
+<td>Cacheable memory store instructions retired whose read for ownership hit in a remote cache.</td>
+</tr>
+<tr>
+<td>INST.STORE.DSRC.REMOTE.HITM.RET</td>
+<td>Cacheable memory store instructions retired whose read for ownership hit a modified line in a remote cache.</td>
+</tr>
+<tr>
+<td>INST.STORE.ASRC.L1.RET</td>
+<td>Memory store instructions retired that hit in the L1 TLB.</td>
+</tr>
+<tr>
+<td>INST.STORE.ASRC.L1.MISS.RET</td>
+<td>Memory store instructions retired that missed in the L1 TLB.</td>
+</tr>
+<tr>
+<td>INST.STORE.ASRC.L1.MERGE.RET</td>
+<td>Memory store instructions retired that merged into an outstanding L1 TLB miss request.</td>
+</tr>
+<tr>
+<td>INST.STORE.ASRC.LL.RET</td>
+<td>Memory store instructions retired that hit in the last level TLB.</td>
+</tr>
+<tr>
+<td>INST.STORE.ASRC.LL.MISS.RET</td>
+<td>Memory store instructions retired that missed in the last level TLB.</td>
+</tr>
+<tr>
+<td>INST.STORE.ASRC.LL.MERGE.RET</td>
+<td>Memory store instructions retired that merged into an outstanding last level TLB miss request.</td>
+</tr>
+<tr>
+<td>INST.LDST.RET</td>
+<td>Memory load and&#x2F;or store instructions retired.</td>
+</tr>
+<tr>
+<td>INST.LDST.UC.RET</td>
+<td>Memory load and&#x2F;or store instructions retired that accessed uncacheable memory.</td>
+</tr>
+<tr>
+<td>INST.LDST.DSRC.L1D.RET</td>
+<td>Memory load and&#x2F;or store instructions retired that hit in the L1D cache.</td>
+</tr>
+<tr>
+<td>INST.LDST.DSRC.L1D.MISS.RET</td>
+<td>Memory load and&#x2F;or store instructions retired that missed in the L1D cache.</td>
+</tr>
+<tr>
+<td>INST.LDST.DSRC.L1D.MERGE.RET</td>
+<td>Memory load and&#x2F;or store instructions retired that merged into an outstanding L1D cache miss request.</td>
+</tr>
+<tr>
+<td>INST.LDST.DSRC.LL.RET</td>
+<td>Memory load and&#x2F;or store instructions retired that hit in the last level cache.</td>
+</tr>
+<tr>
+<td>INST.LDST.DSRC.LL.MISS.RET</td>
+<td>Memory load and&#x2F;or store instructions retired that missed in the last level cache.</td>
+</tr>
+<tr>
+<td>INST.LDST.DSRC.LL.MERGE.RET</td>
+<td>Memory load and&#x2F;or store instructions retired that merged into an outstanding last level cache miss request.</td>
+</tr>
+<tr>
+<td>INST.LDST.DSRC.STLF.RET</td>
+<td>Memory load and&#x2F;or store instructions retired that had data forwarded from an older store.</td>
+</tr>
+<tr>
+<td>INST.LDST.DSRC.LOCAL.MEM.RET</td>
+<td>Memory load and&#x2F;or store instructions retired that hit in local memory.</td>
+</tr>
+<tr>
+<td>INST.LDST.DSRC.REMOTE.MEM.RET</td>
+<td>Memory load and&#x2F;or store instructions retired that hit in remote memory.</td>
+</tr>
+<tr>
+<td>INST.LDST.DSRC.REMOTE.CACHE.RET</td>
+<td>Memory load and&#x2F;or store instructions retired that hit in a remote cache.</td>
+</tr>
+<tr>
+<td>INST.LDST.DSRC.REMOTE.HITM.RET</td>
+<td>Memory load and&#x2F;or store instructions retired that hit a modified line in a remote cache.</td>
+</tr>
+<tr>
+<td>INST.LDST.ASRC.L1.RET</td>
+<td>Memory load and&#x2F;or store instructions retired that hit in the L1 TLB.</td>
+</tr>
+<tr>
+<td>INST.LDST.ASRC.L1.MISS.RET</td>
+<td>Memory load and&#x2F;or store instructions retired that missed in the L1 TLB.</td>
+</tr>
+<tr>
+<td>INST.LDST.ASRC.L1.MERGE.RET</td>
+<td>Memory load and&#x2F;or store instructions retired that merged into an outstanding L1 TLB miss request.</td>
+</tr>
+<tr>
+<td>INST.LDST.ASRC.LL.RET</td>
+<td>Memory load and&#x2F;or store instructions retired that hit in the last level TLB.</td>
+</tr>
+<tr>
+<td>INST.LDST.ASRC.LL.MISS.RET</td>
+<td>Memory load and&#x2F;or store instructions retired that missed in the last level TLB.</td>
+</tr>
+<tr>
+<td>INST.LDST.ASRC.LL.MERGE.RET</td>
+<td>Memory load and&#x2F;or store instructions retired that merged into an outstanding last level TLB miss request.</td>
+</tr>
+<tr>
+<td>INST.MO.RET</td>
+<td>Memory ordering instructions retired.</td>
+</tr>
+<tr>
+<td>INST.INT.RET</td>
+<td>Integer computational instructions retired.</td>
+</tr>
+<tr>
+<td>INST.FP.RET</td>
+<td>Floating point instructions retired.</td>
+</tr>
+<tr>
+<td>INST.RVV.RET</td>
+<td>Vector instructions retired.</td>
+</tr>
+<tr>
+<td>INST.RVV.LOAD.RET</td>
+<td>Vector load instructions retired.</td>
+</tr>
+<tr>
+<td>INST.RVV.LOAD.UNIT.RET</td>
+<td>Vector unit-stride load instructions retired.</td>
+</tr>
+<tr>
+<td>INST.RVV.LOAD.IDXU.RET</td>
+<td>Vector indexed-unordered load instructions retired.</td>
+</tr>
+<tr>
+<td>INST.RVV.LOAD.STRD.RET</td>
+<td>Vector strided load instructions retired.</td>
+</tr>
+<tr>
+<td>INST.RVV.LOAD.IDXO.RET</td>
+<td>Vector indexed-ordered load instructions retired.</td>
+</tr>
+<tr>
+<td>INST.RVV.STORE.RET</td>
+<td>Vector store instructions retired.</td>
+</tr>
+<tr>
+<td>INST.RVV.STORE.UNIT.RET</td>
+<td>Vector unit-stride store instructions retired.</td>
+</tr>
+<tr>
+<td>INST.RVV.STORE.IDXU.RET</td>
+<td>Vector indexed-unordered store instructions retired.</td>
+</tr>
+<tr>
+<td>INST.RVV.STORE.STRD.RET</td>
+<td>Vector strided store instructions retired.</td>
+</tr>
+<tr>
+<td>INST.RVV.STORE.IDXO.RET</td>
+<td>Vector indexed-ordered store instructions retired.</td>
+</tr>
+<tr>
+<td>INST.RVV.LDST.RET</td>
+<td>Vector unit-stride load and store instructions retired.</td>
+</tr>
+<tr>
+<td>INST.RVV.LDST.UNIT.RET</td>
+<td>Vector unit-stride load and store instructions retired.</td>
+</tr>
+<tr>
+<td>INST.RVV.LDST.IDXU.RET</td>
+<td>Vector indexed-unordered load and store instructions retired.</td>
+</tr>
+<tr>
+<td>INST.RVV.LDST.STRD.RET</td>
+<td>Vector strided load and store instructions retired.</td>
+</tr>
+<tr>
+<td>INST.RVV.LDST.IDXO.RET</td>
+<td>Vector indexed-ordered load and store instructions retired.</td>
+</tr>
+<tr>
+<td>INST.RVV.ARITH.RET</td>
+<td>Vector arithmetic instructions retired.</td>
+</tr>
+<tr>
+<td>INST.RVV.ARITH.INT.RET</td>
+<td>Vector arithmetic vector-integer instructions retired.</td>
+</tr>
+<tr>
+<td>INST.RVV.ARITH.FP.RET</td>
+<td>Vector arithmetic vector-FP instructions retired.</td>
+</tr>
+<tr>
+<td>INST.RVV.CFG.RET</td>
+<td>Vector configuration (VSET{I}VL{I}) instructions retired.</td>
+</tr>
+<tr>
+<td>INST.RVC.RET</td>
+<td>Compressed instructions retired.</td>
+</tr>
+</tbody></table>
+<h2 id="LOAD-STORE-LDST-Events"><a href="#LOAD-STORE-LDST-Events" class="headerlink" title="LOAD&#x2F;STORE&#x2F;LDST Events"></a>LOAD&#x2F;STORE&#x2F;LDST Events</h2><hr>
+<p>该组包含由指令执行的显式加载和存储操作的事件。它不计算预取访问或隐式访问，例如页表查找。</p>
+<p>该组中的每个事件都有推测性（.SPEC）和非推测性（.RET）版本.</p>
+<p>注意,<strong>这些事件会计算每个内存访问</strong>。<strong>INST.{LOAD,STORE,LDST}事件只计数指令</strong>，而有些指令可能会执行多次访问。</p>
+<table>
+<thead>
+<tr>
+<th>LOAD, STORE, and LDST Events</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>LOAD.RET</td>
+<td>Memory load operations retired.</td>
+</tr>
+<tr>
+<td>LOAD.UC.RET</td>
+<td>Memory load operations retired that accessed uncacheable memory.</td>
+</tr>
+<tr>
+<td>LOAD.DSRC.L1D.RET</td>
+<td>Memory load operations retired that hit in the L1D cache.</td>
+</tr>
+<tr>
+<td>LOAD.DSRC.L1D.MISS.RET</td>
+<td>Memory load operations retired that missed in the L1D cache.</td>
+</tr>
+<tr>
+<td>LOAD.DSRC.L1D.MERGE.RET</td>
+<td>Memory load operations retired that merged into an outstanding L1D cache miss request.</td>
+</tr>
+<tr>
+<td>LOAD.DSRC.LL.RET</td>
+<td>Memory load operations retired that hit in the last level cache.</td>
+</tr>
+<tr>
+<td>LOAD.DSRC.LL.MISS.RET</td>
+<td>Memory load operations retired that missed in the last level cache.</td>
+</tr>
+<tr>
+<td>LOAD.DSRC.LL.MERGE.RET</td>
+<td>Memory load operations retired that merged into an outstanding last level cache miss request.</td>
+</tr>
+<tr>
+<td>LOAD.DSRC.STLF.RET</td>
+<td>Memory load operations retired that had data forwarded from an older store.</td>
+</tr>
+<tr>
+<td>LOAD.DSRC.LOCAL.MEM.RET</td>
+<td>Memory load operations retired that hit in local memory.</td>
+</tr>
+<tr>
+<td>LOAD.DSRC.REMOTE.MEM.RET</td>
+<td>Memory load operations retired that hit in remote memory.</td>
+</tr>
+<tr>
+<td>LOAD.DSRC.REMOTE.CACHE.RET</td>
+<td>Memory load operations retired that hit in a remote cache.</td>
+</tr>
+<tr>
+<td>LOAD.DSRC.REMOTE.HITM.RET</td>
+<td>Memory load operations retired that hit a modified line in a remote cache.</td>
+</tr>
+<tr>
+<td>LOAD.ASRC.L1.RET</td>
+<td>Memory load operations retired that hit in the L1 TLB.</td>
+</tr>
+<tr>
+<td>LOAD.ASRC.L1.MISS.RET</td>
+<td>Memory load operations retired that missed in the L1 TLB.</td>
+</tr>
+<tr>
+<td>LOAD.ASRC.L1.MERGE.RET</td>
+<td>Memory load operations retired that merged into an outstanding L1 TLB miss request.</td>
+</tr>
+<tr>
+<td>LOAD.ASRC.LL.RET</td>
+<td>Memory load operations retired that hit in the last level TLB.</td>
+</tr>
+<tr>
+<td>LOAD.ASRC.LL.MISS.RET</td>
+<td>Memory load operations retired that missed in the last level TLB.</td>
+</tr>
+<tr>
+<td>LOAD.ASRC.LL.MERGE.RET</td>
+<td>Memory load operations retired that merged into an outstanding last level TLB miss request.</td>
+</tr>
+<tr>
+<td>STORE.RET</td>
+<td>Memory store operations retired.</td>
+</tr>
+<tr>
+<td>STORE.UC.RET</td>
+<td>Memory store operations retired that accessed uncacheable memory.</td>
+</tr>
+<tr>
+<td>STORE.DSRC.L1D.RET</td>
+<td>Cacheable memory store operations retired whose read for ownership hit in the L1D cache.</td>
+</tr>
+<tr>
+<td>STORE.DSRC.L1D.MISS.RET</td>
+<td>Cacheable memory store operations retired whose read for ownership missed in the L1D cache.</td>
+</tr>
+<tr>
+<td>STORE.DSRC.L1D.MERGE.RET</td>
+<td>Cacheable memory store operations retired whose read for ownership merged into an outstanding L1D cache miss request.</td>
+</tr>
+<tr>
+<td>STORE.DSRC.LL.RET</td>
+<td>Cacheable memory store operations retired whose read for ownership hit in the last level cache.</td>
+</tr>
+<tr>
+<td>STORE.DSRC.LL.MISS.RET</td>
+<td>Cacheable memory store operations retired whose read for ownership missed in the last level cache.</td>
+</tr>
+<tr>
+<td>STORE.DSRC.LL.MERGE.RET</td>
+<td>Cacheable memory store operations retired whose read for ownership merged into an outstanding last level cache miss request.</td>
+</tr>
+<tr>
+<td>STORE.DSRC.LOCAL.MEM.RET</td>
+<td>Cacheable memory store operations retired whose read for ownership hit in local memory.</td>
+</tr>
+<tr>
+<td>STORE.DSRC.REMOTE.MEM.RET</td>
+<td>Cacheable memory store operations retired whose read for ownership hit in remote memory.</td>
+</tr>
+<tr>
+<td>STORE.DSRC.REMOTE.CACHE.RET</td>
+<td>Cacheable memory store operations retired whose read for ownership hit in a remote cache.</td>
+</tr>
+<tr>
+<td>STORE.DSRC.REMOTE.HITM.RET</td>
+<td>Cacheable memory store operations retired whose read for ownership hit a modified line in a remote cache.</td>
+</tr>
+<tr>
+<td>STORE.ASRC.L1.RET</td>
+<td>Memory store operations retired that hit in the L1 TLB.</td>
+</tr>
+<tr>
+<td>STORE.ASRC.L1.MISS.RET</td>
+<td>Memory store operations retired that missed in the L1 TLB.</td>
+</tr>
+<tr>
+<td>STORE.ASRC.L1.MERGE.RET</td>
+<td>Memory store operations retired that merged into an outstanding L1 TLB miss request.</td>
+</tr>
+<tr>
+<td>STORE.ASRC.LL.RET</td>
+<td>Memory store operations retired that hit in the last level TLB.</td>
+</tr>
+<tr>
+<td>STORE.ASRC.LL.MISS.RET</td>
+<td>Memory store operations retired that missed in the last level TLB.</td>
+</tr>
+<tr>
+<td>STORE.ASRC.LL.MERGE.RET</td>
+<td>Memory store operations retired that merged into an outstanding last level TLB miss request.</td>
+</tr>
+<tr>
+<td>LDST.RET</td>
+<td>Memory load and&#x2F;or store operations retired.</td>
+</tr>
+<tr>
+<td>LDST.UC.RET</td>
+<td>Memory load and&#x2F;or store operations retired that accessed uncacheable memory.</td>
+</tr>
+<tr>
+<td>LDST.DSRC.L1D.RET</td>
+<td>Memory load and&#x2F;or store operations retired that hit in the L1D cache.</td>
+</tr>
+<tr>
+<td>LDST.DSRC.L1D.MISS.RET</td>
+<td>Memory load and&#x2F;or store operations retired that missed in the L1D cache.</td>
+</tr>
+<tr>
+<td>LDST.DSRC.L1D.MERGE.RET</td>
+<td>Memory load and&#x2F;or store operations retired that merged into an outstanding L1D cache miss request.</td>
+</tr>
+<tr>
+<td>LDST.DSRC.LL.RET</td>
+<td>Memory load and&#x2F;or store operations retired that hit in the last level cache.</td>
+</tr>
+<tr>
+<td>LDST.DSRC.LL.MISS.RET</td>
+<td>Memory load and&#x2F;or store operations retired that missed in the last level cache.</td>
+</tr>
+<tr>
+<td>LDST.DSRC.LL.MERGE.RET</td>
+<td>Memory load and&#x2F;or store operations retired that merged into an outstanding last level cache miss request.</td>
+</tr>
+<tr>
+<td>LDST.DSRC.STLF.RET</td>
+<td>Memory load and&#x2F;or store operations retired that had data forwarded from an older store.</td>
+</tr>
+<tr>
+<td>LDST.DSRC.LOCAL.MEM.RET</td>
+<td>Memory load and&#x2F;or store operations retired that hit in local memory.</td>
+</tr>
+<tr>
+<td>LDST.DSRC.REMOTE.MEM.RET</td>
+<td>Memory load and&#x2F;or store operations retired that hit in remote memory.</td>
+</tr>
+<tr>
+<td>LDST.DSRC.REMOTE.CACHE.RET</td>
+<td>Memory load and&#x2F;or store operations retired that hit in a remote cache.</td>
+</tr>
+<tr>
+<td>LDST.DSRC.REMOTE.HITM.RET</td>
+<td>Memory load and&#x2F;or store operations retired that hit a modified line in a remote cache.</td>
+</tr>
+<tr>
+<td>LDST.ASRC.L1.RET</td>
+<td>Memory load and&#x2F;or store operations retired that hit in the L1 TLB.</td>
+</tr>
+<tr>
+<td>LDST.ASRC.L1.MISS.RET</td>
+<td>Memory load and&#x2F;or store operations retired that missed in the L1 TLB.</td>
+</tr>
+<tr>
+<td>LDST.ASRC.L1.MERGE.RET</td>
+<td>Memory load and&#x2F;or store operations retired that merged into an outstanding L1 TLB miss request.</td>
+</tr>
+<tr>
+<td>LDST.ASRC.LL.RET</td>
+<td>Memory load and&#x2F;or store operations retired that hit in the last level TLB.</td>
+</tr>
+<tr>
+<td>LDST.ASRC.LL.MISS.RET</td>
+<td>Memory load and&#x2F;or store operations retired that missed in the last level TLB.</td>
+</tr>
+<tr>
+<td>LDST.ASRC.LL.MERGE.RET</td>
+<td>Memory load and&#x2F;or store operations retired that merged into an outstanding last level TLB miss request.</td>
+</tr>
+</tbody></table>
+<h2 id="Cache-Events"><a href="#Cache-Events" class="headerlink" title="Cache Events"></a>Cache Events</h2><hr>
+<p>这个组包含指令、数据和统一缓存的事件。组中的事件从缓存的角度计数访问；如果一条指令执行两次缓存访问，它们将被分别计数。此外，组中的所有事件都会计数推测性访问。</p>
+<p>CACHE 事件层次结构的顶层标识与事件关联的缓存。标准缓存命名方案如下详细说明。</p>
+<ul>
+<li>第一个字符是 L，表示层次。</li>
+<li>第二个字符表示缓存级别。最近的缓存是级别 1，其次是级别 2，依此类推。级别 L 表示最后一级缓存。</li>
+<li>可选的第三个字符表示缓存是仅由指令获取（I）还是仅由数据访问（D）访问。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>CACHE 事件缓存示例</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>L1D</td>
+<td>Level 1 data cache</td>
+</tr>
+<tr>
+<td>L1I</td>
+<td>Level 1 instruction cache</td>
+</tr>
+<tr>
+<td>L2</td>
+<td>Level 2 cache</td>
+</tr>
+<tr>
+<td>L3</td>
+<td>Level 3 cache</td>
+</tr>
+<tr>
+<td>LL</td>
+<td>Last level cache</td>
+</tr>
+</tbody></table>
+<p>最后一级缓存的事件可能会被别名化为上述某一级缓存的事件。如 LL别名化为L3.</p>
+<p>这些缓存事件是针对每个硬件线程的。对于可能由多个硬件线程共享的缓存，缓存事件仅在与本地硬件线程直接相关的发生时递增。</p>
+<table>
+<thead>
+<tr>
+<th>CACHE 事件访问或操作类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>RD</td>
+<td>Data reads that lookup the cache. This includes explicit reads (e.g., the LW instruction) and implicit reads (e.g., page table walks).</td>
+</tr>
+<tr>
+<td>RD.DATA</td>
+<td>The subset of reads that are <strong>data load</strong> operations.</td>
+</tr>
+<tr>
+<td>RD.CODE</td>
+<td>The subset of reads that are <strong>code fetch</strong> reads.</td>
+</tr>
+<tr>
+<td>WR</td>
+<td>Data writes to the cache. This includes explicit writes (e.g., the SW instruction) and implicit writes (e.g., page accessed&#x2F;dirty attribute updates).</td>
+</tr>
+<tr>
+<td>RW</td>
+<td>Data reads and writes, the union of the RD and WR types above.</td>
+</tr>
+<tr>
+<td>PREF</td>
+<td>Prefetch requests that lookup the cache.</td>
+</tr>
+<tr>
+<td>FILL</td>
+<td>Cache misses or prefetches that result in a line in the cache being filled with data from memory or a higher-level cache$^\color{teal}{[1]}$.</td>
+</tr>
+<tr>
+<td>WB</td>
+<td>Modified lines written out from the cache to memory or to a higher-level cache.</td>
+</tr>
+<tr>
+<td>SNOOP$^\color{teal}{[2]}$</td>
+<td>Cache coherency snoops that lookup the cache.</td>
+</tr>
+<tr>
+<td>OPREF$^\color{teal}{[3]}$</td>
+<td><strong>O</strong>utbound <strong>pref</strong>etches, for the purpose of pulling lines into the associated cache.</td>
+</tr>
+</tbody></table>
+<p>[1] higher-level cache 表示更靠近内存的缓存。<br>[2] SNOOP 是一种缓存一致性协议，通过探测（snoop）操作维护缓存一致性。<br>[3] OPREF 出站预取，一种缓存操作，用于将数据从更高层次的缓存或主内存拉入当前缓存，以提高数据访问效率。这种操作通常由缓存控制器发起，目的是减少未来的缓存未命中（miss）和访问延迟。这个操作通常在后台进行，<strong>不需要处理器的直接干预</strong>。PREF是对指定缓存的预取，OPREF是从指定缓存发起的预取。</p>
+<p>对于可能由多个 hart 共享的缓存，查找事件（RD*、WR、RW、PREF、SNOOP）应仅对本地 hart 的请求进行计数。FILL 和 WB 事件应仅对本地 hart 请求导致的填充和写回进行计数。<strong>OPREF 事件不应计数</strong>。</p>
+<p>在 CACHE 事件层次结构中，某些事件包括额外的级别。对于缓存查找访问类型（RD*、WR 或 RW），第三级按查找结果计数。</p>
+<table>
+<thead>
+<tr>
+<th>CACHE 事件查找结果</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ACCESS</td>
+<td>Cache lookups</td>
+</tr>
+<tr>
+<td>HIT</td>
+<td>Cache hits</td>
+</tr>
+<tr>
+<td>MISS</td>
+<td>Cache misses</td>
+</tr>
+<tr>
+<td>MERGE</td>
+<td>Lookups that merged with an outstanding miss</td>
+</tr>
+</tbody></table>
+<p>对于 RD.DATA 和 RD.CODE 类型，还存在一个 MISS.CYCLES 事件，在从 cache 加载（load）或取指 (fetch) 未命中时，该事件会以 Zicntr cycle 计数器的速率计数核心周期，从发现缓存未命中开始，到完成数据&#x2F;指令加载并恢复执行所经历的时钟周期，反映了缓存未命中对处理器执行效率的负面影响。</p>
+<p>SNOOP 类型的事件具有两级额外的层次结构。</p>
+<table>
+<thead>
+<tr>
+<th>CACHE Event Snoop Types</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>LOCAL</td>
+<td>Snoops from accesses local to the hart</td>
+</tr>
+<tr>
+<td>REMOTE</td>
+<td>Snoops from remote harts</td>
+</tr>
+</tbody></table>
+<p>如果事件名称中既不包含 LOCAL 也不包含 REMOTE 修饰符，则所有 snoop 都会被计数。</p>
+<table>
+<thead>
+<tr>
+<th>CACHE 事件 snoop 结果</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ACCESS</td>
+<td>Snoop lookups</td>
+</tr>
+<tr>
+<td>HIT</td>
+<td>Snoops that hit unmodified data</td>
+</tr>
+<tr>
+<td>HITM</td>
+<td>Snoops that hit modified data</td>
+</tr>
+<tr>
+<td>MISS</td>
+<td>Snoops that miss</td>
+</tr>
+</tbody></table>
+<h3 id="Cache-事件总表"><a href="#Cache-事件总表" class="headerlink" title="Cache 事件总表"></a>Cache 事件总表</h3><hr>
+<table>
+<thead>
+<tr>
+<th>CACHE Events</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CACHE.L1D.RD.ACCESS</td>
+<td>Read accesses to the L1D cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.RD.MISS</td>
+<td>Read accesses that miss the L1D cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.RD.HIT</td>
+<td>Read accesses that hit the L1D cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.RD.MERGE</td>
+<td>Read accesses that merge into an outstanding L1D cache miss request.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.RD.DATA.ACCESS</td>
+<td>Demand data read accesses to the L1D cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.RD.DATA.MISS</td>
+<td>Demand data read accesses that miss the L1D cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.RD.DATA.HIT</td>
+<td>Demand data read accesses that hit the L1D cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.RD.DATA.MERGE</td>
+<td>Demand data read accesses that merge into an outstanding L1D cache miss request.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.RD.DATA.MISS.CYCLES</td>
+<td>Cycles while at least one L1D read miss is outstanding.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.WR.ACCESS</td>
+<td>Write accesses to the L1D cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.WR.MISS</td>
+<td>Write accesses that miss the L1D cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.WR.HIT</td>
+<td>Write accesses that hit the L1D cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.WR.MERGE</td>
+<td>Write accesses that write-combine into an outstanding L1D cache write.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.ACCESS</td>
+<td>Any accesses to the L1D cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.MISS</td>
+<td>Any accesses that miss the L1D cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.HIT</td>
+<td>Any accesses that hit the L1D cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.MERGE</td>
+<td>Any accesses that merge into an outstanding L1D cache miss request.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.OPREF</td>
+<td>Prefetch issued by the L1D prefetcher.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.SNOOP.LOCAL.ACCESS</td>
+<td>Local snoops to the L1D cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.SNOOP.LOCAL.MISS</td>
+<td>Local snoops that miss the L1D cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.SNOOP.LOCAL.HIT</td>
+<td>Local snoops that hit the L1D cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.SNOOP.LOCAL.HITM</td>
+<td>Local snoops that hit a modified line in the L1D cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.SNOOP.REMOTE.ACCESS</td>
+<td>Remote snoops to the L1D cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.SNOOP.REMOTE.MISS</td>
+<td>Remote snoops that miss the L1D cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.SNOOP.REMOTE.HIT</td>
+<td>Remote snoops that hit the L1D cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.SNOOP.REMOTE.HITM</td>
+<td>Remote snoops that hit a modified line in the L1D cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.SNOOP.ACCESS</td>
+<td>Snoops to the L1D cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.SNOOP.MISS</td>
+<td>Snoops that miss the L1D cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.SNOOP.HIT</td>
+<td>Snoops that hit the L1D cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.SNOOP.HITM</td>
+<td>Snoops that hit a modified line in the L1D cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.REFILL</td>
+<td>Cacheline refills to the L1D cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1D.WB</td>
+<td>Cacheline writebacks from the L1D cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1I.RD.ACCESS</td>
+<td>Read accesses to the L1I cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1I.RD.MISS</td>
+<td>Read accesses that miss the L1I cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1I.RD.HIT</td>
+<td>Read accesses that hit the L1I cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1I.RD.MERGE</td>
+<td>Read accesses that merge into an outstanding L1I cache miss request.</td>
+</tr>
+<tr>
+<td>CACHE.L1I.RD.CODE.ACCESS</td>
+<td>Code fetches to the L1I cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1I.RD.CODE.MISS</td>
+<td>Code fetches that miss the L1I cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1I.RD.CODE.HIT</td>
+<td>Code fetches that hit the L1I cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1I.RD.CODE.MERGE</td>
+<td>Code fetches that merge into an outstanding L1I cache miss request.</td>
+</tr>
+<tr>
+<td>CACHE.L1I.RD.CODE.MISS.CYCLES</td>
+<td>Cycles while at least one L1I read miss is outstanding.</td>
+</tr>
+<tr>
+<td>CACHE.L1I.SNOOP.LOCAL.ACCESS</td>
+<td>Local snoops to the L1I cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1I.SNOOP.LOCAL.MISS</td>
+<td>Local snoops that miss the L1I cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1I.SNOOP.LOCAL.HIT</td>
+<td>Local snoops that hit the L1I cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1I.SNOOP.REMOTE.ACCESS</td>
+<td>Remote snoops to the L1I cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1I.SNOOP.REMOTE.MISS</td>
+<td>Remote snoops that miss the L1I cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1I.SNOOP.REMOTE.HIT</td>
+<td>Remote snoops that hit the L1I cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1I.SNOOP.ACCESS</td>
+<td>Snoops to the L1I cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1I.SNOOP.MISS</td>
+<td>Snoops that miss the L1I cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1I.SNOOP.HIT</td>
+<td>Snoops that hit the L1I cache.</td>
+</tr>
+<tr>
+<td>CACHE.L1I.REFILL</td>
+<td>Cacheline refills to the L1I cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.RD.ACCESS</td>
+<td>Read accesses to the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.RD.MISS</td>
+<td>Read accesses that miss the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.RD.HIT</td>
+<td>Read accesses that hit the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.RD.MERGE</td>
+<td>Read accesses that merge into an outstanding L2 cache miss request.</td>
+</tr>
+<tr>
+<td>CACHE.L2.RD.DATA.ACCESS</td>
+<td>Demand data read accesses to the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.RD.DATA.MISS</td>
+<td>Demand data read accesses that miss the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.RD.DATA.HIT</td>
+<td>Demand data read accesses that hit the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.RD.DATA.MERGE</td>
+<td>Demand data read accesses that merge into an outstanding L2 cache miss request.</td>
+</tr>
+<tr>
+<td>CACHE.L2.RD.DATA.MISS.CYCLES</td>
+<td>Cycles while at least one L2 read miss is outstanding.</td>
+</tr>
+<tr>
+<td>CACHE.L2.WR.ACCESS</td>
+<td>Write accesses to the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.WR.MISS</td>
+<td>Write accesses that miss the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.WR.HIT</td>
+<td>Write accesses that hit the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.WR.MERGE</td>
+<td>Write accesses that write-combine into an outstanding L2 cache write.</td>
+</tr>
+<tr>
+<td>CACHE.L2.RD.PREF.ACCESS</td>
+<td>Prefetches to the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.RD.PREF.MISS</td>
+<td>Prefetches that miss the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.RD.PREF.HIT</td>
+<td>Prefetches that hit the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.RD.PREF.MERGE</td>
+<td>Prefetches that merge into an outstanding L2 cache miss request.</td>
+</tr>
+<tr>
+<td>CACHE.L2.RD.CODE.ACCESS</td>
+<td>Code fetches to the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.RD.CODE.MISS</td>
+<td>Code fetches that miss the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.RD.CODE.HIT</td>
+<td>Code fetches that hit the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.RD.CODE.MERGE</td>
+<td>Code fetches that merge into an outstanding L2 cache miss request.</td>
+</tr>
+<tr>
+<td>CACHE.L2.ACCESS</td>
+<td>Any accesses to the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.MISS</td>
+<td>Any accesses that miss the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.HIT</td>
+<td>Any accesses that hit the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.MERGE</td>
+<td>Any accesses that merge into an outstanding L2 cache miss request.</td>
+</tr>
+<tr>
+<td>CACHE.L2.OPREF</td>
+<td>Prefetch issued by the L2 prefetcher.</td>
+</tr>
+<tr>
+<td>CACHE.L2.SNOOP.LOCAL.ACCESS</td>
+<td>Local snoops to the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.SNOOP.LOCAL.MISS</td>
+<td>Local snoops that miss the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.SNOOP.LOCAL.HIT</td>
+<td>Local snoops that hit the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.SNOOP.LOCAL.HITM</td>
+<td>Local snoops that hit a modified line in the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.SNOOP.REMOTE.ACCESS</td>
+<td>Remote snoops to the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.SNOOP.REMOTE.MISS</td>
+<td>Remote snoops that miss the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.SNOOP.REMOTE.HIT</td>
+<td>Remote snoops that hit the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.SNOOP.REMOTE.HITM</td>
+<td>Remote snoops that hit a modified line in the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.SNOOP.ACCESS</td>
+<td>Snoops to the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.SNOOP.MISS</td>
+<td>Snoops that miss the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.SNOOP.HIT</td>
+<td>Snoops that hit the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.SNOOP.HITM</td>
+<td>Snoops that hit a modified line in the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.REFILL</td>
+<td>Cacheline refills to the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L2.WB</td>
+<td>Cacheline writebacks from the L2 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.RD.ACCESS</td>
+<td>Read accesses to the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.RD.MISS</td>
+<td>Read accesses that miss the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.RD.HIT</td>
+<td>Read accesses that hit the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.RD.MERGE</td>
+<td>Read accesses that merge into an outstanding L3 cache miss request.</td>
+</tr>
+<tr>
+<td>CACHE.L3.RD.DATA.ACCESS</td>
+<td>Demand data read accesses to the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.RD.DATA.MISS</td>
+<td>Demand data read accesses that miss the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.RD.DATA.HIT</td>
+<td>Demand data read accesses that hit the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.RD.DATA.MERGE</td>
+<td>Demand data read accesses that merge into an outstanding L3 cache miss request.</td>
+</tr>
+<tr>
+<td>CACHE.L3.RD.DATA.MISS.CYCLES</td>
+<td>Cycles while at least one L3 read miss is outstanding.</td>
+</tr>
+<tr>
+<td>CACHE.L3.WR.ACCESS</td>
+<td>Write accesses to the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.WR.MISS</td>
+<td>Write accesses that miss the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.WR.HIT</td>
+<td>Write accesses that hit the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.WR.MERGE</td>
+<td>Write accesses that write-combine into an outstanding L3 cache write.</td>
+</tr>
+<tr>
+<td>CACHE.L3.RD.PREF.ACCESS</td>
+<td>Prefetches to the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.RD.PREF.MISS</td>
+<td>Prefetches that miss the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.RD.PREF.HIT</td>
+<td>Prefetches that hit the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.RD.PREF.MERGE</td>
+<td>Prefetches that merge into an outstanding L3 cache miss request.</td>
+</tr>
+<tr>
+<td>CACHE.L3.RD.CODE.ACCESS</td>
+<td>Code fetches to the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.RD.CODE.MISS</td>
+<td>Code fetches that miss the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.RD.CODE.HIT</td>
+<td>Code fetches that hit the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.RD.CODE.MERGE</td>
+<td>Code fetches that merge into an outstanding L3 cache miss request.</td>
+</tr>
+<tr>
+<td>CACHE.L3.ACCESS</td>
+<td>Any accesses to the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.MISS</td>
+<td>Any accesses that miss the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.HIT</td>
+<td>Any accesses that hit the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.MERGE</td>
+<td>Any accesses that merge into an outstanding L3 cache miss request.</td>
+</tr>
+<tr>
+<td>CACHE.L3.OPREF</td>
+<td>Prefetch issued by the L3 prefetcher.</td>
+</tr>
+<tr>
+<td>CACHE.L3.SNOOP.LOCAL.ACCESS</td>
+<td>Local snoops to the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.SNOOP.LOCAL.MISS</td>
+<td>Local snoops that miss the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.SNOOP.LOCAL.HIT</td>
+<td>Local snoops that hit the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.SNOOP.LOCAL.HITM</td>
+<td>Local snoops that hit a modified line in the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.SNOOP.REMOTE.ACCESS</td>
+<td>Remote snoops to the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.SNOOP.REMOTE.MISS</td>
+<td>Remote snoops that miss the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.SNOOP.REMOTE.HIT</td>
+<td>Remote snoops that hit the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.SNOOP.REMOTE.HITM</td>
+<td>Remote snoops that hit a modified line in the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.SNOOP.ACCESS</td>
+<td>Snoops to the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.SNOOP.MISS</td>
+<td>Snoops that miss the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.SNOOP.HIT</td>
+<td>Snoops that hit the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.SNOOP.HITM</td>
+<td>Snoops that hit a modified line in the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.REFILL</td>
+<td>Cacheline refills to the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.L3.WB</td>
+<td>Cacheline writebacks from the L3 cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.RD.ACCESS</td>
+<td>Read accesses to the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.RD.MISS</td>
+<td>Read accesses that miss the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.RD.HIT</td>
+<td>Read accesses that hit the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.RD.MERGE</td>
+<td>Read accesses that merge into an outstanding last level cache miss request.</td>
+</tr>
+<tr>
+<td>CACHE.LL.RD.DATA.ACCESS</td>
+<td>Demand data read accesses to the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.RD.DATA.MISS</td>
+<td>Demand data read accesses that miss the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.RD.DATA.HIT</td>
+<td>Demand data read accesses that hit the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.RD.DATA.MERGE</td>
+<td>Demand data read accesses that merge into an outstanding last level cache miss request.</td>
+</tr>
+<tr>
+<td>CACHE.LL.RD.DATA.MISS.CYCLES</td>
+<td>Cycles while at least one last level cache read miss is outstanding.</td>
+</tr>
+<tr>
+<td>CACHE.LL.WR.ACCESS</td>
+<td>Write accesses to the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.WR.MISS</td>
+<td>Write accesses that miss the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.WR.HIT</td>
+<td>Write accesses that hit the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.WR.MERGE</td>
+<td>Write accesses that write-combine into an outstanding last level cache write.</td>
+</tr>
+<tr>
+<td>CACHE.LL.RD.PREF.ACCESS</td>
+<td>Prefetches to the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.RD.PREF.MISS</td>
+<td>Prefetches that miss the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.RD.PREF.HIT</td>
+<td>Prefetches that hit the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.RD.PREF.MERGE</td>
+<td>Prefetches that merge into an outstanding last level cache miss request.</td>
+</tr>
+<tr>
+<td>CACHE.LL.RD.CODE.ACCESS</td>
+<td>Code fetches to the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.RD.CODE.MISS</td>
+<td>Code fetches that miss the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.RD.CODE.HIT</td>
+<td>Code fetches that hit the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.RD.CODE.MERGE</td>
+<td>Code fetches that merge into an outstanding last level cache miss request.</td>
+</tr>
+<tr>
+<td>CACHE.LL.ACCESS</td>
+<td>Any accesses to the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.MISS</td>
+<td>Any accesses that miss the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.HIT</td>
+<td>Any accesses that hit the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.MERGE</td>
+<td>Any accesses that merge into an outstanding last level cache miss request.</td>
+</tr>
+<tr>
+<td>CACHE.LL.OPREF</td>
+<td>Prefetch issued by the last level cache prefetcher.</td>
+</tr>
+<tr>
+<td>CACHE.LL.SNOOP.LOCAL.ACCESS</td>
+<td>Local snoops to the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.SNOOP.LOCAL.MISS</td>
+<td>Local snoops that miss the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.SNOOP.LOCAL.HIT</td>
+<td>Local snoops that hit the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.SNOOP.LOCAL.HITM</td>
+<td>Local snoops that hit a modified line in the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.SNOOP.REMOTE.ACCESS</td>
+<td>Remote snoops to the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.SNOOP.REMOTE.MISS</td>
+<td>Remote snoops that miss the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.SNOOP.REMOTE.HIT</td>
+<td>Remote snoops that hit the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.SNOOP.REMOTE.HITM</td>
+<td>Remote snoops that hit a modified line in the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.SNOOP.ACCESS</td>
+<td>Snoops to the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.SNOOP.MISS</td>
+<td>Snoops that miss the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.SNOOP.HIT</td>
+<td>Snoops that hit the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.SNOOP.HITM</td>
+<td>Snoops that hit a modified line in the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.REFILL</td>
+<td>Cacheline refills to the last level cache.</td>
+</tr>
+<tr>
+<td>CACHE.LL.WB</td>
+<td>Cacheline writebacks from the last level cache.</td>
+</tr>
+</tbody></table>
+<h2 id="TLB-Events"><a href="#TLB-Events" class="headerlink" title="TLB Events"></a>TLB Events</h2><hr>
+<p>该组包含翻译查找缓冲区（TLB）的事件。此组中的事件从 TLB 的角度计算访问次数；如果一条指令执行了两次地址转换，它们将被分别计数。此外，此组中的所有事件都将计算推测性访问。</p>
+<table>
+<thead>
+<tr>
+<th>TLB 事件缓存示例</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>L1D</td>
+<td>Level 1 data TLB (DTLB)</td>
+</tr>
+<tr>
+<td>L1I</td>
+<td>Level 1 instruction TLB (ITLB)</td>
+</tr>
+<tr>
+<td>LL</td>
+<td>Level 2 shared TLB (STLB)</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>TLB Event Access or Operation Type</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ACCESS</td>
+<td>TLB lookups</td>
+</tr>
+<tr>
+<td>HIT</td>
+<td>TLB hits</td>
+</tr>
+<tr>
+<td>MISS</td>
+<td>TLB misses</td>
+</tr>
+<tr>
+<td>MERGE</td>
+<td>Lookups that merged with an outstanding miss</td>
+</tr>
+</tbody></table>
+<p>对于 LDST 和 CODE 类型，还存在一个 MISS.CYCLES 事件，从处理器发现未命中开始，到数据&#x2F;指令加载到缓存并恢复执行截止，记录 cycles 数。</p>
+<table>
+<thead>
+<tr>
+<th>TLB Events</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TLB.L1D.LOAD.ACCESS</td>
+<td>Load address translation requests to the L1 TLB.</td>
+</tr>
+<tr>
+<td>TLB.L1D.LOAD.MISS</td>
+<td>Load address translation requests that miss the L1 TLB.</td>
+</tr>
+<tr>
+<td>TLB.L1D.LOAD.HIT</td>
+<td>Load address translation requests that hit the L1 TLB.</td>
+</tr>
+<tr>
+<td>TLB.L1D.LOAD.MERGE</td>
+<td>Load address translation requests that merge into an outstanding L1 TLB miss.</td>
+</tr>
+<tr>
+<td>TLB.L1D.STORE.ACCESS</td>
+<td>Store address translation requests to the L1 TLB.</td>
+</tr>
+<tr>
+<td>TLB.L1D.STORE.MISS</td>
+<td>Store address translation requests that miss the L1 TLB.</td>
+</tr>
+<tr>
+<td>TLB.L1D.STORE.HIT</td>
+<td>Store address translation requests that hit the L1 TLB.</td>
+</tr>
+<tr>
+<td>TLB.L1D.STORE.MERGE</td>
+<td>Store address translation requests that merge into an outstanding L1 TLB miss.</td>
+</tr>
+<tr>
+<td>TLB.L1D.LDST.ACCESS</td>
+<td>Load or store address translation requests to the L1 TLB.</td>
+</tr>
+<tr>
+<td>TLB.L1D.LDST.MISS</td>
+<td>Load or store address translation requests that miss the L1 TLB.</td>
+</tr>
+<tr>
+<td>TLB.L1D.LDST.HIT</td>
+<td>Load or store address translation requests that hit the L1 TLB.</td>
+</tr>
+<tr>
+<td>TLB.L1D.LDST.MERGE</td>
+<td>Load or store address translation requests that merge into an outstanding L1 TLB miss.</td>
+</tr>
+<tr>
+<td>TLB.L1D.LDST.MISS.CYCLES</td>
+<td>Cycles while at least one L1 TLB load or store translation miss is outstanding.</td>
+</tr>
+<tr>
+<td>TLB.L1I.CODE.ACCESS</td>
+<td>Instruction fetch address translation requests to the L1 TLB.</td>
+</tr>
+<tr>
+<td>TLB.L1I.CODE.MISS</td>
+<td>Instruction fetch address translation requests that miss the L1 TLB.</td>
+</tr>
+<tr>
+<td>TLB.L1I.CODE.HIT</td>
+<td>Instruction fetch address translation requests that hit the L1 TLB.</td>
+</tr>
+<tr>
+<td>TLB.L1I.CODE.MERGE</td>
+<td>Instruction fetch address translation requests that merge into an outstanding L1 TLB miss.</td>
+</tr>
+<tr>
+<td>TLB.L1I.CODE.MISS.CYCLES</td>
+<td>Cycles while at least one L1 TLB instruction fetch translation miss is outstanding.</td>
+</tr>
+<tr>
+<td>TLB.LL.LOAD.ACCESS</td>
+<td>Load address translation requests to the last level TLB.</td>
+</tr>
+<tr>
+<td>TLB.LL.LOAD.MISS</td>
+<td>Load address translation requests that miss the last level TLB.</td>
+</tr>
+<tr>
+<td>TLB.LL.LOAD.HIT</td>
+<td>Load address translation requests that hit the last level TLB.</td>
+</tr>
+<tr>
+<td>TLB.LL.LOAD.MERGE</td>
+<td>Load address translation requests that merge into an outstanding last level TLB miss.</td>
+</tr>
+<tr>
+<td>TLB.LL.STORE.ACCESS</td>
+<td>Store address translation requests to the last level TLB.</td>
+</tr>
+<tr>
+<td>TLB.LL.STORE.MISS</td>
+<td>Store address translation requests that miss the last level TLB.</td>
+</tr>
+<tr>
+<td>TLB.LL.STORE.HIT</td>
+<td>Store address translation requests that hit the last level TLB.</td>
+</tr>
+<tr>
+<td>TLB.LL.STORE.MERGE</td>
+<td>Store address translation requests that merge into an outstanding last level TLB miss.</td>
+</tr>
+<tr>
+<td>TLB.LL.LDST.ACCESS</td>
+<td>Load or store address translation requests to the last level TLB.</td>
+</tr>
+<tr>
+<td>TLB.LL.LDST.MISS</td>
+<td>Load or store address translation requests that miss the last level TLB.</td>
+</tr>
+<tr>
+<td>TLB.LL.LDST.HIT</td>
+<td>Load or store address translation requests that hit the last level TLB.</td>
+</tr>
+<tr>
+<td>TLB.LL.LDST.MERGE</td>
+<td>Load or store address translation requests that merge into an outstanding last level TLB miss.</td>
+</tr>
+<tr>
+<td>TLB.LL.LDST.MISS.CYCLES</td>
+<td>Cycles while at least one last level TLB load or store translation miss is outstanding.</td>
+</tr>
+<tr>
+<td>TLB.LL.CODE.ACCESS</td>
+<td>Instruction fetch address translation requests to the last level TLB.</td>
+</tr>
+<tr>
+<td>TLB.LL.CODE.MISS</td>
+<td>Instruction fetch address translation requests that miss the last level TLB.</td>
+</tr>
+<tr>
+<td>TLB.LL.CODE.HIT</td>
+<td>Instruction fetch address translation requests that hit the last level TLB.</td>
+</tr>
+<tr>
+<td>TLB.LL.CODE.MERGE</td>
+<td>Instruction fetch address translation requests that merge into an outstanding last level TLB miss.</td>
+</tr>
+<tr>
+<td>TLB.LL.CODE.MISS.CYCLES</td>
+<td>Cycles while at least one last level TLB instruction fetch translation miss is outstanding.</td>
+</tr>
+</tbody></table>
+<h2 id="FETCH-Events"><a href="#FETCH-Events" class="headerlink" title="FETCH Events"></a>FETCH Events</h2><hr>
+<p>该组包含<strong>计数指令取址请求</strong>的事件，按地址转换源或指令数据源细分。所有事件都计数推测性取址请求。</p>
+<table>
+<thead>
+<tr>
+<th>FETCH Event Categories</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DSRC.*</td>
+<td><strong>Instruction fetches</strong> that accessed data from the specified source$^\color{teal}{[1]}$</td>
+</tr>
+<tr>
+<td>ASRC.*</td>
+<td><strong>Instruction fetches</strong> whose address translation came from the specified source$^\color{teal}{[2]}$</td>
+</tr>
+</tbody></table>
+<p>[1] the specified source is one of the following: L1I, L2, L3, LL. 强调<strong>指令Cache</strong>.<br>[2] the specified source is one of the following: L1I TLB, L2 TLB, LL TLB. 强调指令地址转换Cache.</p>
+<p>注意，这里针对 fetch 事件。</p>
+<table>
+<thead>
+<tr>
+<th>DSRC 事件指令获取数据源</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>&lt;cache&gt;</code></td>
+<td><strong>Instruction fetches</strong> for which the <strong><strong>instruction data</strong></strong> access hit in the selected cache.</td>
+</tr>
+<tr>
+<td><code>&lt;cache&gt;</code>.MISS</td>
+<td><strong>Instruction fetches</strong> for which the <strong><strong>instruction data</strong></strong> access missed in the selected cache.</td>
+</tr>
+<tr>
+<td><code>&lt;cache&gt;</code>.MERGE</td>
+<td><strong>Instruction fetches</strong> for which the <strong><strong>instruction data</strong></strong> access merged with an outstanding miss in the selected cache.</td>
+</tr>
+<tr>
+<td>LOCAL.MEM</td>
+<td><strong>Instruction fetches</strong> for which the <strong><strong>instruction data</strong></strong> access hit in local memory.</td>
+</tr>
+<tr>
+<td>REMOTE.MEM</td>
+<td><strong>Instruction fetches</strong> for which the <strong><strong>instruction data</strong></strong> access hit in remote memory.</td>
+</tr>
+<tr>
+<td>REMOTE.CACHE</td>
+<td><strong>Instruction fetches</strong> for which the <strong><strong>instruction data</strong></strong> access hit in a remote cache.</td>
+</tr>
+<tr>
+<td>REMOTE.HITM</td>
+<td><strong>Instruction fetches</strong> for which the <strong><strong>instruction data</strong></strong> access hit modified data in a remote cache.</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>ASRC 事件指令获取地址转换来源</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>&lt;tlb&gt;</code></td>
+<td><strong>Instruction fetches</strong> for which the address translation hit in the selected TLB.</td>
+</tr>
+<tr>
+<td><code>&lt;tlb&gt;</code>.MISS</td>
+<td>Instruction fetches for which the address translation missed in the selected.</td>
+</tr>
+</tbody></table>
+<p><strong>注意</strong>，在 INSN 事件中也有相同的分类，但是对象不同，INSN 事件章节强调的是 load&#x2F;store 指令，对象是数据，而此处只针对 fetch 指令，对象是指令。</p>
+<table>
+<thead>
+<tr>
+<th>FETCH Events</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FETCH.DSRC.L1I</td>
+<td>Instruction fetches that <strong>hit</strong> in the L1I cache.</td>
+</tr>
+<tr>
+<td>FETCH.DSRC.L1I.MISS</td>
+<td>Instruction fetches that missed in the L1I cache.</td>
+</tr>
+<tr>
+<td>FETCH.DSRC.L1I.MERGE</td>
+<td>Instruction fetches that merged into an outstanding L1I cache miss request.</td>
+</tr>
+<tr>
+<td>FETCH.DSRC.LL</td>
+<td>Instruction fetches that hit in the last level cache.</td>
+</tr>
+<tr>
+<td>FETCH.DSRC.LL.MISS</td>
+<td>Instruction fetches that missed in the last level cache.</td>
+</tr>
+<tr>
+<td>FETCH.DSRC.LL.MERGE</td>
+<td>Instruction fetches that merged into an outstanding last level cache miss request.</td>
+</tr>
+<tr>
+<td>FETCH.DSRC.LOCAL.MEM</td>
+<td>Instruction fetches that hit in local memory.</td>
+</tr>
+<tr>
+<td>FETCH.DSRC.REMOTE.MEM</td>
+<td>Instruction fetches that hit in remote memory.</td>
+</tr>
+<tr>
+<td>FETCH.DSRC.REMOTE.CACHE</td>
+<td>Instruction fetches that hit in a remote cache.</td>
+</tr>
+<tr>
+<td>FETCH.DSRC.REMOTE.HITM</td>
+<td>Instruction fetches that hit a modified line in a remote cache.</td>
+</tr>
+<tr>
+<td>FETCH.ASRC.L1</td>
+<td>Instruction fetch address translation requests that hit in the L1 TLB.</td>
+</tr>
+<tr>
+<td>FETCH.ASRC.L1.MISS</td>
+<td>Instruction fetch address translation requests that missed in the L1 TLB.</td>
+</tr>
+<tr>
+<td>FETCH.ASRC.L1.MERGE</td>
+<td>Instruction fetch address translation requests that merged into an outstanding L1 TLB miss request.</td>
+</tr>
+<tr>
+<td>FETCH.ASRC.LL</td>
+<td>Instruction fetch address translation requests that hit in the last level TLB.</td>
+</tr>
+<tr>
+<td>FETCH.ASRC.LL.MISS</td>
+<td>Instruction fetch address translation requests that missed in the last level TLB.</td>
+</tr>
+<tr>
+<td>FETCH.ASRC.LL.MERGE</td>
+<td>Instruction fetch address translation requests that merged into an outstanding last level TLB miss request.</td>
+</tr>
+</tbody></table>
+<h2 id="TMA-事件"><a href="#TMA-事件" class="headerlink" title="TMA 事件"></a>TMA 事件</h2><hr>
+<p>该组包含用于使用自顶向下微架构分析（Top-down Microarchitecture Analysis）方法的事件。</p>
+<p>TMA 是由 Intel 引入的一种行业标准方法，用于表征 SPEC CPU2006 在 Intel CPU 上的性能，并且后来用于表征 HPC 工作负载、GPU 工作负载、微架构更改、硅前性能验证失败等。</p>
+<p>在给定的工作负载中，瓶颈存在于何处。TMA通过计算微架构中每个流水线“槽”的利用率来实现这一点。例如，在一个 4 宽的实现中，每个时钟周期都有 4 个槽需要考虑。当硬件以最佳效率利用时，每个槽都会被一条指令或微操作（uop）占用，该指令或微操作将执行并退休。当出现瓶颈时，可能是由于缓存缺失、分支预测错误或其他微架构条件，某些槽可能会未被使用或被丢弃，从而导致效率低下和性能降低。TMA 能够识别这些浪费的槽位，以及导致这些槽位未被使用的停顿、清除、缺失或其他事件。这使开发人员能够在调优代码时做出明智的决策。</p>
+<p>TMA 通过定义每个 uop 插槽所属的一系列层次状态来实现这一点。每个时钟周期，处理器的前端（负责指令获取和解码）可以向后端（指令执行和退休）发出一些由实现定义的数量（N）的指令&#x2F;uop。因此，每个时钟周期有 N 个 issue slots 需要分类。在 TMA 层次结构的最高层，issue slots 的分类如下所述。</p>
+<img src="/2025/07/30/RISC-V-%E6%80%A7%E8%83%BD%E8%AE%A1%E6%95%B0%E5%99%A8%E7%AE%80%E4%BB%8B/tma-l1.svg" class="">
+
+
+<table>
+<thead>
+<tr>
+<th>Topdown <strong>Level 1</strong> State Descriptions</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Frontend Bound</td>
+<td>Slots where the frontend did not issue a uop to the backend, despite the backend being able to accept uops. Example causes include stalls that result from cache or TLB misses during instruction fetch.</td>
+</tr>
+<tr>
+<td>Backend Bound</td>
+<td>Slots where the backend could not consume a uop from the frontend. Example causes include backpressure that results from cache or TLB misses on data (load&#x2F;store) accesses, or from oversubscribed execution units.</td>
+</tr>
+<tr>
+<td>Bad Speculation</td>
+<td><strong>Uops that are dropped, as a result of a pipeline flush</strong>. Example flushes include <u>branch&#x2F;jump mispredictions</u>, <u>memory ordering clears</u>, <u>exceptions</u>, and <u>interrupts</u>. This state also includes slots that are <u>unfilled</u> by the frontend as the pipeline recovers from the flush, slots that otherwise would have been classified as Frontend Bound.</td>
+</tr>
+<tr>
+<td>Retiring</td>
+<td>Uops retired. Ideally the majority of slots fall into this state.</td>
+</tr>
+</tbody></table>
+<p>上述事件是 level 1 层级的，还有 level 2 层级， level 3 层级，分别简写为 L1, L2, L3. <strong>这与缓存的层级是不同的概念</strong>。</p>
+<p>The full standard hierarchy of TMA states is illustrated below.</p>
+<img src="/2025/07/30/RISC-V-%E6%80%A7%E8%83%BD%E8%AE%A1%E6%95%B0%E5%99%A8%E7%AE%80%E4%BB%8B/tma-full2.svg" class="">
+
+
+<ul>
+<li><strong>前端限制 Frontend Bound</strong><ul>
+<li><strong>前端延迟限制 Frontend Latency Bound</strong><ul>
+<li>前端延迟的插槽是解码器正在等待获取数据的情况，因此没有 uops 可以交付给后端。前端延迟进一步细分为三个标准 L3 状态。</li>
+<li><strong>地址 Frontend Address Latency</strong><ul>
+<li>前端地址延迟是指前端在<strong>等待指令地址转换完成</strong>时的延迟。这段时间插槽未被填充。如，ITLB 缺失。当处理器<strong>fetch instruction</strong>时,会将指令的虚拟地址发送到 ITLB 进行地址转换。ITLB 缺失会进行 PTW 来获取物理地址。地址转换未完成，前端无法将物理地址发送到<strong>指令缓存</strong>。</li>
+</ul>
+</li>
+<li><strong>数据 Frontend Data Latency</strong><ul>
+<li>前端数据延迟是指前端在<strong>等待指令数据返回</strong>时的延迟。这段时间插槽未被填充。如，L1I Cache 未命中。当物理地址发送到指令缓存 I-Cache 时，如果 I-Cache 中没有对应的数据，会向更高层缓存或内存发起miss 请求。</li>
+</ul>
+</li>
+<li><strong>重定向 Frontend Redirect Latency</strong><ul>
+<li>是指由于<strong>控制转移</strong>指令（如跳转或分支）导致的前端流水线插槽被丢弃（空闲）的延迟。这种延迟主要发生在处理器的前端（Frontend），即指令获取（Instruction Fetch）和解码（Decode）阶段。<strong>控制转移</strong>是指程序执行流程的改变，如跳转、分支、函数调用或返回。<strong>前端重定向</strong>指当控制转移指令被执行时处理器需要从新的地址获取指令的过程，包括，指令预测、指令获取、流水线重置。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>前端带宽限制 Frontend bandwidth Bound</strong><ul>
+<li>前端由于解码器的限制而没有向后端传递微操作（uop）的那些槽位，这些槽位没有被充分利用。解码器无法在一个时钟周期内解码<strong>足够</strong>的指令。<strong>前端带宽（Frontend Bandwidth）</strong> 是指前端在每个时钟周期内能够向后端提供的指令或微操作（uops）的数量。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>后端限制 Backend Bound</strong><ul>
+<li><strong>核心限制 Core Bound</strong><ul>
+<li>表示后端因除内存引起的停滞之外的其他原因停滞的槽位。只有一个标准的 L3 事件。</li>
+<li><strong>Serialization Bound</strong>，为了保证指令顺序序列化而导致流水线<strong>暂停</strong>而阻塞的槽位。通常是为了维护内存一致性或处理同步指令。包括，fence、AMO、CSR指令等。</li>
+<li><strong>Backpressure Bound</strong>，回压不是一个标准的 L3 事件，但也会导致 Core Bound slots 产生。回压主要是长延迟算术操作和执行单元过载引起。长延迟算术操作会导致执行单元被长时间占用，执行单元过载是指执行单元被分配了过多的任务。都会导致流水线插槽阻塞。</li>
+</ul>
+</li>
+<li><strong>内存访问限制 Memory Bound</strong><ul>
+<li>后端因内存操作（加载和存储）引起的停滞槽位，导致后端无法从前端接受 uops。可进一步细分为两个标准 L3 状态。</li>
+<li><strong>内存地址限制 Memory Address Bound</strong><ul>
+<li>内存地址限制表示后端因等待数据地址转换而停滞的槽位，例如由于 DTLB 缺失。这与前端的地址延迟类似，前端是指令地址转换，后端是数据地址转换。</li>
+<li><strong>L1 TLB</strong></li>
+<li><strong>LL TLB</strong></li>
+<li><strong>Page Walk</strong></li>
+</ul>
+</li>
+<li><strong>内存数据限制 Memory Data Bound</strong><ul>
+<li>内存数据限制表示后端因等待加载或存储访问完成而停滞的槽位，例如由于 L1D 缓存缺失。这与前端数延迟类似，前端是指令，后端是内存数据。</li>
+<li><strong>L1 D-Cache</strong></li>
+<li><strong>LL Cache</strong></li>
+<li><strong>External Memory</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>TMA 事件</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TOPDOWN.SLOTS$^\color{teal}{[1]}$</td>
+<td>TMA slots available for an unhalted hart.</td>
+</tr>
+<tr>
+<td>TOPDOWN.FRONTEND_BOUND.SLOTS</td>
+<td>TMA slots stalled in the frontend, which implies slots where the frontend was unable to deliver a uop to the backend despite the backend being able to accept uops.</td>
+</tr>
+<tr>
+<td><font size="1">TOPDOWN.FRONTEND_BOUND.BANDWIDTH.SLOTS</font></td>
+<td>TMA slots stalled in the frontend due to decode bandwidth limitations, resulting in a reduced number of uops delivered to the backend.</td>
+</tr>
+<tr>
+<td><font size="1">TOPDOWN.FRONTEND_BOUND.LATENCY.SLOTS</font></td>
+<td>TMA slots stalled in the frontend due to fetch latency, resulting in no uops delivered to the backend.</td>
+</tr>
+<tr>
+<td><font size="1">TOPDOWN.FRONTEND_BOUND.LATENCY.ADDR.SLOTS</font></td>
+<td>TMA slots stalled in the frontend due to fetch address translation latency.</td>
+</tr>
+<tr>
+<td><font size="1">TOPDOWN.FRONTEND_BOUND.LATENCY.DATA.SLOTS</font></td>
+<td>TMA slots stalled in the frontend due to fetch data latency.</td>
+</tr>
+<tr>
+<td><font size="1">TOPDOWN.FRONTEND_BOUND.LATENCY.REDIRECT.SLOTS</font></td>
+<td>TMA slots stalled in the frontend due to fetch pipeline bubbles resulting from control transfer redirects.</td>
+</tr>
+<tr>
+<td>TOPDOWN.BAD_SPECULATION.SLOTS</td>
+<td>TMA slots wasted due to incorrect speculations. This includes slots used to issue uops that do not eventually retire, and slots for which the frontend did not deliver uops due to recovery from earlier incorrect speculation.</td>
+</tr>
+<tr>
+<td><font size="1">TOPDOWN.BAD_SPECULATION.MISPREDICT.SLOTS$^\color{teal}{[2]}$</font></td>
+<td>TMA slots wasted due to mispredicted branch or jump instructions.</td>
+</tr>
+<tr>
+<td><font size="1">TOPDOWN.BAD_SPECULATION.MEM_ORDERING.SLOTS$^\color{teal}{[3]}$</font></td>
+<td>TMA slots wasted due to pipeline clears that result from memory ordering violations.</td>
+</tr>
+<tr>
+<td>TOPDOWN.BACKEND_BOUND.SLOTS</td>
+<td>TMA slots backend stalled, which implies slots where the backend cannot accept uops due to a lack of backend resources.</td>
+</tr>
+<tr>
+<td><font size="1">TOPDOWN.BACKEND_BOUND.MEMORY.SLOTS</font></td>
+<td>TMA slots backend stalled due to stalls caused by load and store instructions.</td>
+</tr>
+<tr>
+<td>TOPDOWN.BACKEND_BOUND.CORE.SLOTS</td>
+<td>TMA slots backend stalled due to stalls caused by non-memory operations.</td>
+</tr>
+<tr>
+<td><font size="1">TOPDOWN.BACKEND_BOUND.CORE.SERIALIZING.SLOTS</font></td>
+<td>TMA slots backend stalled due to serializing operations like fence or csr accesses.</td>
+</tr>
+<tr>
+<td><font size="1">TOPDOWN.BACKEND_BOUND.MEMORY.ADDR.SLOTS</font></td>
+<td>TMA slots backend stalled waiting for address generation and translation.</td>
+</tr>
+<tr>
+<td><font size="1">TOPDOWN.BACKEND_BOUND.MEMORY.ADDR.TLB.L1_MISS.SLOTS</font></td>
+<td>TMA slots backend stalled waiting for address translations that missed the L1 TLB.</td>
+</tr>
+<tr>
+<td><font size="1">TOPDOWN.BACKEND_BOUND.MEMORY.ADDR.TLB.LL_MISS.SLOTS</font></td>
+<td>TMA slots backend stalled waiting for address translations that missed the last-level TLB.</td>
+</tr>
+<tr>
+<td><font size="1">TOPDOWN.BACKEND_BOUND.MEMORY.DATA.SLOTS</font></td>
+<td>TMA slots backend stalled waiting for load reads or store writes to complete.</td>
+</tr>
+<tr>
+<td><font size="1">TOPDOWN.BACKEND_BOUND.MEMORY.DATA.L1_MISS.SLOTS</font></td>
+<td>TMA slots backend stalled awaiting completion of loads or stores that missed the L1 cache.</td>
+</tr>
+<tr>
+<td><font size="1">TOPDOWN.BACKEND_BOUND.MEMORY.DATA.LL_MISS.SLOTS</font></td>
+<td>TMA slots backend stalled awaiting completion of loads or stores that missed the last-level cache.</td>
+</tr>
+</tbody></table>
+<p>[1] 表示在给定时间段内处理器同时使用的指令槽位数量。它反映了处理器在每个时钟周期内可以处理的指令数量。假设处理器的流水线宽度为 $\omega$，程序运行的总时钟周期数为 <code>cpu_cycles</code>，则 TOPDOWN.SLOTS 的总数为：$\omega \times \text{cpu_cycles}$.<br>[2] 由于分支 (branch) 或跳转 (jump) 指令预测错误浪费的槽位。<br>[3] 由于内存排序违规导致的流水线<strong>清除</strong>而浪费的槽位。注意，Serialization 是针对流水线<strong>暂停</strong>。</p>
+<h2 id="Other-Events"><a href="#Other-Events" class="headerlink" title="Other Events"></a>Other Events</h2><hr>
+<p>该组包含不归属于其他组的一般事件。</p>
+<table>
+<thead>
+<tr>
+<th>Other Events</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CYCLES.HART$^\color{teal}{[1]}$</td>
+<td>Clock cycles executed by the processor core on which the hart is running. Ceases to increment when the hart is paused, such as during WFI, even if another hart running on the same core remains active. This clock is subject to clock-gating and frequency variations.</td>
+</tr>
+<tr>
+<td>CYCLES.REF</td>
+<td>Reference clock cycles. This event counts at a fixed frequency.</td>
+</tr>
+<tr>
+<td>UOP.RET</td>
+<td>Number of micro-operations retired.</td>
+</tr>
+<tr>
+<td>UOP.SPEC</td>
+<td>Number of micro-operations issued.</td>
+</tr>
+<tr>
+<td>FLUSH.SPEC</td>
+<td>Occurences of backend pipeline flushes, such as mispredictions or memory ordering violations.</td>
+</tr>
+<tr>
+<td>FLUSH.CYCLES</td>
+<td>Cycles to recover from backend pipeline flushes, such as mispredictions or memory ordering violations. Counts cycles the frontend is unable to deliver uops to the backend in the shadow of a backend pipeline flush.</td>
+</tr>
+<tr>
+<td>RESTEER.SPEC$^\color{teal}{[2]}$</td>
+<td>Occurences of frontend resteers, such as taken branch predictions, that introduce pipeline bubbles when resteering fetch to the target pc address.</td>
+</tr>
+<tr>
+<td>RESTEER.CYCLES</td>
+<td>Cycles to recover from frontend resteers, such as taken branch predictions, that introduce pipeline bubbles when resteering fetch to the target pc address. Counts the bubble cycles lost as a result of the resteers.</td>
+</tr>
+<tr>
+<td>CTR.UPDATE.RET</td>
+<td>Instructions retired and&#x2F;or traps delivered that are recorded by Control Transfer Records (CTR).</td>
+</tr>
+<tr>
+<td>TRACE.STALL.CYCLES</td>
+<td>Core cycles where retirement is stalled due to trace backpressure.</td>
+</tr>
+</tbody></table>
+<p>[1] 预期 HPM CSR 和 cycle CSR 统计的结果相同。CPU空转是否计数？<br>[2] 前端重定向的次数。当预测为 taken branch 时，会进行重定向。当预测错误时，纠正重定向等。</p>
+<h1 id="标准事件编码"><a href="#标准事件编码" class="headerlink" title="标准事件编码"></a>标准事件编码</h1><hr>
+<p>RV Spec 定义了以下的标准事件编码。编码使用<code>mhpmeventX[4:0]</code>作为<code>SEL</code>字段。</p>
+<table>
+<thead>
+<tr>
+<th>mhpmeventX.SEL</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>No event</td>
+</tr>
+<tr>
+<td>1</td>
+<td>CYCLES.HART</td>
+</tr>
+<tr>
+<td>2</td>
+<td>INST.RET</td>
+</tr>
+<tr>
+<td>3</td>
+<td>CACHE.L1.RD.DATA.ACCESS</td>
+</tr>
+<tr>
+<td>4</td>
+<td>CACHE.L1.RD.DATA.MISS</td>
+</tr>
+<tr>
+<td>5</td>
+<td>INST.BRJMP.SPEC</td>
+</tr>
+<tr>
+<td>6</td>
+<td>INST.MISPRED.SPEC</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Reserved, no event</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Reserved, no event</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Reserved, no event</td>
+</tr>
+<tr>
+<td>10</td>
+<td>CYCLES.REF</td>
+</tr>
+<tr>
+<td>11</td>
+<td>CACHE.L1I.RD.CODE.ACCESS</td>
+</tr>
+<tr>
+<td>12</td>
+<td>CACHE.L1I.RD.CODE.MISS</td>
+</tr>
+<tr>
+<td>13</td>
+<td>CACHE.LL.RD.DATA.ACCESS</td>
+</tr>
+<tr>
+<td>14</td>
+<td>CACHE.LL.RD.DATA.MISS</td>
+</tr>
+<tr>
+<td>15</td>
+<td>TLB.L1.LDST.ACCESS</td>
+</tr>
+<tr>
+<td>16</td>
+<td>TLB.L1.LDST.MISS</td>
+</tr>
+<tr>
+<td>17</td>
+<td>TLB.L1I.CODE.ACCESS</td>
+</tr>
+<tr>
+<td>18</td>
+<td>TLB.L1I.CODE.MISS</td>
+</tr>
+<tr>
+<td>19</td>
+<td>INST.BRJMP.TK.RET</td>
+</tr>
+<tr>
+<td>20</td>
+<td>TOPDOWN.SLOTS</td>
+</tr>
+<tr>
+<td>21</td>
+<td>TOPDOWN.RETIRING.SLOTS</td>
+</tr>
+<tr>
+<td>22</td>
+<td>TOPDOWN.FRONTEND_BOUND.SLOTS</td>
+</tr>
+<tr>
+<td>23</td>
+<td>TOPDOWN.BACKEND_BOUND.SLOTS</td>
+</tr>
+<tr>
+<td>24</td>
+<td>TOPDOWN.BAD_SPECULATION.SLOTS</td>
+</tr>
+<tr>
+<td>25</td>
+<td>Reserved, no event</td>
+</tr>
+<tr>
+<td>26</td>
+<td>Reserved, no event</td>
+</tr>
+<tr>
+<td>27</td>
+<td>Reserved, no event</td>
+</tr>
+<tr>
+<td>28</td>
+<td>Reserved, no event</td>
+</tr>
+<tr>
+<td>29</td>
+<td>Reserved, no event</td>
+</tr>
+<tr>
+<td>30</td>
+<td>Reserved, no event</td>
+</tr>
+<tr>
+<td>31</td>
+<td>Reserved, no event</td>
+</tr>
+</tbody></table>
+<p>与 Linux Perf <strong>Hardware Events</strong> 的对应关系：</p>
+<table>
+<thead>
+<tr>
+<th><strong>Linux Perf Hardware Event</strong></th>
+<th><strong>mhpmeventX.SEL</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CPU_CYCLES</td>
+<td>1 (CYCLES.HART)</td>
+</tr>
+<tr>
+<td>INSTRUCTIONS</td>
+<td>2 (INST.RET)</td>
+</tr>
+<tr>
+<td>CACHE_REFERENCES</td>
+<td>3 (CACHE.L1.RD.DATA.ACCESS)</td>
+</tr>
+<tr>
+<td>CACHE_MISSES</td>
+<td>4 (CACHE.L1.RD.DATA.MISS)</td>
+</tr>
+<tr>
+<td>BRANCH_INSTRUCTIONS</td>
+<td>5 (INST.BRJMP.SPEC)</td>
+</tr>
+<tr>
+<td>BRANCH_MISSES</td>
+<td>6 (INST.MISPRED.SPEC)</td>
+</tr>
+<tr>
+<td>REF_CPU_CYCLES</td>
+<td>10 (CYCLES.REF)</td>
+</tr>
+</tbody></table>
+<p>与 Linux Perf <strong>Cache Events</strong> 的对应关系：</p>
+<table>
+<thead>
+<tr>
+<th><strong>Linux Perf Cache Event</strong></th>
+<th><strong>mhpmeventX.SEL</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CACHE_L1D_READ_ACCESS</td>
+<td>3 (CACHE.L1.RD.DATA.ACCESS)</td>
+</tr>
+<tr>
+<td>CACHE_L1D_READ_MISS</td>
+<td>4 (CACHE.L1.RD.DATA.MISS)</td>
+</tr>
+<tr>
+<td>CACHE_L1I_READ_ACCESS</td>
+<td>11 (CACHE.L1I.RD.CODE.ACCESS)</td>
+</tr>
+<tr>
+<td>CACHE_L1I_READ_MISS</td>
+<td>12 (CACHE.L1I.RD.CODE.MISS)</td>
+</tr>
+<tr>
+<td>CACHE_LL_READ_ACCESS</td>
+<td>13 (CACHE.LL.RD.DATA.ACCESS)</td>
+</tr>
+<tr>
+<td>CACHE_LL_READ_MISS</td>
+<td>14 (CACHE.LL.RD.DATA.MISS)</td>
+</tr>
+<tr>
+<td>CACHE_DTLB_READ_ACCESS</td>
+<td>15 (TLB.L1.LDST.ACCESS)</td>
+</tr>
+<tr>
+<td>CACHE_DTLB_READ_MISS</td>
+<td>16 (TLB.L1.LDST.MISS)</td>
+</tr>
+<tr>
+<td>CACHE_ITLB_READ_ACCESS</td>
+<td>17 (TLB.L1I.CODE.ACCESS)</td>
+</tr>
+<tr>
+<td>CACHE_ITLB_READ_MISS</td>
+<td>18 (TLB.L1I.CODE.ACCESS)</td>
+</tr>
+<tr>
+<td>CACHE_BPU_READ_ACCESS</td>
+<td>5 (INST.BRJMP.SPEC)</td>
+</tr>
+<tr>
+<td>CACHE_BPU_READ_MISS</td>
+<td>6 (INST.MISPRED.SPEC)</td>
+</tr>
+</tbody></table>
+
+                
+                <hr>
+                <!-- Pager -->
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2025/08/21/Linux-Perf-介绍-——-Perf-命令行工具/" data-toggle="tooltip" data-placement="top" title="Linux Perf 介绍 —— Perf 命令行工具">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2025/07/23/搭建-x86-下的-riscv-linux-平台/" data-toggle="tooltip" data-placement="top" title="搭建 x86 下的 riscv linux 开发平台">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- tip start -->
+                
+
+                
+                <!-- tip end -->
+
+                <!-- Music start-->
+                
+                <!-- Music end -->
+
+                <!-- Sharing -->
+                
+                <!-- Sharing -->
+
+                <!-- gitment start -->
+                
+                <!-- gitment end -->
+
+                <!-- 来必力City版安装代码 -->
+                
+                <!-- City版安装代码已完成 -->
+
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+    
+      
+        <aside id="sidebar">
+          <div id="toc" class="toc-article">
+          <strong class="toc-title">Contents</strong>
+          
+            
+              <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">简介</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E4%BA%8B%E4%BB%B6"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">事件</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#INST-Events"><span class="toc-nav-number">2.1.</span> <span class="toc-nav-text">INST Events</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%8E%A7%E5%88%B6%E8%BD%AC%E7%A7%BB%E6%8C%87%E4%BB%A4%E4%BA%8B%E4%BB%B6"><span class="toc-nav-number">2.1.1.</span> <span class="toc-nav-text">控制转移指令事件</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%86%85%E5%AD%98%E8%AE%BF%E9%97%AE%E6%8C%87%E4%BB%A4%E4%BA%8B%E4%BB%B6"><span class="toc-nav-number">2.1.2.</span> <span class="toc-nav-text">内存访问指令事件</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%90%91%E9%87%8F%E6%8C%87%E4%BB%A4%E4%BA%8B%E4%BB%B6"><span class="toc-nav-number">2.1.3.</span> <span class="toc-nav-text">向量指令事件</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%8C%87%E4%BB%A4%E4%BA%8B%E4%BB%B6%E6%80%BB%E8%A1%A8"><span class="toc-nav-number">2.1.4.</span> <span class="toc-nav-text">指令事件总表</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#LOAD-STORE-LDST-Events"><span class="toc-nav-number">2.2.</span> <span class="toc-nav-text">LOAD&#x2F;STORE&#x2F;LDST Events</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Cache-Events"><span class="toc-nav-number">2.3.</span> <span class="toc-nav-text">Cache Events</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Cache-%E4%BA%8B%E4%BB%B6%E6%80%BB%E8%A1%A8"><span class="toc-nav-number">2.3.1.</span> <span class="toc-nav-text">Cache 事件总表</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#TLB-Events"><span class="toc-nav-number">2.4.</span> <span class="toc-nav-text">TLB Events</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#FETCH-Events"><span class="toc-nav-number">2.5.</span> <span class="toc-nav-text">FETCH Events</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#TMA-%E4%BA%8B%E4%BB%B6"><span class="toc-nav-number">2.6.</span> <span class="toc-nav-text">TMA 事件</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Other-Events"><span class="toc-nav-number">2.7.</span> <span class="toc-nav-text">Other Events</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E6%A0%87%E5%87%86%E4%BA%8B%E4%BB%B6%E7%BC%96%E7%A0%81"><span class="toc-nav-number">3.</span> <span class="toc-nav-text">标准事件编码</span></a></li></ol>
+            
+          
+          </div>
+        </aside>
+      
+    
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <!-- <h5><a href="/tags/">FEATURED TAGS</a></h5> -->
+                    <h5><a href="/tags/"></a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#Zihpm" title="Zihpm">Zihpm</a>
+                        
+                          <a class="tag" href="/tags/#HPE" title="HPE">HPE</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                
+                <script src="https://giscus.app/client.js"
+                    data-repo="AllenZF/allenzf.github.io"
+                    data-repo-id="R_kgDOQMASLQ"
+                    data-category="General"
+                    data-category-id="DIC_kwDOQMASLc4CxR4Q"
+                    data-mapping="pathname"
+                    data-strict="0"
+                    data-reactions-enabled="1"
+                    data-emit-metadata="0"
+                    data-input-position="bottom"
+                    data-theme="preferred_color_scheme"
+                    data-lang="en"
+                    crossorigin="anonymous"
+                    async>
+                </script>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: 'ℬ'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+
+
+<style  type="text/css">
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/AllenZF">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://gitee.com/Sven">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-stack-1x fa-inverse">码</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/people/zhou-lang-jie-feng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; 周郎借风 2025 
+                    <br>
+                    Powered by 
+                    <a href="https://github.com/dusign/hexo-theme-snail">
+                        <i>hexo-theme-snail</i>
+                    </a> | 
+                    <iframe name="star" style="margin-left: 2px; margin-bottom:-5px;" frameborder="0" scrolling="0"
+                        width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=dusign&repo=hexo-theme-snail&type=star&count=true">
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+
+</footer>
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- Search -->
+
+<script src="/js/search.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://allenzf.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-XXXXXXXX-X';
+    var _gaDomain = 'yoursite';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+<!-- Search -->
+
+    <script type="text/javascript">      
+        var search_path = "search.xml";
+        if (search_path.length == 0) {
+            search_path = "search.xml";
+        }
+    var path = "/" + search_path;
+    searchFunc(path, 'local-search-input', 'local-search-result');
+    </script>
+
+
+<!-- busuanzi -->
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+
+    
+        <!-- background effects line -->
+        
+
+        
+            <script type="text/javascript" src="/js/mouse-click.js" content='[&quot;🌱&quot;,&quot;just do it&quot;,&quot;🍀&quot;]' color='[&quot;rgb(121,93,179)&quot; ,&quot;rgb(76,180,231)&quot; ,&quot;rgb(184,90,154)&quot;]'></script>
+        
+
+        <!-- background effects end -->
+    
+
+    <!--<script size="50" alpha='0.3' zIndex="-999" src="/js/ribbonStatic.js"></script>-->
+    
+        <script src="/js/ribbonDynamic.js"></script>
+    
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+
+</html>

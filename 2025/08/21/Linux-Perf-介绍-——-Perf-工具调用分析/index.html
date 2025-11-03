@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="baidu-site-verification" content="093lY4ziMu" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="记录点滴">
+    <meta name="keyword"  content="加油, 个人博客">
+    <link rel="shortcut icon" href="/img/ironman-draw.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <!--<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
+    <title>
+        
+          Linux Perf 介绍 —— Perf 工具调用分析 - Sven-Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://allenzf.github.io/2025/08/21/Linux-Perf-介绍-——-Perf-工具调用分析/">
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+
+    <!-- Custom CSS --> 
+    
+        
+<link rel="stylesheet" href="/css/dusign-light.css">
+
+        
+<link rel="stylesheet" href="/css/dusign-common-light.css">
+
+        
+<link rel="stylesheet" href="/css/font-awesome.css">
+
+        
+<link rel="stylesheet" href="/css/toc.css">
+
+        <!-- background effects end -->
+    
+    
+    <!-- Pygments Highlight CSS -->
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+
+    
+<link rel="stylesheet" href="/css/widget.css">
+
+
+    
+<link rel="stylesheet" href="/css/rocket.css">
+
+
+    
+<link rel="stylesheet" href="/css/signature.css">
+
+
+    
+<link rel="stylesheet" href="/css/fonts.googleapis.css">
+
+
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+    <!-- photography -->
+    
+<link rel="stylesheet" href="/css/photography.css">
+
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+<meta name="generator" content="Hexo 8.1.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- background effects start -->
+    
+    <!-- background effects end -->
+
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            
+                background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('../../../../img/header_img/Iron-Man-3.jpg')
+                /*post*/
+            
+        
+    }
+    
+    #signature{
+        background-image: url('/img/signature/Just-do-it-white.png');
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#RISC-V" title="RISC-V">RISC-V</a>
+                            
+                              <a class="tag" href="/tags/#Perf" title="Perf">Perf</a>
+                            
+                              <a class="tag" href="/tags/#Linux" title="Linux">Linux</a>
+                            
+                        </div>
+                        <h1>Linux Perf 介绍 —— Perf 工具调用分析</h1>
+                        <h2 class="subheading"></h2>
+                        <span class="meta">
+                            Posted by 周郎借风 on
+                            2025-08-21
+                        </span>
+
+                        
+                            <div class="blank_box"></div>
+                            <span class="meta">
+                                Words <span class="post-count">1.3k</span> and
+                                Reading Time <span class="post-count">6</span> Minutes
+                            </span>
+                            <div class="blank_box"></div>
+                            <!-- 不蒜子统计 start -->
+                            <span class="meta">
+                                Viewed <span id="busuanzi_value_page_pv"><i class="fa fa-spinner fa-spin"></i></span> Times
+                            </span>
+                            <!-- 不蒜子统计 end -->
+                        
+
+                    </div>
+                
+
+                </div>
+            </div>
+        </div>      
+    </div>
+
+    
+    <div class="waveWrapper">
+        <div class="wave wave_before" style="background-image: url('/img/wave-light.png')"></div>
+        <div class="wave wave_after" style="background-image: url('/img/wave-light.png')"></div>
+    </div>
+    
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">周郎借风</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">主页</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/categories/">分类</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">关于</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">归档</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/photography/">摄影</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">标签</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+                    
+                    
+                    <li>
+                        <a href="https://allenzf.github.io" target="_blank">中文博客</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="系列目录"><a href="#系列目录" class="headerlink" title="系列目录"></a>系列目录</h1><hr>
+<p><a href="http://localhost:4000/2025/08/21/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7/">Linux Perf 介绍 —— Perf 命令行工具</a><br><a href="http://localhost:4000/2025/08/21/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-%E5%B7%A5%E5%85%B7%E8%B0%83%E7%94%A8%E5%88%86%E6%9E%90/">Linux Perf 介绍-—— Perf 工具调用分析</a><br><a href="http://localhost:4000/2025/08/26/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-%E5%86%85%E6%A0%B8%E5%8F%8A%E9%A9%B1%E5%8A%A8%E6%94%AF%E6%8C%81/">Linux Perf 介绍 —— Perf 内核及驱动支持</a><br><a href="http://localhost:4000/2025/08/26/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-opensbi-%E6%94%AF%E6%8C%81/">Linux Perf 介绍 —— Perf opensbi 支持</a><br><a href="http://localhost:4000/2025/08/26/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-%E6%80%BB%E7%BB%93/">Linux Perf 介绍 —— Perf 总结</a></p>
+<h1 id="Perf-命令"><a href="#Perf-命令" class="headerlink" title="Perf 命令"></a>Perf 命令</h1><hr>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">usage: perf [--version] [--help] [OPTIONS] COMMAND [ARGS]</span><br><span class="line"></span><br><span class="line">The most commonly used perf commands are:</span><br><span class="line">  annotate        Read perf.data (created by perf record) and display annotated code</span><br><span class="line">  archive         Create archive with object files with build-ids found in perf.data file</span><br><span class="line">  bench           General framework for benchmark suites</span><br><span class="line">  buildid-cache   Manage build-id cache.</span><br><span class="line">  buildid-list    List the buildids in a perf.data file</span><br><span class="line">  c2c             Shared Data C2C/HITM Analyzer.</span><br><span class="line">  config          Get and set variables in a configuration file.</span><br><span class="line">  daemon          Run record sessions on background</span><br><span class="line">  data            Data file related processing</span><br><span class="line">  diff            Read perf.data files and display the differential profile</span><br><span class="line">  evlist          List the event names in a perf.data file</span><br><span class="line">  ftrace          simple wrapper for kernel&#x27;s ftrace functionality</span><br><span class="line">  inject          Filter to augment the events stream with additional information</span><br><span class="line">  iostat          Show I/O performance metrics</span><br><span class="line">  kallsyms        Searches running kernel for symbols</span><br><span class="line">  kmem            Tool to trace/measure kernel memory properties</span><br><span class="line">  kvm             Tool to trace/measure kvm guest os</span><br><span class="line">  list            List all symbolic event types</span><br><span class="line">  lock            Analyze lock events</span><br><span class="line">  mem             Profile memory accesses</span><br><span class="line">  record          Run a command and record its profile into perf.data</span><br><span class="line">  report          Read perf.data (created by perf record) and display the profile</span><br><span class="line">  sched           Tool to trace/measure scheduler properties (latencies)</span><br><span class="line">  script          Read perf.data (created by perf record) and display trace output</span><br><span class="line">  stat            Run a command and gather performance counter statistics</span><br><span class="line">  test            Runs sanity tests.</span><br><span class="line">  timechart       Tool to visualize total system behavior during a workload</span><br><span class="line">  top             System profiling tool.</span><br><span class="line">  version         display the version of perf binary</span><br><span class="line">  probe           Define new dynamic tracepoints</span><br><span class="line">  trace           strace inspired tool</span><br><span class="line"></span><br><span class="line">See &#x27;perf help COMMAND&#x27; for more information on a specific command.</span><br></pre></td></tr></table></figure>
+
+<p>每个命令对应的源码：<a href="https://elixir.bootlin.com/linux/v6.6.36/source/tools/perf/perf.c">tools&#x2F;perf&#x2F;perf.c:49</a></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">cmd_struct</span> <span class="title">commands</span>[] =</span> &#123;</span><br><span class="line">	&#123; <span class="string">&quot;archive&quot;</span>,	<span class="literal">NULL</span>,	<span class="number">0</span> &#125;,</span><br><span class="line">	&#123; <span class="string">&quot;buildid-cache&quot;</span>, cmd_buildid_cache, <span class="number">0</span> &#125;,</span><br><span class="line">	&#123; <span class="string">&quot;buildid-list&quot;</span>, cmd_buildid_list, <span class="number">0</span> &#125;,</span><br><span class="line">	&#123; <span class="string">&quot;config&quot;</span>,	cmd_config,	<span class="number">0</span> &#125;,</span><br><span class="line">	&#123; <span class="string">&quot;c2c&quot;</span>,	cmd_c2c,	<span class="number">0</span> &#125;,</span><br><span class="line">	&#123; <span class="string">&quot;diff&quot;</span>,	cmd_diff,	<span class="number">0</span> &#125;,</span><br><span class="line">	&#123; <span class="string">&quot;evlist&quot;</span>,	cmd_evlist,	<span class="number">0</span> &#125;,</span><br><span class="line">	&#123; <span class="string">&quot;help&quot;</span>,	cmd_help,	<span class="number">0</span> &#125;,</span><br><span class="line">	&#123; <span class="string">&quot;iostat&quot;</span>,	<span class="literal">NULL</span>,	<span class="number">0</span> &#125;,</span><br><span class="line">	&#123; <span class="string">&quot;kallsyms&quot;</span>,	cmd_kallsyms,	<span class="number">0</span> &#125;,</span><br><span class="line">	&#123; <span class="string">&quot;list&quot;</span>,	cmd_list,	<span class="number">0</span> &#125;,</span><br><span class="line">	&#123; <span class="string">&quot;record&quot;</span>,	cmd_record,	<span class="number">0</span> &#125;,</span><br><span class="line">	&#123; <span class="string">&quot;report&quot;</span>,	cmd_report,	<span class="number">0</span> &#125;,</span><br><span class="line">	&#123; <span class="string">&quot;bench&quot;</span>,	cmd_bench,	<span class="number">0</span> &#125;,</span><br><span class="line">	&#123; <span class="string">&quot;stat&quot;</span>,	cmd_stat,	<span class="number">0</span> &#125;,</span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> HAVE_LIBTRACEEVENT</span></span><br><span class="line">	&#123; <span class="string">&quot;timechart&quot;</span>,	cmd_timechart,	<span class="number">0</span> &#125;,</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">	&#123; <span class="string">&quot;top&quot;</span>,	cmd_top,	<span class="number">0</span> &#125;,</span><br><span class="line">	&#123; <span class="string">&quot;annotate&quot;</span>,	cmd_annotate,	<span class="number">0</span> &#125;,</span><br><span class="line">	&#123; <span class="string">&quot;version&quot;</span>,	cmd_version,	<span class="number">0</span> &#125;,</span><br><span class="line">	&#123; <span class="string">&quot;script&quot;</span>,	cmd_script,	<span class="number">0</span> &#125;,</span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> HAVE_LIBTRACEEVENT</span></span><br><span class="line">	&#123; <span class="string">&quot;sched&quot;</span>,	cmd_sched,	<span class="number">0</span> &#125;,</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> HAVE_LIBELF_SUPPORT</span></span><br><span class="line">	&#123; <span class="string">&quot;probe&quot;</span>,	cmd_probe,	<span class="number">0</span> &#125;,</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> HAVE_LIBTRACEEVENT</span></span><br><span class="line">	&#123; <span class="string">&quot;kmem&quot;</span>,	cmd_kmem,	<span class="number">0</span> &#125;,</span><br><span class="line">	&#123; <span class="string">&quot;lock&quot;</span>,	cmd_lock,	<span class="number">0</span> &#125;,</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">	&#123; <span class="string">&quot;kvm&quot;</span>,	cmd_kvm,	<span class="number">0</span> &#125;,</span><br><span class="line">	&#123; <span class="string">&quot;test&quot;</span>,	cmd_test,	<span class="number">0</span> &#125;,</span><br><span class="line"><span class="meta">#<span class="keyword">if</span> defined(HAVE_LIBTRACEEVENT) &amp;&amp; (defined(HAVE_LIBAUDIT_SUPPORT) || defined(HAVE_SYSCALL_TABLE_SUPPORT))</span></span><br><span class="line">	&#123; <span class="string">&quot;trace&quot;</span>,	cmd_trace,	<span class="number">0</span> &#125;,</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">	&#123; <span class="string">&quot;inject&quot;</span>,	cmd_inject,	<span class="number">0</span> &#125;,</span><br><span class="line">	&#123; <span class="string">&quot;mem&quot;</span>,	cmd_mem,	<span class="number">0</span> &#125;,</span><br><span class="line">	&#123; <span class="string">&quot;data&quot;</span>,	cmd_data,	<span class="number">0</span> &#125;,</span><br><span class="line">	&#123; <span class="string">&quot;ftrace&quot;</span>,	cmd_ftrace,	<span class="number">0</span> &#125;,</span><br><span class="line">	&#123; <span class="string">&quot;daemon&quot;</span>,	cmd_daemon,	<span class="number">0</span> &#125;,</span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> HAVE_LIBTRACEEVENT</span></span><br><span class="line">	&#123; <span class="string">&quot;kwork&quot;</span>,	cmd_kwork,	<span class="number">0</span> &#125;,</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>每个命令都对应一个C文件，在 tools&#x2F;perf 目录。</p>
+<p>后续以 <strong>perf stat ls</strong> 为例进行分析。</p>
+<h1 id="创建计数器"><a href="#创建计数器" class="headerlink" title="创建计数器"></a>创建计数器</h1><hr>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">perf_event_open</span><span class="params">(<span class="keyword">struct</span> perf_event_attr *attr,</span></span><br><span class="line"><span class="params">                    <span class="type">pid_t</span> pid,</span></span><br><span class="line"><span class="params">                    <span class="type">int</span> cpu,</span></span><br><span class="line"><span class="params">                    <span class="type">int</span> group_fd,</span></span><br><span class="line"><span class="params">                    <span class="type">unsigned</span> <span class="type">long</span> flags)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>perf_event_open() 是 Linux 提供的底层系统调用，用于 性能监控（Performance Monitoring），允许用户空间程序访问 CPU 硬件性能计数器（PMCs）、内核事件（如上下文切换、缺页异常）等。它是 perf 工具的核心实现基础。详细介绍参考<a href="https://man7.org/linux/man-pages/man2/perf_event_open.2.html">perf_event_open</a>。</p>
+<p>perf_event_open() 返回一个文件描述符，用于后续系统调用（如 read(2)、mmap(2)、prctl(2)、fcntl(2) 等）。</p>
+<p>调用 perf_event_open() 可创建一个文件描述符，用于测量性能信息。每个文件描述符对应一个被测量的事件；这些事件可以组合在一起同时测量多个事件。</p>
+<p>事件可以通过两种方式启用和禁用：通过 ioctl(2)和通过 prctl(2)。当一个事件被禁用时，它不会被计数或产生溢出，但仍然存在并保持其计数值。</p>
+<p>创建计数器的调用关系，以<a href="https://elixir.bootlin.com/linux/v6.6.36/source/tools/perf/perf.c">6.6.36</a>, <em>perf stat ls</em>为例(在432处调用的main)：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">perf.c:<span class="number">432</span>:main -&gt;</span><br><span class="line">  perf.c:<span class="number">535</span>:run_argv -&gt;</span><br><span class="line">    perf.c:<span class="number">419</span>:handle_internal_command -&gt;</span><br><span class="line">      perf.c:<span class="number">375</span>:run_builtin -&gt;</span><br><span class="line">        perf.c:<span class="number">322</span>:p-&gt;fn (cmd_stat) -&gt;</span><br><span class="line">          builtin_stat.c:<span class="number">2831</span>:run_perf_stat -&gt;</span><br><span class="line">            builtin_stat.c:<span class="number">960</span>:__run_perf_stat -&gt;</span><br><span class="line">              builtin_stat.c:<span class="number">745</span>:create_perf_stat_counter (evsel__open_per_thread-&gt;*-&gt;evsel__open_cpu) -&gt;</span><br><span class="line">                evsel.c:<span class="number">2073</span>:sys_perf_event_open -&gt;</span><br><span class="line">                  perf-sys.h:<span class="number">17</span>:syscall(__NR_perf_event_open, attr, pid, cpu, group_fd, flags);</span><br></pre></td></tr></table></figure>
+<p>上述流程会反复执行，直到所有cpu&#x2F;events被遍历。此时不涉及PMU，是软件行为。</p>
+<p>sys_perf_event_open 是一个包装函数，用于调用底层的 perf_event_open 系统调用。它通过 syscall 函数调用 __NR_perf_event_open，并传递上述参数。该函数的主要作用是打开一个性能事件，并返回一个文件描述符，用于后续的读取和控制。</p>
+<p>__NR_perf_event_open 是一个系统调用号，用于标识 perf_event_open 系统调用。在 Linux 系统中，每个系统调用都有一个唯一的编号，__NR_perf_event_open 就是 perf_event_open 系统调用的编号。</p>
+<h1 id="计数器计数"><a href="#计数器计数" class="headerlink" title="计数器计数"></a>计数器计数</h1><hr>
+<p>调用过程：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">perf.c:<span class="number">432</span>:main -&gt;</span><br><span class="line">  perf.c:<span class="number">535</span>:run_argv -&gt;</span><br><span class="line">    perf.c:<span class="number">419</span>:handle_internal_command -&gt;</span><br><span class="line">      perf.c:<span class="number">375</span>:run_builtin -&gt;</span><br><span class="line">        perf.c:<span class="number">322</span>:p-&gt;fn (cmd_stat) -&gt;</span><br><span class="line">          builtin_stat.c:<span class="number">2831</span>:run_perf_stat -&gt;</span><br><span class="line">            builtin_stat.c:<span class="number">960</span>:__run_perf_stat -&gt;</span><br><span class="line">              builtin_stat.c:<span class="number">872</span>:evlist__start_workload -&gt;</span><br><span class="line">                evlist.c:<span class="number">1537</span>:write(evlist-&gt;workload_fd, &amp;bf, <span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+<p>write是系统调用, 向 cork_fd 写入一个字节（bf），表示父进程已经准备好，子进程可以开始执行。结合os分析，就是先配置计数器然后再执行 perf 命令，最后关闭计数器。在 <code>builtin_stat.c:934:read_counters</code> 会更新统计结果。</p>
+<h1 id="打印结果"><a href="#打印结果" class="headerlink" title="打印结果"></a>打印结果</h1><hr>
+<p>调用过程：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">perf.c:<span class="number">432</span>:main -&gt;</span><br><span class="line">  perf.c:<span class="number">535</span>:run_argv -&gt;</span><br><span class="line">    perf.c:<span class="number">419</span>:handle_internal_command -&gt;</span><br><span class="line">      perf.c:<span class="number">375</span>:run_builtin -&gt;</span><br><span class="line">        perf.c:<span class="number">322</span>:p-&gt;fn (cmd_stat) -&gt;</span><br><span class="line">          builtin_stat.c:<span class="number">2841</span>:print_counters</span><br></pre></td></tr></table></figure>
+<p>从 run_perf_stat 退出后，会调用 print_counters 函数，打印结果。</p>
+<p>如下，是执行<code>perf stat ls</code>的打印结果</p>
+<img src="/2025/08/21/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-%E5%B7%A5%E5%85%B7%E8%B0%83%E7%94%A8%E5%88%86%E6%9E%90/image.png" class="">
+                
+                <hr>
+                <!-- Pager -->
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2025/08/26/Linux-Perf-介绍-——-Perf-内核及驱动支持/" data-toggle="tooltip" data-placement="top" title="Linux Perf 介绍 —— Perf 内核及驱动支持">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2025/08/21/Linux-Perf-介绍-——-Perf-命令行工具/" data-toggle="tooltip" data-placement="top" title="Linux Perf 介绍 —— Perf 命令行工具">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- tip start -->
+                
+
+                
+                <!-- tip end -->
+
+                <!-- Music start-->
+                
+                <!-- Music end -->
+
+                <!-- Sharing -->
+                
+                <!-- Sharing -->
+
+                <!-- gitment start -->
+                
+                <!-- gitment end -->
+
+                <!-- 来必力City版安装代码 -->
+                
+                <!-- City版安装代码已完成 -->
+
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+    
+      
+        <aside id="sidebar">
+          <div id="toc" class="toc-article">
+          <strong class="toc-title">Contents</strong>
+          
+            
+              <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E7%B3%BB%E5%88%97%E7%9B%AE%E5%BD%95"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">系列目录</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#Perf-%E5%91%BD%E4%BB%A4"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">Perf 命令</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E5%88%9B%E5%BB%BA%E8%AE%A1%E6%95%B0%E5%99%A8"><span class="toc-nav-number">3.</span> <span class="toc-nav-text">创建计数器</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E8%AE%A1%E6%95%B0%E5%99%A8%E8%AE%A1%E6%95%B0"><span class="toc-nav-number">4.</span> <span class="toc-nav-text">计数器计数</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E6%89%93%E5%8D%B0%E7%BB%93%E6%9E%9C"><span class="toc-nav-number">5.</span> <span class="toc-nav-text">打印结果</span></a></li></ol>
+            
+          
+          </div>
+        </aside>
+      
+    
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <!-- <h5><a href="/tags/">FEATURED TAGS</a></h5> -->
+                    <h5><a href="/tags/"></a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#RISC-V" title="RISC-V">RISC-V</a>
+                        
+                          <a class="tag" href="/tags/#Perf" title="Perf">Perf</a>
+                        
+                          <a class="tag" href="/tags/#Linux" title="Linux">Linux</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                
+                <script src="https://giscus.app/client.js"
+                    data-repo="AllenZF/allenzf.github.io"
+                    data-repo-id="R_kgDOQMASLQ"
+                    data-category="General"
+                    data-category-id="DIC_kwDOQMASLc4CxR4Q"
+                    data-mapping="pathname"
+                    data-strict="0"
+                    data-reactions-enabled="1"
+                    data-emit-metadata="0"
+                    data-input-position="bottom"
+                    data-theme="preferred_color_scheme"
+                    data-lang="en"
+                    crossorigin="anonymous"
+                    async>
+                </script>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: 'ℬ'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+
+
+<style  type="text/css">
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/AllenZF">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://gitee.com/Sven">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-stack-1x fa-inverse">码</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/people/zhou-lang-jie-feng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; 周郎借风 2025 
+                    <br>
+                    Powered by 
+                    <a href="https://github.com/dusign/hexo-theme-snail">
+                        <i>hexo-theme-snail</i>
+                    </a> | 
+                    <iframe name="star" style="margin-left: 2px; margin-bottom:-5px;" frameborder="0" scrolling="0"
+                        width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=dusign&repo=hexo-theme-snail&type=star&count=true">
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+
+</footer>
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- Search -->
+
+<script src="/js/search.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://allenzf.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-XXXXXXXX-X';
+    var _gaDomain = 'yoursite';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+<!-- Search -->
+
+    <script type="text/javascript">      
+        var search_path = "search.xml";
+        if (search_path.length == 0) {
+            search_path = "search.xml";
+        }
+    var path = "/" + search_path;
+    searchFunc(path, 'local-search-input', 'local-search-result');
+    </script>
+
+
+<!-- busuanzi -->
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+
+    
+        <!-- background effects line -->
+        
+
+        
+            <script type="text/javascript" src="/js/mouse-click.js" content='[&quot;🌱&quot;,&quot;just do it&quot;,&quot;🍀&quot;]' color='[&quot;rgb(121,93,179)&quot; ,&quot;rgb(76,180,231)&quot; ,&quot;rgb(184,90,154)&quot;]'></script>
+        
+
+        <!-- background effects end -->
+    
+
+    <!--<script size="50" alpha='0.3' zIndex="-999" src="/js/ribbonStatic.js"></script>-->
+    
+        <script src="/js/ribbonDynamic.js"></script>
+    
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+
+</html>

@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="baidu-site-verification" content="093lY4ziMu" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="记录点滴">
+    <meta name="keyword"  content="加油, 个人博客">
+    <link rel="shortcut icon" href="/img/ironman-draw.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <!--<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
+    <title>
+        
+          Linux Perf 介绍 —— Perf OpenSBI 支持 - Sven-Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://allenzf.github.io/2025/08/26/Linux-Perf-介绍-——-Perf-opensbi-支持/">
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+
+    <!-- Custom CSS --> 
+    
+        
+<link rel="stylesheet" href="/css/dusign-light.css">
+
+        
+<link rel="stylesheet" href="/css/dusign-common-light.css">
+
+        
+<link rel="stylesheet" href="/css/font-awesome.css">
+
+        
+<link rel="stylesheet" href="/css/toc.css">
+
+        <!-- background effects end -->
+    
+    
+    <!-- Pygments Highlight CSS -->
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+
+    
+<link rel="stylesheet" href="/css/widget.css">
+
+
+    
+<link rel="stylesheet" href="/css/rocket.css">
+
+
+    
+<link rel="stylesheet" href="/css/signature.css">
+
+
+    
+<link rel="stylesheet" href="/css/fonts.googleapis.css">
+
+
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+    <!-- photography -->
+    
+<link rel="stylesheet" href="/css/photography.css">
+
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+<meta name="generator" content="Hexo 8.1.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- background effects start -->
+    
+    <!-- background effects end -->
+
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            
+                background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('../../../../img/header_img/Iron-Man-3.jpg')
+                /*post*/
+            
+        
+    }
+    
+    #signature{
+        background-image: url('/img/signature/Just-do-it-white.png');
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#RISC-V" title="RISC-V">RISC-V</a>
+                            
+                              <a class="tag" href="/tags/#Perf" title="Perf">Perf</a>
+                            
+                              <a class="tag" href="/tags/#Linux" title="Linux">Linux</a>
+                            
+                        </div>
+                        <h1>Linux Perf 介绍 —— Perf OpenSBI 支持</h1>
+                        <h2 class="subheading"></h2>
+                        <span class="meta">
+                            Posted by 周郎借风 on
+                            2025-08-26
+                        </span>
+
+                        
+                            <div class="blank_box"></div>
+                            <span class="meta">
+                                Words <span class="post-count">1k</span> and
+                                Reading Time <span class="post-count">4</span> Minutes
+                            </span>
+                            <div class="blank_box"></div>
+                            <!-- 不蒜子统计 start -->
+                            <span class="meta">
+                                Viewed <span id="busuanzi_value_page_pv"><i class="fa fa-spinner fa-spin"></i></span> Times
+                            </span>
+                            <!-- 不蒜子统计 end -->
+                        
+
+                    </div>
+                
+
+                </div>
+            </div>
+        </div>      
+    </div>
+
+    
+    <div class="waveWrapper">
+        <div class="wave wave_before" style="background-image: url('/img/wave-light.png')"></div>
+        <div class="wave wave_after" style="background-image: url('/img/wave-light.png')"></div>
+    </div>
+    
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">周郎借风</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">主页</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/categories/">分类</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">关于</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">归档</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/photography/">摄影</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">标签</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+                    
+                    
+                    <li>
+                        <a href="https://allenzf.github.io" target="_blank">中文博客</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="系列目录"><a href="#系列目录" class="headerlink" title="系列目录"></a>系列目录</h1><hr>
+<p><a href="http://localhost:4000/2025/08/21/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7/">Linux Perf 介绍 —— Perf 命令行工具</a><br><a href="http://localhost:4000/2025/08/21/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-%E5%B7%A5%E5%85%B7%E8%B0%83%E7%94%A8%E5%88%86%E6%9E%90/">Linux Perf 介绍-—— Perf 工具调用分析</a><br><a href="http://localhost:4000/2025/08/26/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-%E5%86%85%E6%A0%B8%E5%8F%8A%E9%A9%B1%E5%8A%A8%E6%94%AF%E6%8C%81/">Linux Perf 介绍 —— Perf 内核及驱动支持</a><br><a href="http://localhost:4000/2025/08/26/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-opensbi-%E6%94%AF%E6%8C%81/">Linux Perf 介绍 —— Perf OpenSBI 支持</a><br><a href="http://localhost:4000/2025/08/26/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-%E6%80%BB%E7%BB%93/">Linux Perf 介绍 —— Perf 总结</a></p>
+<h1 id="初始化的-ecall-跟踪"><a href="#初始化的-ecall-跟踪" class="headerlink" title="初始化的 ecall 跟踪"></a>初始化的 ecall 跟踪</h1><hr>
+<p>整体过程：</p>
+<ol>
+<li><p>获取计数器数量。os 通过 ecall 调用 sbi_pmu_num_ctr 从而返回平台支持的计数器数量，在 xuantie c920v3 中，该函数返回 48 个计数器，包括32个硬件计数器，16 个软件计数器。</p>
+</li>
+<li><p>获取计数器信息。os 通过 ecall 调用 sbi_pmu_get_ctr_info 获取计数器信息，返回计数器信息结构体。</p>
+</li>
+</ol>
+<img src="/2025/08/26/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-opensbi-%E6%94%AF%E6%8C%81/image.png" class="">
+<p>因此当为 mcycle 时，返回 0x3fc00, 其中 0xc00 是 csr 地址，0x3f 是计数器宽度，表示64位计数器。若为 FW 计数器，则返回 0x800000000003f000, 其最高位为1，表示计数器是软件计数器，0x3f 表示宽度为64位，csr 地址为 0，因为不需要csr. 这一步会对第一步返回的48个计数器进行遍历。因此，在实现上暗含所有core的pmu相同的信息。</p>
+<ol start="3">
+<li>停止 cycles&#x2F;instructions 事件<br>由于索引 idx&#x3D;0 是 cycle, idx &#x3D; 1 是 time, idx &#x3D; 2 是 instret，这3个计数器是专用的，因此，opensbi 初始化时，针对这3个计数器设置了专门的标志，而且标志不可修改。因此，初始化时对这3个计数进行了停止操作（置位mcountinhibit）。</li>
+</ol>
+<h1 id="运行-Perf-时-ecall-跟踪"><a href="#运行-Perf-时-ecall-跟踪" class="headerlink" title="运行 Perf 时 ecall 跟踪"></a>运行 Perf 时 ecall 跟踪</h1><p>执行命令<code>perf stat -e cycles,instructions date &gt; /dev/null</code>，对 <code>sbi_ecall_pmu_handler</code> 函数断点跟踪。生成日志 <a href="gdb.log_perf_stat_-e_cycles_instructions_date_dev_null">gdblog</a>。</p>
+<p>整理相关参数如下：</p>
+<table>
+<thead>
+<tr>
+<th>No.</th>
+<th>A0</th>
+<th>A1</th>
+<th>A2</th>
+<th>A3</th>
+<th>A6</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>0</td>
+<td>mask</td>
+<td>0x18</td>
+<td>1</td>
+<td>2</td>
+<td>SBI_EXT_PMU_COUNTER_CFG_MATCH SBI_PMU_CFG_FLAG_SET_VUINH SBI_PMU_CFG_FLAG_SET_VSINH event_idx&#x3D;1 ，对应 pmu_sbi_ctr_get_idx 的 ecall 调用，配置 mhpmevent，事件编码1，HW事件 cpu_cycles, 并返回可用索引值</td>
+</tr>
+<tr>
+<td>2</td>
+<td>0x1f</td>
+<td>1</td>
+<td>1</td>
+<td>ival</td>
+<td>3</td>
+<td>SBI_EXT_PMU_COUNTER_START SBI_PMU_START_FLAG_SET_INIT_VALUE，配置 mcountinhibit 和 mhpmcounter，索引值 0x1f (由上一步返回给os), counter初始值 0x8000000000000001，此步执行后开始计数</td>
+</tr>
+<tr>
+<td>3</td>
+<td>0</td>
+<td>mask</td>
+<td>0x18</td>
+<td>2</td>
+<td>2</td>
+<td>SBI_EXT_PMU_COUNTER_CFG_MATCH SBI_PMU_CFG_FLAG_SET_VUINH SBI_PMU_CFG_FLAG_SET_VSINH event_idx&#x3D;2, 与第一步相似，只是事件编码为2，instruction 事件</td>
+</tr>
+<tr>
+<td>4</td>
+<td>0x1e</td>
+<td>1</td>
+<td>1</td>
+<td>ival</td>
+<td>3</td>
+<td>SBI_EXT_PMU_COUNTER_START SBI_PMU_START_FLAG_SET_INIT_VALUE</td>
+</tr>
+<tr>
+<td>5</td>
+<td>0x1f</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>4</td>
+<td>SBI_EXT_PMU_COUNTER_STOP</td>
+</tr>
+<tr>
+<td>6</td>
+<td>0x1f</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>4</td>
+<td>SBI_EXT_PMU_COUNTER_STOP SBI_PMU_STOP_FLAG_RESET</td>
+</tr>
+<tr>
+<td>7</td>
+<td>0x1e</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>4</td>
+<td>SBI_EXT_PMU_COUNTER_STOP</td>
+</tr>
+<tr>
+<td>8</td>
+<td>0x1e</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>4</td>
+<td>SBI_EXT_PMU_COUNTER_STOP SBI_PMU_STOP_FLAG_RESET</td>
+</tr>
+</tbody></table>
+<p>mask&#x3D;0xfffffffffffd;<br>ival&#x3D;0x8000000000000001;</p>
+<ul>
+<li>A0表示counter索引，从0开始到31表示硬件计数器，分别代表cycle, time, instret, hpmN, 32~47表示 FW 计数器。</li>
+<li>A1表示counter mask，每个比特对应一个计数器。</li>
+<li>A2为flag，针对不同的 SBI PMU 扩展类型，解释不同。0x18, 表示设置 VSINH&#x2F;VUINH; 1在START时表示设置初始值，在STOP时表示清理active标志，这个标志表示计数器当前正在统计的事件编码。</li>
+<li>A3为事件索引，格式由 SBI PMU 扩展定义。当A3为ival时表示要写入 counter 的值。</li>
+<li>A4&#x2F;A5在HW事件中未使用；</li>
+<li>A6是 SBI PMU 扩展定义的功能</li>
+<li>A7是固定值，表示ecall触发PMU事件。</li>
+</ul>
+<p>结合代码和调试，perf 命令并未使用 cycle 和 instret 计数器，而是使用 HPM 来实现 cycles 和 instructions 计数，这是因为 xuantie 实现了 sscofpmf 扩展，在这种情况下 opensbi 会优先选择 HPM 计数器。</p>
+<p>因此，整个过程：</p>
+<ol>
+<li>从最后一个计数器开始，搜索可用于 <strong>cycles</strong> 事件的 HPM, 当搜索到 HPM 后，根据传入的 event_idx 从设备树上找到 mhpmevent 的配置值，然后更新 mhpmevent, 若 sscof 扩展支持，需要根据 flag 设置中断溢出 OF 和 INH 字段。最后返回索引值。</li>
+<li>使用第一步返回的索引，设置 mhpmcounter 和 mcountinhibit 寄存器。counter 初始值由 os 下发，根据 flag 决定是否进行初始化。最后启动计数器。</li>
+<li>重复第一、二步，但事件换成 <strong>instructions</strong> 事件。</li>
+<li>Perf 执行完后，发出 STOP 的 ecall 信号(A6&#x3D;4)，并将 phs-&gt;active_events[idx] 标志清除。</li>
+</ol>
+<p>上述过程是最简单的事件统计，当执行 <code>perf stat sleep 1s</code> 这种需要长时间完成的命令时，会因为cpu的时间片到期反复执行上述 <code>cfg_match -&gt; start -&gt; stop</code> 过程，而且 os 还会矫正更新时间，过程更加复杂。</p>
+
+                
+                <hr>
+                <!-- Pager -->
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2025/08/26/Linux-Perf-介绍-——-Perf-总结/" data-toggle="tooltip" data-placement="top" title="Linux Perf 介绍 —— Perf 总结">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2025/08/26/Linux-Perf-介绍-——-Perf-内核及驱动支持/" data-toggle="tooltip" data-placement="top" title="Linux Perf 介绍 —— Perf 内核及驱动支持">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- tip start -->
+                
+
+                
+                <!-- tip end -->
+
+                <!-- Music start-->
+                
+                <!-- Music end -->
+
+                <!-- Sharing -->
+                
+                <!-- Sharing -->
+
+                <!-- gitment start -->
+                
+                <!-- gitment end -->
+
+                <!-- 来必力City版安装代码 -->
+                
+                <!-- City版安装代码已完成 -->
+
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+    
+      
+        <aside id="sidebar">
+          <div id="toc" class="toc-article">
+          <strong class="toc-title">Contents</strong>
+          
+            
+              <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E7%B3%BB%E5%88%97%E7%9B%AE%E5%BD%95"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">系列目录</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E7%9A%84-ecall-%E8%B7%9F%E8%B8%AA"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">初始化的 ecall 跟踪</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E8%BF%90%E8%A1%8C-Perf-%E6%97%B6-ecall-%E8%B7%9F%E8%B8%AA"><span class="toc-nav-number">3.</span> <span class="toc-nav-text">运行 Perf 时 ecall 跟踪</span></a></li></ol>
+            
+          
+          </div>
+        </aside>
+      
+    
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <!-- <h5><a href="/tags/">FEATURED TAGS</a></h5> -->
+                    <h5><a href="/tags/"></a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#RISC-V" title="RISC-V">RISC-V</a>
+                        
+                          <a class="tag" href="/tags/#Perf" title="Perf">Perf</a>
+                        
+                          <a class="tag" href="/tags/#Linux" title="Linux">Linux</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                
+                <script src="https://giscus.app/client.js"
+                    data-repo="AllenZF/allenzf.github.io"
+                    data-repo-id="R_kgDOQMASLQ"
+                    data-category="General"
+                    data-category-id="DIC_kwDOQMASLc4CxR4Q"
+                    data-mapping="pathname"
+                    data-strict="0"
+                    data-reactions-enabled="1"
+                    data-emit-metadata="0"
+                    data-input-position="bottom"
+                    data-theme="preferred_color_scheme"
+                    data-lang="en"
+                    crossorigin="anonymous"
+                    async>
+                </script>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: 'ℬ'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+
+
+<style  type="text/css">
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/AllenZF">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://gitee.com/Sven">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-stack-1x fa-inverse">码</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/people/zhou-lang-jie-feng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; 周郎借风 2025 
+                    <br>
+                    Powered by 
+                    <a href="https://github.com/dusign/hexo-theme-snail">
+                        <i>hexo-theme-snail</i>
+                    </a> | 
+                    <iframe name="star" style="margin-left: 2px; margin-bottom:-5px;" frameborder="0" scrolling="0"
+                        width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=dusign&repo=hexo-theme-snail&type=star&count=true">
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+
+</footer>
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- Search -->
+
+<script src="/js/search.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://allenzf.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-XXXXXXXX-X';
+    var _gaDomain = 'yoursite';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+<!-- Search -->
+
+    <script type="text/javascript">      
+        var search_path = "search.xml";
+        if (search_path.length == 0) {
+            search_path = "search.xml";
+        }
+    var path = "/" + search_path;
+    searchFunc(path, 'local-search-input', 'local-search-result');
+    </script>
+
+
+<!-- busuanzi -->
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+
+    
+        <!-- background effects line -->
+        
+
+        
+            <script type="text/javascript" src="/js/mouse-click.js" content='[&quot;🌱&quot;,&quot;just do it&quot;,&quot;🍀&quot;]' color='[&quot;rgb(121,93,179)&quot; ,&quot;rgb(76,180,231)&quot; ,&quot;rgb(184,90,154)&quot;]'></script>
+        
+
+        <!-- background effects end -->
+    
+
+    <!--<script size="50" alpha='0.3' zIndex="-999" src="/js/ribbonStatic.js"></script>-->
+    
+        <script src="/js/ribbonDynamic.js"></script>
+    
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+
+</html>

@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="baidu-site-verification" content="093lY4ziMu" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="记录点滴">
+    <meta name="keyword"  content="加油, 个人博客">
+    <link rel="shortcut icon" href="/img/ironman-draw.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <!--<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
+    <title>
+        
+          Linux tracing 追踪体系 - Sven-Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://allenzf.github.io/2025/10/30/Linux-tracing-追踪体系/">
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+
+    <!-- Custom CSS --> 
+    
+        
+<link rel="stylesheet" href="/css/dusign-light.css">
+
+        
+<link rel="stylesheet" href="/css/dusign-common-light.css">
+
+        
+<link rel="stylesheet" href="/css/font-awesome.css">
+
+        
+<link rel="stylesheet" href="/css/toc.css">
+
+        <!-- background effects end -->
+    
+    
+    <!-- Pygments Highlight CSS -->
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+
+    
+<link rel="stylesheet" href="/css/widget.css">
+
+
+    
+<link rel="stylesheet" href="/css/rocket.css">
+
+
+    
+<link rel="stylesheet" href="/css/signature.css">
+
+
+    
+<link rel="stylesheet" href="/css/fonts.googleapis.css">
+
+
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+    <!-- photography -->
+    
+<link rel="stylesheet" href="/css/photography.css">
+
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+<meta name="generator" content="Hexo 8.1.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- background effects start -->
+    
+    <!-- background effects end -->
+
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            
+                background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('../../../../img/header_img/Iron-Man-3.jpg')
+                /*post*/
+            
+        
+    }
+    
+    #signature{
+        background-image: url('/img/signature/Just-do-it-white.png');
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#Linux" title="Linux">Linux</a>
+                            
+                              <a class="tag" href="/tags/#trace" title="trace">trace</a>
+                            
+                              <a class="tag" href="/tags/#tracefs" title="tracefs">tracefs</a>
+                            
+                        </div>
+                        <h1>Linux tracing 追踪体系</h1>
+                        <h2 class="subheading"></h2>
+                        <span class="meta">
+                            Posted by 周郎借风 on
+                            2025-10-30
+                        </span>
+
+                        
+                            <div class="blank_box"></div>
+                            <span class="meta">
+                                Words <span class="post-count">4k</span> and
+                                Reading Time <span class="post-count">15</span> Minutes
+                            </span>
+                            <div class="blank_box"></div>
+                            <!-- 不蒜子统计 start -->
+                            <span class="meta">
+                                Viewed <span id="busuanzi_value_page_pv"><i class="fa fa-spinner fa-spin"></i></span> Times
+                            </span>
+                            <!-- 不蒜子统计 end -->
+                        
+
+                    </div>
+                
+
+                </div>
+            </div>
+        </div>      
+    </div>
+
+    
+    <div class="waveWrapper">
+        <div class="wave wave_before" style="background-image: url('/img/wave-light.png')"></div>
+        <div class="wave wave_after" style="background-image: url('/img/wave-light.png')"></div>
+    </div>
+    
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">周郎借风</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">主页</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/categories/">分类</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">关于</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">归档</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/photography/">摄影</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">标签</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+                    
+                    
+                    <li>
+                        <a href="https://allenzf.github.io" target="_blank">中文博客</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <p>本文章由 Qwen3-Max 生成，由作者整理。</p>
+<hr>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p><a href="https://www.kernel.org/doc/html/latest/trace/index.html">Linux Tracing Technologies Guide</a></p>
+<hr>
+<h2 id="Linux-追踪体系概览"><a href="#Linux-追踪体系概览" class="headerlink" title="Linux 追踪体系概览"></a>Linux 追踪体系概览</h2><p>Linux 内核提供了多层次、模块化的追踪基础设施，统称为 Linux Tracing Technologies。其核心目标是：</p>
+<ul>
+<li>观测内核行为（函数调用、中断、调度等）</li>
+<li>分析性能瓶颈（延迟、抖动、锁竞争）</li>
+<li>调试系统异常（死锁、崩溃、资源泄漏）</li>
+</ul>
+<p>主要技术栈包括：</p>
+<ul>
+<li>软件追踪：ftrace、tracepoints、kprobes&#x2F;uprobes、event tracing</li>
+<li>硬件辅助追踪：CoreSight（ARM）、Intel Trace Hub</li>
+<li>专用延迟分析器：irqsoff、preemptoff、osnoise、timerlat</li>
+<li>用户态追踪接口：user_events、tracefs</li>
+</ul>
+<p>所有追踪数据通过统一的 tracefs 文件系统暴露给用户空间（传统通过 debugfs，现推荐 tracefs）。</p>
+<img src="/2025/10/30/Linux-tracing-%E8%BF%BD%E8%B8%AA%E4%BD%93%E7%B3%BB/linux_tracing_system.svg" class="" title="Linux追踪体系图">
+
+<hr>
+<h2 id="静态追踪点-——-Tracepoints-与-Event-Tracing"><a href="#静态追踪点-——-Tracepoints-与-Event-Tracing" class="headerlink" title="静态追踪点 —— Tracepoints 与 Event Tracing"></a>静态追踪点 —— Tracepoints 与 Event Tracing</h2><h3 id="Tracepoints-机制"><a href="#Tracepoints-机制" class="headerlink" title="Tracepoints 机制"></a>Tracepoints 机制</h3><p>Tracepoints 是内核中预定义的静态插桩点，由开发者在关键路径（如调度、内存分配、文件操作）插入。其优势在于：</p>
+<ul>
+<li>开销极低（默认关闭时无影响）</li>
+<li>语义明确，稳定性高</li>
+<li>无需动态指令修改</li>
+</ul>
+<p>每个 tracepoint 需在头文件中定义，并在代码中调用。</p>
+<p>想要自定义追踪点，参考<a href="https://www.kernel.org/doc/html/latest/trace/tracepoints.html">Using the Linux Kernel Tracepoints</a>.</p>
+<h3 id="Event-Tracing-系统"><a href="#Event-Tracing-系统" class="headerlink" title="Event Tracing 系统"></a>Event Tracing 系统</h3><p>Tracepoints 可自动注册为”事件”，通过 &#x2F;sys&#x2F;kernel&#x2F;tracing&#x2F;events&#x2F; 下的目录暴露，可用于跟踪的事件可以在文件 &#x2F;sys&#x2F;kernel&#x2F;tracing&#x2F;available_events 中找到。用户可：</p>
+<ul>
+<li>启用&#x2F;禁用事件</li>
+<li>设置过滤条件（如 pid &#x3D;&#x3D; 123）</li>
+<li>配置触发器（如 stacktrace、snapshot）</li>
+<li>查看事件格式（format 文件）</li>
+</ul>
+<p><strong>并非所有</strong> tracepoint 都支持事件追踪，需开发者提供格式定义。</p>
+<p>该机制无需编写内核模块即可使用。</p>
+<p>具体使用可参考<a href="https://www.kernel.org/doc/html/latest/trace/events.html">Event Tracing</a>.</p>
+<hr>
+<h2 id="ftrace-——-内核函数追踪器"><a href="#ftrace-——-内核函数追踪器" class="headerlink" title="ftrace —— 内核函数追踪器"></a>ftrace —— 内核函数追踪器</h2><h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>ftrace（Function Tracer）是 Linux 内核内置的轻量级追踪框架，专为内核开发者设计，用于分析函数调用、延迟、调度行为等。它无需加载额外模块，通过 <code>/sys/kernel/tracing</code>（即 tracefs）暴露控制接口。<strong>ftrace 已经不仅仅是函数追踪器，已经发展成内核的追踪器框架</strong>。ftrace 是内核内置的轻量级追踪框架，支持多种 tracer.</p>
+<h3 id="核心功能"><a href="#核心功能" class="headerlink" title="核心功能"></a>核心功能</h3><ul>
+<li>function tracer：追踪所有内核函数调用。</li>
+<li>function_graph tracer：以类似调用图的方式显示函数入口与返回，支持嵌套深度分析。</li>
+<li>latency tracers：<ul>
+<li><code>irqsoff</code>：追踪中断关闭期间的最大延迟。</li>
+<li><code>preemptoff</code>：追踪抢占关闭期间的延迟。</li>
+<li><code>preemptirqsoff</code>：同时追踪中断与抢占关闭。</li>
+<li><code>wakeup</code> &#x2F; <code>wakeup_rt</code>：追踪高优先级任务被唤醒的延迟。</li>
+</ul>
+</li>
+<li>stack tracer：监控内核栈使用深度（需 CONFIG_STACK_TRACER）。</li>
+<li>snapshot：保存当前追踪缓冲区快照。</li>
+<li>instances：支持多实例并行追踪，互不干扰。</li>
+</ul>
+<h3 id="使用方式"><a href="#使用方式" class="headerlink" title="使用方式"></a>使用方式</h3><p>通过写入 tracefs 文件控制行为，例如：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="keyword">function</span> &gt; /sys/kernel/tracing/current_tracer</span><br><span class="line"><span class="built_in">echo</span> do_fork &gt; /sys/kernel/tracing/set_ftrace_filter</span><br><span class="line"><span class="built_in">cat</span> /sys/kernel/tracing/trace</span><br></pre></td></tr></table></figure>
+<p>ftrace 支持动态过滤（<code>set_ftrace_filter</code>）、排除（<code>set_ftrace_notrace</code>）和格式化输出。</p>
+<h3 id="高级特性"><a href="#高级特性" class="headerlink" title="高级特性"></a>高级特性</h3><ul>
+<li>dynamic ftrace：仅在启用追踪时插入跳转指令，运行时开销极低。</li>
+<li>Fprobe：在函数入口&#x2F;出口插入轻量探针（类似 kretprobe，但更高效）。</li>
+<li>boot-time tracing：通过内核启动参数（如 <code>ftrace=function</code>）在早期阶段启用追踪。</li>
+</ul>
+<hr>
+<h2 id="动态探针-——-Kprobes、Uprobes、Eprrobes"><a href="#动态探针-——-Kprobes、Uprobes、Eprrobes" class="headerlink" title="动态探针 —— Kprobes、Uprobes、Eprrobes"></a>动态探针 —— Kprobes、Uprobes、Eprrobes</h2><h3 id="Kprobes（内核探针）"><a href="#Kprobes（内核探针）" class="headerlink" title="Kprobes（内核探针）"></a>Kprobes（内核探针）</h3><p>Kprobes 允许在任意内核指令地址动态插入探针，无需修改内核代码或重启系统。支持两种类型：</p>
+<ul>
+<li>kprobe：在指定地址插入探针（函数入口或中间指令）。</li>
+<li>kretprobe：在函数返回时触发。<br>Kprobes 可用于性能分析、故障注入、安全监控等。其开销高于 tracepoints，但灵活性极高。</li>
+</ul>
+<h3 id="Uprobes（用户态探针）"><a href="#Uprobes（用户态探针）" class="headerlink" title="Uprobes（用户态探针）"></a>Uprobes（用户态探针）</h3><p>Uprobes 是 Kprobes 的用户空间对应物，可对用户态程序的任意函数或地址进行追踪。常用于应用性能分析、系统调用拦截等。</p>
+<h3 id="基于探针的事件追踪"><a href="#基于探针的事件追踪" class="headerlink" title="基于探针的事件追踪"></a>基于探针的事件追踪</h3><p>Kprobe 和 Uprobe 可注册为“事件”（events），通过 tracefs 暴露为可读写的事件节点，支持过滤、触发器和直方图统计。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;p:myprobe do_sys_open&#x27;</span> &gt; /sys/kernel/tracing/kprobe_events</span><br><span class="line"><span class="built_in">echo</span> 1 &gt; /sys/kernel/tracing/events/kprobes/myprobe/enable</span><br></pre></td></tr></table></figure>
+
+<h3 id="Eprobes（事件探针）"><a href="#Eprobes（事件探针）" class="headerlink" title="Eprobes（事件探针）"></a>Eprobes（事件探针）</h3><p>在 Linux 中，<code>EPROBE</code> 并不是一个独立的探针类型，而是与 tracefs 动态事件（dynamic events） 相关的一个概念。具体来说，EPROBE 是 Linux 内核中用于 事件探针（event probe） 的一种动态追踪机制，它允许用户基于已有的 trace event 创建新的、可定制的探针。</p>
+<ul>
+<li><p>什么是 EPROBE</p>
+<ul>
+<li><code>EPROBE</code> 是一种 基于现有 <code>trace event</code> 的动态探针，它利用 <code>tracefs</code> 文件系统（通常挂载在 <code>/sys/kernel/tracing/</code>）来定义和管理。</li>
+<li>它不同于传统的 <code>kprobe</code>（内核函数&#x2F;指令级探针）或 <code>uprobe</code>（用户空间探针），而是 对已有 tracepoint 事件进行“再包装”或“再采样”，可以附加过滤器、修改字段、重命名等。</li>
+<li>在内核 API 中，可以通过 <code>tracefs_eprobe_alloc()</code> 来分配一个 <code>EPROBE</code> 探针结构，该结构描述了事件探针的配置。</li>
+</ul>
+</li>
+<li><p>与 Kprobe 的区别</p>
+<ul>
+<li>Kprobe：直接插入到内核任意函数或指令地址，用于动态插桩，适用于没有 tracepoint 的代码路径。</li>
+<li>EPROBE：必须基于已存在的 trace event（如 sched&#x2F;sched_switch、irq&#x2F;irq_handler_entry 等），不能直接挂钩到任意地址，但使用更安全、开销更低。</li>
+</ul>
+</li>
+<li><p>使用方式（简要）<br>EPROBE 通常通过写入 <code>tracefs</code> 中的 <code>dyn_events</code> 文件来创建，例如：</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;e:my_sched_switch sched/sched_switch prev_comm=$prev_comm next_comm=$next_comm&#x27;</span> &gt; /sys/kernel/tracing/dyn_events</span><br></pre></td></tr></table></figure>
+<p>这会创建一个名为 <code>my_sched_switch</code> 的 EPROBE，它基于 <code>sched/sched_switch</code> 事件，并只提取部分字段。</p>
+<p>启用后，可以在 <code>events/eprobes/</code> 目录下看到该事件，并通过 <code>trace</code> 或 <code>trace_pipe</code> 读取。</p>
+<hr>
+<h2 id="专用延迟分析器"><a href="#专用延迟分析器" class="headerlink" title="专用延迟分析器"></a>专用延迟分析器</h2><h3 id="OSNOISE-Tracer"><a href="#OSNOISE-Tracer" class="headerlink" title="OSNOISE Tracer"></a>OSNOISE Tracer</h3><p>用于测量操作系统噪声（OS Noise），即干扰实时任务执行的内核活动（如 IRQ、SoftIRQ、线程调度）。它统计每种干扰源的持续时间和次数。</p>
+<h3 id="Timerlat-Tracer"><a href="#Timerlat-Tracer" class="headerlink" title="Timerlat Tracer"></a>Timerlat Tracer</h3><p>专为实时调度延迟设计。它在每个 CPU 上创建高优先级内核线程，周期性设置定时器并测量：</p>
+<ul>
+<li>IRQ 延迟：从定时器到期到 IRQ 处理开始</li>
+<li>Thread 延迟：从 IRQ 到实时线程被唤醒并运行</li>
+</ul>
+<p>帮助开发者定位导致 wakeup 延迟的根源。常与用户工具 rtla timerlat 配合使用。</p>
+<hr>
+<h2 id="用户事件"><a href="#用户事件" class="headerlink" title="用户事件"></a>用户事件</h2><p>一种 用户态主动注册事件 的机制，允许用户程序显式地向内核注册自定义追踪事件。程序需主动调用特定接口（如写入 tracefs 或使用 ring buffer）来“触发”事件。类似于用户态的 racepoint，但由用户程序定义格式和内容。允许用户态程序向内核追踪系统注册自定义事件，实现用户-内核联合追踪。</p>
+<hr>
+<h2 id="硬件辅助追踪"><a href="#硬件辅助追踪" class="headerlink" title="硬件辅助追踪"></a>硬件辅助追踪</h2><ul>
+<li>ARM CoreSight</li>
+<li>X86 Trace Hub</li>
+<li>RISC-V N&#x2F;E-Trace</li>
+</ul>
+<p>硬件辅助追踪（HW-assisted tracing）是一种用于追踪内核和用户态程序的硬件技术，它利用了硬件的硬件支持，如 CoreSight、Trace Hub 或 RISC-V N&#x2F;E-Trace 等，来提高追踪效率。这些硬件支持通常与 CPU、内存、存储设备、外设等硬件组件一起工作，抓取CPU的指令流，通用寄存器，MSR&#x2F;CSR, 内存数据等，通过应用软件解析生成可视化追踪数据，以提供更高效的追踪功能。</p>
+<h2 id="eBPF"><a href="#eBPF" class="headerlink" title="eBPF"></a>eBPF</h2><h3 id="eBPF-是什么"><a href="#eBPF-是什么" class="headerlink" title="eBPF 是什么"></a>eBPF 是什么</h3><p>eBPF 是一种革命性技术，起源于 Linux 内核，能够在特权环境（如操作系统内核）中运行沙箱程序。它可以在不修改内核源代码或加载内核模块的情况下，安全高效地扩展内核功能。</p>
+<p>eBPF 是一种安全、高效、可编程的内核虚拟机技术, 是类似 Linux Tracing 的高层次可编程框架，允许用户在不修改内核源码、不加载内核模块的前提下，在内核中运行沙箱化的程序（称为 eBPF 程序），用于：</p>
+<ul>
+<li>网络（XDP、tc）</li>
+<li>安全（LSM hooks）</li>
+<li>追踪与性能分析（Tracing &amp; Profiling）</li>
+<li>调度、存储等</li>
+</ul>
+<p>应用程序开发者可以在运行时通过 eBPF 程序向操作系统添加额外功能。操作系统通过借助即时编译器（JIT）和验证引擎，保证了安全性和执行效率，如同原生编译一般。这引发了一系列基于 eBPF 的项目，覆盖了广泛的应用场景，包括下一代网络、可观测性和安全功能。</p>
+<p>如今，eBPF 被广泛用于推动各种应用场景：在现代数据中心和云原生环境中提供高性能网络和负载均衡，以低开销提取细粒度的安全可观测性数据，帮助应用程序开发者追踪应用，为性能故障排查提供洞见，实施预防性的应用程序和容器运行时安全策略，等等。可能性无限，而 eBPF 正在解锁的创新才刚刚开始。</p>
+<p><a href="https://ebpf.io/">ebpf.io</a></p>
+<h3 id="eBPF-与内核追踪技术的关系"><a href="#eBPF-与内核追踪技术的关系" class="headerlink" title="eBPF 与内核追踪技术的关系"></a>eBPF 与内核追踪技术的关系</h3><p>eBPF 本身不是追踪器，而是一个可编程的执行引擎，它可以挂载到各种追踪“钩子”（hooks）上，这些钩子包括：</p>
+<table>
+<thead>
+<tr>
+<th>钩子类型</th>
+<th>对应内核机制</th>
+<th>eBPF 支持</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>函数入口&#x2F;出口</td>
+<td>ftrace &#x2F; kprobes</td>
+<td>✅ kprobe &#x2F; kretprobe 程序类型</td>
+</tr>
+<tr>
+<td>用户态函数</td>
+<td>uprobes</td>
+<td>✅ uprobe &#x2F; uretprobe</td>
+</tr>
+<tr>
+<td>静态插桩点</td>
+<td>tracepoints</td>
+<td>✅ tracepoint 程序类型</td>
+</tr>
+<tr>
+<td>性能计数器</td>
+<td>perf_events</td>
+<td>✅ perf_event 程序类型</td>
+</tr>
+<tr>
+<td>调度事件</td>
+<td>sched tracepoints</td>
+<td>✅（如 sched:sched_switch）</td>
+</tr>
+<tr>
+<td>自定义事件</td>
+<td>user_events（Linux</td>
+<td>5.17+）	✅ 可通过 tracepoint 接口挂载</td>
+</tr>
+</tbody></table>
+<p>eBPF 重度依赖并扩展了 ftrace、kprobes、uprobes、tracepoints 等机制。</p>
+<h3 id="eBPF-在追踪中的优势"><a href="#eBPF-在追踪中的优势" class="headerlink" title="eBPF 在追踪中的优势"></a>eBPF 在追踪中的优势</h3><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>ftrace &#x2F; tracefs events</th>
+<th>eBPF</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>数据过滤</td>
+<td>基础字符串&#x2F;数值过滤</td>
+<td>✅ 任意逻辑（if&#x2F;else、循环受限）</td>
+</tr>
+<tr>
+<td>数据聚合</td>
+<td>需借助 hist 触发器</td>
+<td>✅ 内置 maps（hash、array、lru 等）</td>
+</tr>
+<tr>
+<td>上下文访问</td>
+<td>有限（依赖事件定义）</td>
+<td>✅ 可读取寄存器、栈、内存（安全校验后）</td>
+</tr>
+<tr>
+<td>输出格式</td>
+<td>固定文本</td>
+<td>✅ 自定义结构化数据（通过 perf&#x2F;ringbuf）</td>
+</tr>
+<tr>
+<td>用户态交互</td>
+<td>读 trace_pipe</td>
+<td>✅ 高效共享内存（ring buffer, perf buffer）</td>
+</tr>
+<tr>
+<td>多事件关联</td>
+<td>困难</td>
+<td>✅ 通过 maps 跨事件状态跟踪（如 PID → 请求ID）</td>
+</tr>
+</tbody></table>
+<h3 id="典型-eBPF-追踪工具"><a href="#典型-eBPF-追踪工具" class="headerlink" title="典型 eBPF 追踪工具"></a>典型 eBPF 追踪工具</h3><ul>
+<li><p>BCC (BPF Compiler Collection)<br>提供 Python&#x2F;C++ 前端，封装 kprobe&#x2F;uprobe&#x2F;tracepoint 使用，如 opensnoop, execsnoop, profile。</p>
+</li>
+<li><p>bpftrace<br>类似 awk 的脚本语言，直接写单行追踪命令：</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bpftrace -e <span class="string">&#x27;tracepoint:syscalls:sys_enter_openat &#123; printf(&quot;%s %s\n&quot;, comm, str(args-&gt;filename)); &#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>libbpf + CO-RE<br>用于生产级 eBPF 应用开发（如 Pixie, Parca, Pixie, Datadog）。</li>
+</ul>
+<p>现代 Linux 追踪 &#x3D; 内核追踪基础设施（ftrace 等） + eBPF 可编程能力。</p>
+<h2 id="tracefs"><a href="#tracefs" class="headerlink" title="tracefs"></a>tracefs</h2><p>tracefs 是 Linux 内核提供的一个文件系统，用于提供内核追踪功能。它提供了一系列文件，用于配置和查看内核的追踪信息。<code>/sys/kernel/tracing</code> 的主要文件及目录如下，</p>
+<table>
+<thead>
+<tr>
+<th align="left">概念</th>
+<th align="left">文件及路径名</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong><span style="color: #FFA500">核心追踪后端与控制</span></strong></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">说明</td>
+<td align="left">README</td>
+<td align="left">简要说明 tracefs 的用途和基本操作</td>
+</tr>
+<tr>
+<td align="left">当前激活的追踪器</td>
+<td align="left">current_tracer</td>
+<td align="left">设置&#x2F;读取当前使用的追踪器（如 function,function_graph,nop等）</td>
+</tr>
+<tr>
+<td align="left">可用的追踪器列表</td>
+<td align="left">available_tracers</td>
+<td align="left">用于配置到current_tracer</td>
+</tr>
+<tr>
+<td align="left">追踪开关</td>
+<td align="left">tracing_on</td>
+<td align="left">全局开关。1 开启追踪，0 暂停（但不丢弃已注册的探针）</td>
+</tr>
+<tr>
+<td align="left">追踪缓冲区</td>
+<td align="left">buffer_size_kb</td>
+<td align="left">设置每个 CPU 的环形缓冲区大小</td>
+</tr>
+<tr>
+<td align="left">总追踪缓冲区</td>
+<td align="left">buffer_total_size_kb</td>
+<td align="left">只读，所有 CPU 的总环形缓冲区大小</td>
+</tr>
+<tr>
+<td align="left">追踪数据输出</td>
+<td align="left">trace, trace_pipe</td>
+<td align="left">trace 是静态快照，trace_pipe 是流式、消费后即消失的输出</td>
+</tr>
+<tr>
+<td align="left">追踪标记</td>
+<td align="left">trace_marker, trace_marker_raw</td>
+<td align="left">用户空间程序可向其中写入自定义消息，用于标记时间点</td>
+</tr>
+<tr>
+<td align="left">追踪缓冲区释放</td>
+<td align="left">free_buffer</td>
+<td align="left">写入此文件可释放追踪缓冲区内存（通常在关闭追踪后使用）</td>
+</tr>
+<tr>
+<td align="left">追踪快照</td>
+<td align="left">snapshot</td>
+<td align="left">管理快照缓冲区。写入1可交换主缓冲区与快照缓冲区，用于在关键时刻保存现场</td>
+</tr>
+<tr>
+<td align="left">追踪 CPU 位图</td>
+<td align="left">tracing_cpumask</td>
+<td align="left">设置参与追踪的 CPU 位图。可用于只追踪特定 CPU 上的事件</td>
+</tr>
+<tr>
+<td align="left">追踪最大延迟</td>
+<td align="left">tracing_max_latency, tracing_thresh</td>
+<td align="left">用于延迟追踪器（如irqsoff）。当检测到延迟超过阈值时，会保存当时的调用栈</td>
+</tr>
+<tr>
+<td align="left">追踪栈深度</td>
+<td align="left">stack_trace, stack_max_size</td>
+<td align="left">显示&#x2F;重置最大内核栈深度。配合stack_trace追踪器使用</td>
+</tr>
+<tr>
+<td align="left">追踪栈深度过滤</td>
+<td align="left">stack_trace_filter</td>
+<td align="left">设置只对特定函数调用栈进行深度记录</td>
+</tr>
+<tr>
+<td align="left"><strong><span style="color: #08F800">静态追踪：Tracepoints 与 Events</span></strong></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">可用事件列表</td>
+<td align="left">available_events</td>
+<td align="left">列出所有已注册的静态 tracepoint 事件</td>
+</tr>
+<tr>
+<td align="left">事件开关</td>
+<td align="left">events&#x2F;</td>
+<td align="left">每个子系统（如 sched&#x2F;,kmem&#x2F;）下都有 enable 文件，用于开关该事件</td>
+</tr>
+<tr>
+<td align="left">全局事件开关</td>
+<td align="left">set_event, set_event_pid, set_event_notrace_pid</td>
+<td align="left">全局事件开关：通过写入事件名（如 sched:sched_switch）或 PID 来启用&#x2F;禁止特定事件</td>
+</tr>
+<tr>
+<td align="left">合成事件</td>
+<td align="left">synthetic_events</td>
+<td align="left">合成事件：用户可定义基于现有事件的复杂事件（如延迟计算）</td>
+</tr>
+<tr>
+<td align="left"><strong><span style="color: #00FFFF">动态追踪：Kprobes, Uprobes, Fprobe</span></strong></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">Kprobe 动态事件</td>
+<td align="left">kprobe_events</td>
+<td align="left">核心接口。通过写入特定语法（如 p:myprobe o_sys_open）来动态创建内核探针</td>
+</tr>
+<tr>
+<td align="left">Uprobe 动态事件</td>
+<td align="left">uprobe_events</td>
+<td align="left">核心接口。用于动态探测用户空间程序（如p:malloc_entry &#x2F;lib&#x2F;libc.so:malloc）</td>
+</tr>
+<tr>
+<td align="left">通用动态事件</td>
+<td align="left">dynamic_events</td>
+<td align="left">统一入口。Kprobe、Uprobe、Fprobe、Eprobe 事件均可在此定义</td>
+</tr>
+<tr>
+<td align="left">性能剖析</td>
+<td align="left">kprobe_profile, uprobe_profile</td>
+<td align="left">显示每个动态探针的命中次数</td>
+</tr>
+<tr>
+<td align="left"><strong><span style="color: #0000FF">函数追踪：Ftrace 核心</span></strong></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">可用函数列表</td>
+<td align="left">available_filter_functions</td>
+<td align="left">列出所有可被 ftrace 追踪的函数</td>
+</tr>
+<tr>
+<td align="left">可用函数列表</td>
+<td align="left">available_filter_functions_addrs</td>
+<td align="left">列出所有可被 ftrace 追踪的函数及其地址</td>
+</tr>
+<tr>
+<td align="left">函数过滤器</td>
+<td align="left">set_ftrace_filter</td>
+<td align="left">写入函数名，仅追踪这些函数</td>
+</tr>
+<tr>
+<td align="left">函数黑名单</td>
+<td align="left">set_ftrace_notrace</td>
+<td align="left">写入函数名，排除这些函数</td>
+</tr>
+<tr>
+<td align="left">进程过滤</td>
+<td align="left">set_ftrace_pid, set_ftrace_notrace_pid</td>
+<td align="left">按进程 PID 过滤，只追踪或排除特定进程的函数调用</td>
+</tr>
+<tr>
+<td align="left">函数调用图过滤</td>
+<td align="left">set_graph_function, set_graph_notrace</td>
+<td align="left">为 function_graph 追踪器设置函数调用图的过滤器</td>
+</tr>
+<tr>
+<td align="left">调用图深度</td>
+<td align="left">max_graph_depth</td>
+<td align="left">与 function_graph 追踪器配合，限制调用图深度</td>
+</tr>
+<tr>
+<td align="left">函数性能剖析</td>
+<td align="left">function_profile_enabled</td>
+<td align="left">启用函数性能剖析。启用后，trace_stats&#x2F;function会统计每个函数的调用次数和耗时</td>
+</tr>
+<tr>
+<td align="left">追踪过的函数</td>
+<td align="left">touched_functions</td>
+<td align="left">只读，列出自追踪启动以来被调用过的所有函数（需先启用function追踪器）</td>
+</tr>
+<tr>
+<td align="left">动态 ftrace 总信息</td>
+<td align="left">dyn_ftrace_total_info</td>
+<td align="left">只读，显示动态 ftrace 的内部统计信息，如已打补丁的函数数量</td>
+</tr>
+<tr>
+<td align="left"><strong><span style="color: #FF00FF">高级追踪器与专用工具</span></strong></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">硬件延迟检测</td>
+<td align="left">hwlat_detector&#x2F;</td>
+<td align="left">专用追踪器，用于检测硬件引起的巨大延迟</td>
+</tr>
+<tr>
+<td align="left">操作系统噪声</td>
+<td align="left">osnoise&#x2F;</td>
+<td align="left">追踪系统中非任务相关的延迟源（如中断、软中断）</td>
+</tr>
+<tr>
+<td align="left">运行时验证</td>
+<td align="left">rv&#x2F;</td>
+<td align="left">用于形式化验证的追踪接口</td>
+</tr>
+<tr>
+<td align="left">实例化追踪</td>
+<td align="left">instances&#x2F;</td>
+<td align="left">创建独立的追踪实例，用于隔离不同用途的追踪会话</td>
+</tr>
+<tr>
+<td align="left"><strong><span style="color: #FF8800">用户空间追踪</span></strong></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">用户事件数据</td>
+<td align="left">user_events_data</td>
+<td align="left">写入端。用户空间程序向此文件写入自定义事件数据</td>
+</tr>
+<tr>
+<td align="left">用户事件状态</td>
+<td align="left">user_events_status</td>
+<td align="left">读取端。显示已注册的用户事件及其格式</td>
+</tr>
+<tr>
+<td align="left"><strong><span style="color: #FF0000">底层支持与元数据</span></strong></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">cpu独立追踪数据</td>
+<td align="left">per_cpu&#x2F;</td>
+<td align="left">每个 CPU 的独立追踪数据。包含trace_pipe_raw文件，用于高性能、零拷贝的内存映射读取（见ring-buffer-map.html）</td>
+</tr>
+<tr>
+<td align="left">追踪选项开关</td>
+<td align="left">options&#x2F;</td>
+<td align="left">如print-parent（打印调用者）、latency-format（延迟格式）等。可通过trace_options文件批量设置</td>
+</tr>
+<tr>
+<td align="left">追踪数据输出格式</td>
+<td align="left">printk_formats</td>
+<td align="left">只读，列出内核中printk使用的格式字符串，供某些追踪后端解析使用</td>
+</tr>
+<tr>
+<td align="left">保存的进程名和线程组 ID</td>
+<td align="left">saved_cmdlines, saved_tgids</td>
+<td align="left">保存进程名和线程组 ID。追踪系统会缓存最近活跃的 PID 及其命令名，以便在trace输出中显示可读的进程名而非 PID</td>
+</tr>
+<tr>
+<td align="left">保存的进程名缓存大小</td>
+<td align="left">saved_cmdlines_size</td>
+<td align="left">设置 saved_cmdlines 缓存的大小</td>
+</tr>
+<tr>
+<td align="left">时间戳模式</td>
+<td align="left">timestamp_mode</td>
+<td align="left">设置时间戳的来源和格式，如local,global,counter等</td>
+</tr>
+<tr>
+<td align="left">错误日志</td>
+<td align="left">error_log</td>
+<td align="left">追踪系统内部错误日志。当动态事件定义语法错误时，错误信息会记录在此</td>
+</tr>
+</tbody></table>
+
+                
+                <hr>
+                <!-- Pager -->
+                <ul class="pager">
+                    
+                    
+                    <li class="next">
+                        <a href="/2025/09/30/RISC-V-MTE-Spec-学习笔记/" data-toggle="tooltip" data-placement="top" title="RISC-V MTE 内存标签">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- tip start -->
+                
+
+                
+                <!-- tip end -->
+
+                <!-- Music start-->
+                
+                <!-- Music end -->
+
+                <!-- Sharing -->
+                
+                <!-- Sharing -->
+
+                <!-- gitment start -->
+                
+                <!-- gitment end -->
+
+                <!-- 来必力City版安装代码 -->
+                
+                <!-- City版安装代码已完成 -->
+
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+    
+      
+        <aside id="sidebar">
+          <div id="toc" class="toc-article">
+          <strong class="toc-title">Contents</strong>
+          
+            
+              <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">参考文献</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Linux-%E8%BF%BD%E8%B8%AA%E4%BD%93%E7%B3%BB%E6%A6%82%E8%A7%88"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">Linux 追踪体系概览</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E9%9D%99%E6%80%81%E8%BF%BD%E8%B8%AA%E7%82%B9-%E2%80%94%E2%80%94-Tracepoints-%E4%B8%8E-Event-Tracing"><span class="toc-nav-number">3.</span> <span class="toc-nav-text">静态追踪点 —— Tracepoints 与 Event Tracing</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Tracepoints-%E6%9C%BA%E5%88%B6"><span class="toc-nav-number">3.1.</span> <span class="toc-nav-text">Tracepoints 机制</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Event-Tracing-%E7%B3%BB%E7%BB%9F"><span class="toc-nav-number">3.2.</span> <span class="toc-nav-text">Event Tracing 系统</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#ftrace-%E2%80%94%E2%80%94-%E5%86%85%E6%A0%B8%E5%87%BD%E6%95%B0%E8%BF%BD%E8%B8%AA%E5%99%A8"><span class="toc-nav-number">4.</span> <span class="toc-nav-text">ftrace —— 内核函数追踪器</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="toc-nav-number">4.1.</span> <span class="toc-nav-text">简介</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%A0%B8%E5%BF%83%E5%8A%9F%E8%83%BD"><span class="toc-nav-number">4.2.</span> <span class="toc-nav-text">核心功能</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="toc-nav-number">4.3.</span> <span class="toc-nav-text">使用方式</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E9%AB%98%E7%BA%A7%E7%89%B9%E6%80%A7"><span class="toc-nav-number">4.4.</span> <span class="toc-nav-text">高级特性</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%8A%A8%E6%80%81%E6%8E%A2%E9%92%88-%E2%80%94%E2%80%94-Kprobes%E3%80%81Uprobes%E3%80%81Eprrobes"><span class="toc-nav-number">5.</span> <span class="toc-nav-text">动态探针 —— Kprobes、Uprobes、Eprrobes</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Kprobes%EF%BC%88%E5%86%85%E6%A0%B8%E6%8E%A2%E9%92%88%EF%BC%89"><span class="toc-nav-number">5.1.</span> <span class="toc-nav-text">Kprobes（内核探针）</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Uprobes%EF%BC%88%E7%94%A8%E6%88%B7%E6%80%81%E6%8E%A2%E9%92%88%EF%BC%89"><span class="toc-nav-number">5.2.</span> <span class="toc-nav-text">Uprobes（用户态探针）</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%9F%BA%E4%BA%8E%E6%8E%A2%E9%92%88%E7%9A%84%E4%BA%8B%E4%BB%B6%E8%BF%BD%E8%B8%AA"><span class="toc-nav-number">5.3.</span> <span class="toc-nav-text">基于探针的事件追踪</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Eprobes%EF%BC%88%E4%BA%8B%E4%BB%B6%E6%8E%A2%E9%92%88%EF%BC%89"><span class="toc-nav-number">5.4.</span> <span class="toc-nav-text">Eprobes（事件探针）</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E4%B8%93%E7%94%A8%E5%BB%B6%E8%BF%9F%E5%88%86%E6%9E%90%E5%99%A8"><span class="toc-nav-number">6.</span> <span class="toc-nav-text">专用延迟分析器</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#OSNOISE-Tracer"><span class="toc-nav-number">6.1.</span> <span class="toc-nav-text">OSNOISE Tracer</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Timerlat-Tracer"><span class="toc-nav-number">6.2.</span> <span class="toc-nav-text">Timerlat Tracer</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E7%94%A8%E6%88%B7%E4%BA%8B%E4%BB%B6"><span class="toc-nav-number">7.</span> <span class="toc-nav-text">用户事件</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E7%A1%AC%E4%BB%B6%E8%BE%85%E5%8A%A9%E8%BF%BD%E8%B8%AA"><span class="toc-nav-number">8.</span> <span class="toc-nav-text">硬件辅助追踪</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#eBPF"><span class="toc-nav-number">9.</span> <span class="toc-nav-text">eBPF</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#eBPF-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-nav-number">9.1.</span> <span class="toc-nav-text">eBPF 是什么</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#eBPF-%E4%B8%8E%E5%86%85%E6%A0%B8%E8%BF%BD%E8%B8%AA%E6%8A%80%E6%9C%AF%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="toc-nav-number">9.2.</span> <span class="toc-nav-text">eBPF 与内核追踪技术的关系</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#eBPF-%E5%9C%A8%E8%BF%BD%E8%B8%AA%E4%B8%AD%E7%9A%84%E4%BC%98%E5%8A%BF"><span class="toc-nav-number">9.3.</span> <span class="toc-nav-text">eBPF 在追踪中的优势</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%85%B8%E5%9E%8B-eBPF-%E8%BF%BD%E8%B8%AA%E5%B7%A5%E5%85%B7"><span class="toc-nav-number">9.4.</span> <span class="toc-nav-text">典型 eBPF 追踪工具</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#tracefs"><span class="toc-nav-number">10.</span> <span class="toc-nav-text">tracefs</span></a></li></ol>
+            
+          
+          </div>
+        </aside>
+      
+    
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <!-- <h5><a href="/tags/">FEATURED TAGS</a></h5> -->
+                    <h5><a href="/tags/"></a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#Linux" title="Linux">Linux</a>
+                        
+                          <a class="tag" href="/tags/#trace" title="trace">trace</a>
+                        
+                          <a class="tag" href="/tags/#tracefs" title="tracefs">tracefs</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                
+                <script src="https://giscus.app/client.js"
+                    data-repo="AllenZF/allenzf.github.io"
+                    data-repo-id="R_kgDOQMASLQ"
+                    data-category="General"
+                    data-category-id="DIC_kwDOQMASLc4CxR4Q"
+                    data-mapping="pathname"
+                    data-strict="0"
+                    data-reactions-enabled="1"
+                    data-emit-metadata="0"
+                    data-input-position="bottom"
+                    data-theme="preferred_color_scheme"
+                    data-lang="en"
+                    crossorigin="anonymous"
+                    async>
+                </script>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: 'ℬ'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+
+
+<style  type="text/css">
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/AllenZF">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://gitee.com/Sven">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-stack-1x fa-inverse">码</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/people/zhou-lang-jie-feng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; 周郎借风 2025 
+                    <br>
+                    Powered by 
+                    <a href="https://github.com/dusign/hexo-theme-snail">
+                        <i>hexo-theme-snail</i>
+                    </a> | 
+                    <iframe name="star" style="margin-left: 2px; margin-bottom:-5px;" frameborder="0" scrolling="0"
+                        width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=dusign&repo=hexo-theme-snail&type=star&count=true">
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+
+</footer>
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- Search -->
+
+<script src="/js/search.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://allenzf.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-XXXXXXXX-X';
+    var _gaDomain = 'yoursite';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+<!-- Search -->
+
+    <script type="text/javascript">      
+        var search_path = "search.xml";
+        if (search_path.length == 0) {
+            search_path = "search.xml";
+        }
+    var path = "/" + search_path;
+    searchFunc(path, 'local-search-input', 'local-search-result');
+    </script>
+
+
+<!-- busuanzi -->
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+
+    
+        <!-- background effects line -->
+        
+
+        
+            <script type="text/javascript" src="/js/mouse-click.js" content='[&quot;🌱&quot;,&quot;just do it&quot;,&quot;🍀&quot;]' color='[&quot;rgb(121,93,179)&quot; ,&quot;rgb(76,180,231)&quot; ,&quot;rgb(184,90,154)&quot;]'></script>
+        
+
+        <!-- background effects end -->
+    
+
+    <!--<script size="50" alpha='0.3' zIndex="-999" src="/js/ribbonStatic.js"></script>-->
+    
+        <script src="/js/ribbonDynamic.js"></script>
+    
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+
+</html>

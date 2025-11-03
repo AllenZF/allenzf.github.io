@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="baidu-site-verification" content="093lY4ziMu" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="记录点滴">
+    <meta name="keyword"  content="加油, 个人博客">
+    <link rel="shortcut icon" href="/img/ironman-draw.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <!--<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
+    <title>
+        
+          Linux Perf 介绍 —— Perf 内核及驱动支持 - Sven-Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://allenzf.github.io/2025/08/26/Linux-Perf-介绍-——-Perf-内核及驱动支持/">
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+
+    <!-- Custom CSS --> 
+    
+        
+<link rel="stylesheet" href="/css/dusign-light.css">
+
+        
+<link rel="stylesheet" href="/css/dusign-common-light.css">
+
+        
+<link rel="stylesheet" href="/css/font-awesome.css">
+
+        
+<link rel="stylesheet" href="/css/toc.css">
+
+        <!-- background effects end -->
+    
+    
+    <!-- Pygments Highlight CSS -->
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+
+    
+<link rel="stylesheet" href="/css/widget.css">
+
+
+    
+<link rel="stylesheet" href="/css/rocket.css">
+
+
+    
+<link rel="stylesheet" href="/css/signature.css">
+
+
+    
+<link rel="stylesheet" href="/css/fonts.googleapis.css">
+
+
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+    <!-- photography -->
+    
+<link rel="stylesheet" href="/css/photography.css">
+
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+<meta name="generator" content="Hexo 8.1.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- background effects start -->
+    
+    <!-- background effects end -->
+
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            
+                background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('../../../../img/header_img/Iron-Man-3.jpg')
+                /*post*/
+            
+        
+    }
+    
+    #signature{
+        background-image: url('/img/signature/Just-do-it-white.png');
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#RISC-V" title="RISC-V">RISC-V</a>
+                            
+                              <a class="tag" href="/tags/#Perf" title="Perf">Perf</a>
+                            
+                              <a class="tag" href="/tags/#Linux" title="Linux">Linux</a>
+                            
+                        </div>
+                        <h1>Linux Perf 介绍 —— Perf 内核及驱动支持</h1>
+                        <h2 class="subheading"></h2>
+                        <span class="meta">
+                            Posted by 周郎借风 on
+                            2025-08-26
+                        </span>
+
+                        
+                            <div class="blank_box"></div>
+                            <span class="meta">
+                                Words <span class="post-count">1.3k</span> and
+                                Reading Time <span class="post-count">5</span> Minutes
+                            </span>
+                            <div class="blank_box"></div>
+                            <!-- 不蒜子统计 start -->
+                            <span class="meta">
+                                Viewed <span id="busuanzi_value_page_pv"><i class="fa fa-spinner fa-spin"></i></span> Times
+                            </span>
+                            <!-- 不蒜子统计 end -->
+                        
+
+                    </div>
+                
+
+                </div>
+            </div>
+        </div>      
+    </div>
+
+    
+    <div class="waveWrapper">
+        <div class="wave wave_before" style="background-image: url('/img/wave-light.png')"></div>
+        <div class="wave wave_after" style="background-image: url('/img/wave-light.png')"></div>
+    </div>
+    
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">周郎借风</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">主页</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/categories/">分类</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">关于</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">归档</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/photography/">摄影</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">标签</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+                    
+                    
+                    <li>
+                        <a href="https://allenzf.github.io" target="_blank">中文博客</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="系列目录"><a href="#系列目录" class="headerlink" title="系列目录"></a>系列目录</h1><hr>
+<p><a href="http://localhost:4000/2025/08/21/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7/">Linux Perf 介绍 —— Perf 命令行工具</a><br><a href="http://localhost:4000/2025/08/21/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-%E5%B7%A5%E5%85%B7%E8%B0%83%E7%94%A8%E5%88%86%E6%9E%90/">Linux Perf 介绍-—— Perf 工具调用分析</a><br><a href="http://localhost:4000/2025/08/26/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-%E5%86%85%E6%A0%B8%E5%8F%8A%E9%A9%B1%E5%8A%A8%E6%94%AF%E6%8C%81/">Linux Perf 介绍 —— Perf 内核及驱动支持</a><br><a href="http://localhost:4000/2025/08/26/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-opensbi-%E6%94%AF%E6%8C%81/">Linux Perf 介绍 —— Perf opensbi 支持</a><br><a href="http://localhost:4000/2025/08/26/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-%E6%80%BB%E7%BB%93/">Linux Perf 介绍 —— Perf 总结</a></p>
+<h1 id="Linux-Perf-初始化"><a href="#Linux-Perf-初始化" class="headerlink" title="Linux Perf 初始化"></a>Linux Perf 初始化</h1><hr>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">start_kernel</span><br><span class="line">  -&gt; perf_event_init  <span class="comment">// 初始化 PMU 框架，注册软件和硬件事件源，构建性能事件的内存缓存，验证关键数据结构的内存布局</span></span><br><span class="line">  -&gt; arch_call_rest_init</span><br><span class="line">    -&gt; rest_init</span><br><span class="line">      -&gt; kernel_init</span><br><span class="line">        -&gt; kernel_init_freeable</span><br><span class="line">          -&gt; do_basic_setup</span><br><span class="line">            -&gt; do_initcalls</span><br><span class="line">              -&gt; do_initcall_level</span><br><span class="line">                -&gt; do_one_initcall</span><br><span class="line">                  -&gt; fn (pmu_sbi_devinit) <span class="comment">// PMU 驱动初始化</span></span><br><span class="line">                    -&gt; sbi_probe_extension <span class="comment">// SBI PMU 扩展检测，验证固件是否支持 PMU 扩展</span></span><br><span class="line">                    -&gt; cpuhp_setup_state_multi <span class="comment">// CPU 热插拔回调注册：设置 CPU 上线/下线时的 PMU 配置钩子</span></span><br><span class="line">                    -&gt; platform_driver_register <span class="comment">// 平台驱动注册：为 SBI PMU 注册平台设备</span></span><br><span class="line">                    -&gt; platform_device_register_simple <span class="comment">// 平台驱动注册：为 SBI PMU 注册平台驱动</span></span><br><span class="line">                      -&gt; platform_device_register_resndata</span><br><span class="line">                        -&gt; platform_device_register_full</span><br><span class="line">                          -&gt; platform_device_alloc <span class="comment">// 分配并初始化一个 platform_device 结构体，设置基础名称和ID</span></span><br><span class="line">                          -&gt; platform_device_add_resources <span class="comment">// 资源（内存、IRQ等）关联</span></span><br><span class="line">                          -&gt; platform_device_add_data <span class="comment">// 平台数据绑定</span></span><br><span class="line">                          -&gt; device_create_managed_software_node <span class="comment">// 动态创建设备属性，属性自动随设备释放</span></span><br><span class="line">                          -&gt; platform_device_add  <span class="comment">// 设备注册</span></span><br><span class="line">                            -&gt; device_add</span><br><span class="line">                              -&gt; bus_probe_device</span><br><span class="line">                                -&gt; device_initial_probe</span><br><span class="line">                                  -&gt; __device_attach</span><br><span class="line">                                    -&gt; bus_for_each_drv</span><br><span class="line">                                      -&gt; fn (__device_attach_driver)</span><br><span class="line">                                        -&gt; driver_probe_device</span><br><span class="line">                                          -&gt; __driver_probe_device</span><br><span class="line">                                            -&gt; really_probe</span><br><span class="line">                                              -&gt; call_driver_probe</span><br><span class="line">                                                -&gt; dev-&gt;bus-&gt;probe (platform_probe)</span><br><span class="line">                                                  -&gt; drv-&gt;probe (pmu_sbi_device_probe)</span><br><span class="line"></span><br><span class="line">pmu_sbi_device_probe <span class="comment">//  RISC-V SBI PMU 驱动的 探测（Probe）入口</span></span><br><span class="line">  -&gt; riscv_pmu_alloc <span class="comment">// 分配并初始化 struct riscv_pmu 结构体，包含 PMU 的通用属性和操作函数</span></span><br><span class="line">    -&gt; pmu=kzalloc  <span class="comment">// 为 struct riscv_pmu 分配内存</span></span><br><span class="line">    -&gt; pmu-&gt;hw_events = alloc_percpu_gfp <span class="comment">// 为每个 CPU 分配硬件事件跟踪结构</span></span><br><span class="line">    -&gt; per_cpu_ptr <span class="comment">// 遍历所有可能存在的 CPU（包括离线 CPU）,初始化数据</span></span><br><span class="line">    -&gt; pmu-&gt;pmu-&gt;* = riscv_pmu_* <span class="comment">//PMU 操作回调绑定</span></span><br><span class="line">  -&gt; pmu_sbi_find_num_ctrs <span class="comment">// 通过 SBI 调用（如 sbi_pmu_num_ctr()）获取硬件计数器数量</span></span><br><span class="line">  -&gt; pmu_sbi_get_ctrinfo <span class="comment">// 获取所有计数器的csr地址，宽度，事件类型等计数器信息，mask等</span></span><br><span class="line">  -&gt; pmu_sbi_setup_irqs <span class="comment">// 配置中断，sscof扩展不支持时，不支持 perf 采样和过滤</span></span><br><span class="line">  -&gt; pmu-&gt;* = pmu_sbi_*       <span class="comment">// PMU 操作函数绑定, 每个操作最终通过ecall触发SBI调用</span></span><br><span class="line">  -&gt; cpuhp_state_add_instance <span class="comment">// 将当前 PMU 实例添加到 CPU 热插拔回调列表，确保 CPU 上线/下线时正确配置计数器</span></span><br><span class="line">  -&gt; riscv_pm_pmu_register <span class="comment">// 全局注册 struct riscv_pmu *pmu</span></span><br></pre></td></tr></table></figure>
+<p>从代码上看，perf 的初始化分2部分，<code>perf_event_init</code>和<code>pmu_sbi_device_probe</code>. <code>perf_event_init</code> 主要完成高层次的初始化，如注册FW，HW，SW等事件源；而<code>pmu_sbi_device_probe</code> 主要完成底层的初始化，如操作绑定，每个cpu数据初始化等。</p>
+<p>具体操作绑定如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">pmu-&gt;pmu.attr_groups = riscv_pmu_attr_groups;</span><br><span class="line">pmu-&gt;cmask = cmask;</span><br><span class="line">pmu-&gt;ctr_start = pmu_sbi_ctr_start;</span><br><span class="line">pmu-&gt;ctr_stop = pmu_sbi_ctr_stop;</span><br><span class="line">pmu-&gt;event_map = pmu_sbi_event_map;</span><br><span class="line">pmu-&gt;ctr_get_idx = pmu_sbi_ctr_get_idx;</span><br><span class="line">pmu-&gt;ctr_get_width = pmu_sbi_ctr_get_width;</span><br><span class="line">pmu-&gt;ctr_clear_idx = pmu_sbi_ctr_clear_idx;</span><br><span class="line">pmu-&gt;ctr_read = pmu_sbi_ctr_read;</span><br><span class="line">pmu-&gt;event_init = pmu_sbi_event_init;</span><br><span class="line">pmu-&gt;event_mapped = pmu_sbi_event_mapped;</span><br><span class="line">pmu-&gt;event_unmapped = pmu_sbi_event_unmapped;</span><br><span class="line">pmu-&gt;csr_index = pmu_sbi_csr_index;</span><br><span class="line"></span><br><span class="line">pmu-&gt;pmu = (<span class="keyword">struct</span> pmu) &#123;</span><br><span class="line">	.event_init	= riscv_pmu_event_init,</span><br><span class="line">	.event_mapped	= riscv_pmu_event_mapped,</span><br><span class="line">	.event_unmapped	= riscv_pmu_event_unmapped,</span><br><span class="line">	.event_idx	= riscv_pmu_event_idx,</span><br><span class="line">	.add		= riscv_pmu_add,</span><br><span class="line">	.del		= riscv_pmu_del,</span><br><span class="line">	.start		= riscv_pmu_start,</span><br><span class="line">	.stop		= riscv_pmu_stop,</span><br><span class="line">	.read		= riscv_pmu_read,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>通过对这些函数追踪可以观察到函数的调用关系和Perf的执行流程，以及ecall的调用来源。</p>
+<h1 id="Linux-Perf-响应"><a href="#Linux-Perf-响应" class="headerlink" title="Linux Perf 响应"></a>Linux Perf 响应</h1><hr>
+<p>在执行命令时，首先是通过 <strong>perf_event_open</strong> 创建计数器事件的文件描述符用于测量性能信息。由于不与PMU发生交互，此处省略。后续描述是 Perf write 系统调用时涉及到的执行过程。</p>
+<p>执行命令<code>perf stat -e cycles,instructions date &gt; /dev/null</code>，通过配置 <code>pmu_sbi_ctr_*</code> 和 <code>riscv_pmu_ctr_read*</code> 到 set_ftrace_filter 并打开堆栈选项，执行ftrace，生成日志 <a href="trace.function">trace.function</a>；通过配置 <code>riscv_pmu_s*</code> 到 set_graph_function 生成日志 <a href="trace.graph">trace.graph</a></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// trace.function</span></span><br><span class="line">            date<span class="number">-262</span>     [<span class="number">001</span>] d..<span class="number">2.</span>   <span class="number">911.415279</span>: pmu_sbi_ctr_get_idx &lt;-riscv_pmu_add</span><br><span class="line">            date<span class="number">-262</span>     [<span class="number">001</span>] d..<span class="number">2.</span>   <span class="number">911.415302</span>: &lt;<span class="built_in">stack</span> trace&gt;</span><br><span class="line"> =&gt; ftrace_call</span><br><span class="line"> =&gt; event_sched_in</span><br><span class="line"> =&gt; merge_sched_in</span><br><span class="line"> =&gt; visit_groups_merge.constprop.<span class="number">0.</span>isra.<span class="number">0</span></span><br><span class="line"> =&gt; ctx_groups_sched_in</span><br><span class="line"> =&gt; ctx_sched_in</span><br><span class="line"> =&gt; ctx_resched</span><br><span class="line"> =&gt; perf_event_exec</span><br><span class="line"> =&gt; begin_new_exec</span><br><span class="line"> =&gt; load_elf_binary</span><br><span class="line"> =&gt; bprm_execve</span><br><span class="line"> =&gt; do_execveat_common.isra.<span class="number">0</span></span><br><span class="line"> =&gt; __riscv_sys_execve</span><br><span class="line"> =&gt; do_trap_ecall_u</span><br><span class="line"> =&gt; ret_from_exception</span><br><span class="line">            date<span class="number">-262</span>     [<span class="number">001</span>] d..<span class="number">2.</span>   <span class="number">911.416165</span>: pmu_sbi_ctr_start &lt;-riscv_pmu_start</span><br><span class="line">            date<span class="number">-262</span>     [<span class="number">001</span>] d..<span class="number">2.</span>   <span class="number">911.416173</span>: &lt;<span class="built_in">stack</span> trace&gt;</span><br><span class="line"> =&gt; ftrace_call</span><br><span class="line"> =&gt; riscv_pmu_add</span><br><span class="line"> =&gt; event_sched_in</span><br><span class="line"> =&gt; merge_sched_in</span><br><span class="line"> =&gt; visit_groups_merge.constprop.<span class="number">0.</span>isra.<span class="number">0</span></span><br><span class="line"> =&gt; ctx_groups_sched_in</span><br><span class="line"> =&gt; ctx_sched_in</span><br><span class="line"> =&gt; ctx_resched</span><br><span class="line"> =&gt; perf_event_exec</span><br><span class="line"> =&gt; begin_new_exec</span><br><span class="line"> =&gt; load_elf_binary</span><br><span class="line"> =&gt; bprm_execve</span><br><span class="line"> =&gt; do_execveat_common.isra.<span class="number">0</span></span><br><span class="line"> =&gt; __riscv_sys_execve</span><br><span class="line"> =&gt; do_trap_ecall_u</span><br><span class="line"> =&gt; ret_from_exception</span><br><span class="line"><span class="comment">// trace.graph</span></span><br><span class="line"> <span class="number">1</span>)               |  riscv_pmu_add() &#123;</span><br><span class="line"> <span class="number">1</span>) + <span class="number">14.300</span> us   |    pmu_sbi_ctr_get_idx();</span><br><span class="line"> <span class="number">1</span>)               |    riscv_pmu_start() &#123;</span><br><span class="line"> <span class="number">1</span>)   <span class="number">2.300</span> us    |      pmu_sbi_ctr_get_width();</span><br><span class="line"> <span class="number">1</span>)               |      riscv_pmu_event_set_period() &#123;</span><br><span class="line"> <span class="number">1</span>)   <span class="number">2.200</span> us    |        pmu_sbi_ctr_get_width();</span><br><span class="line"> <span class="number">1</span>)   <span class="number">2.300</span> us    |        perf_event_update_userpage();</span><br><span class="line"> <span class="number">1</span>) + <span class="number">11.700</span> us   |      &#125;</span><br><span class="line"> <span class="number">1</span>)   <span class="number">6.800</span> us    |      pmu_sbi_ctr_start();</span><br><span class="line"> <span class="number">1</span>)   <span class="number">2.300</span> us    |      perf_event_update_userpage();</span><br><span class="line"> <span class="number">1</span>) + <span class="number">35.500</span> us   |    &#125;</span><br><span class="line"> <span class="number">1</span>)   <span class="number">2.300</span> us    |    perf_event_update_userpage();</span><br><span class="line"> <span class="number">1</span>) + <span class="number">62.200</span> us   |  &#125;</span><br><span class="line"> <span class="number">1</span>)               |  riscv_pmu_del() &#123;</span><br><span class="line"> <span class="number">1</span>)               |    riscv_pmu_stop() &#123;</span><br><span class="line"> <span class="number">1</span>) + <span class="number">17.800</span> us   |      pmu_sbi_ctr_stop();</span><br><span class="line"> <span class="number">1</span>)               |      riscv_pmu_event_update() &#123;</span><br><span class="line"> <span class="number">1</span>)   <span class="number">3.600</span> us    |        pmu_sbi_ctr_get_width();</span><br><span class="line"> <span class="number">1</span>)               |        pmu_sbi_ctr_read() &#123;</span><br><span class="line"> <span class="number">1</span>)   <span class="number">7.000</span> us    |          riscv_pmu_ctr_read_csr();</span><br><span class="line"> <span class="number">1</span>) + <span class="number">47.400</span> us   |        &#125;</span><br><span class="line"> <span class="number">1</span>) + <span class="number">60.900</span> us   |      &#125;</span><br><span class="line"> <span class="number">1</span>) + <span class="number">90.000</span> us   |    &#125;</span><br><span class="line"> <span class="number">1</span>)   <span class="number">9.400</span> us    |    pmu_sbi_ctr_stop();</span><br><span class="line"> <span class="number">1</span>)   <span class="number">3.100</span> us    |    pmu_sbi_ctr_clear_idx();</span><br><span class="line"> <span class="number">1</span>)   <span class="number">2.900</span> us    |    perf_event_update_userpage();</span><br><span class="line"> <span class="number">1</span>) ! <span class="number">130.400</span> us  |  &#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>pmu_sbi_ctr_get_idx: 通过 ecall 获取某个事件的可用计数器索引并设置mhpmevent，通过 gdb 调试可知，这个索引指向事件的最大可用计数器编号，如31（mhpmcounter31）;</li>
+<li>pmu_sbi_ctr_get_width: 获取计数器宽度，如64位，在初始化时已经通过 ecall 获取了，所以这里是软件行为；</li>
+<li>pmu_sbi_ctr_start: 通过 ecall 启动计数器，参数为计数器索引和计数器初始化值；</li>
+<li>perf_event_update_userpage：时间矫正，更新用户空间映射的性能事件数据页（perf_event_mmap_page），确保用户态工具（如 perf）能实时读取事件计数器值、累计启用&#x2F;运行时间等；</li>
+<li>riscv_pmu_ctr_read_csr: 从S模式直接读取CSR寄存器从而获取计数值。</li>
+</ul>
+
+                
+                <hr>
+                <!-- Pager -->
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2025/08/26/Linux-Perf-介绍-——-Perf-opensbi-支持/" data-toggle="tooltip" data-placement="top" title="Linux Perf 介绍 —— Perf OpenSBI 支持">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2025/08/21/Linux-Perf-介绍-——-Perf-工具调用分析/" data-toggle="tooltip" data-placement="top" title="Linux Perf 介绍 —— Perf 工具调用分析">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- tip start -->
+                
+
+                
+                <!-- tip end -->
+
+                <!-- Music start-->
+                
+                <!-- Music end -->
+
+                <!-- Sharing -->
+                
+                <!-- Sharing -->
+
+                <!-- gitment start -->
+                
+                <!-- gitment end -->
+
+                <!-- 来必力City版安装代码 -->
+                
+                <!-- City版安装代码已完成 -->
+
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+    
+      
+        <aside id="sidebar">
+          <div id="toc" class="toc-article">
+          <strong class="toc-title">Contents</strong>
+          
+            
+              <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E7%B3%BB%E5%88%97%E7%9B%AE%E5%BD%95"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">系列目录</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#Linux-Perf-%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">Linux Perf 初始化</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#Linux-Perf-%E5%93%8D%E5%BA%94"><span class="toc-nav-number">3.</span> <span class="toc-nav-text">Linux Perf 响应</span></a></li></ol>
+            
+          
+          </div>
+        </aside>
+      
+    
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <!-- <h5><a href="/tags/">FEATURED TAGS</a></h5> -->
+                    <h5><a href="/tags/"></a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#RISC-V" title="RISC-V">RISC-V</a>
+                        
+                          <a class="tag" href="/tags/#Perf" title="Perf">Perf</a>
+                        
+                          <a class="tag" href="/tags/#Linux" title="Linux">Linux</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                
+                <script src="https://giscus.app/client.js"
+                    data-repo="AllenZF/allenzf.github.io"
+                    data-repo-id="R_kgDOQMASLQ"
+                    data-category="General"
+                    data-category-id="DIC_kwDOQMASLc4CxR4Q"
+                    data-mapping="pathname"
+                    data-strict="0"
+                    data-reactions-enabled="1"
+                    data-emit-metadata="0"
+                    data-input-position="bottom"
+                    data-theme="preferred_color_scheme"
+                    data-lang="en"
+                    crossorigin="anonymous"
+                    async>
+                </script>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: 'ℬ'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+
+
+<style  type="text/css">
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/AllenZF">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://gitee.com/Sven">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-stack-1x fa-inverse">码</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/people/zhou-lang-jie-feng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; 周郎借风 2025 
+                    <br>
+                    Powered by 
+                    <a href="https://github.com/dusign/hexo-theme-snail">
+                        <i>hexo-theme-snail</i>
+                    </a> | 
+                    <iframe name="star" style="margin-left: 2px; margin-bottom:-5px;" frameborder="0" scrolling="0"
+                        width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=dusign&repo=hexo-theme-snail&type=star&count=true">
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+
+</footer>
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- Search -->
+
+<script src="/js/search.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://allenzf.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-XXXXXXXX-X';
+    var _gaDomain = 'yoursite';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+<!-- Search -->
+
+    <script type="text/javascript">      
+        var search_path = "search.xml";
+        if (search_path.length == 0) {
+            search_path = "search.xml";
+        }
+    var path = "/" + search_path;
+    searchFunc(path, 'local-search-input', 'local-search-result');
+    </script>
+
+
+<!-- busuanzi -->
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+
+    
+        <!-- background effects line -->
+        
+
+        
+            <script type="text/javascript" src="/js/mouse-click.js" content='[&quot;🌱&quot;,&quot;just do it&quot;,&quot;🍀&quot;]' color='[&quot;rgb(121,93,179)&quot; ,&quot;rgb(76,180,231)&quot; ,&quot;rgb(184,90,154)&quot;]'></script>
+        
+
+        <!-- background effects end -->
+    
+
+    <!--<script size="50" alpha='0.3' zIndex="-999" src="/js/ribbonStatic.js"></script>-->
+    
+        <script src="/js/ribbonDynamic.js"></script>
+    
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+
+</html>
