@@ -164,7 +164,7 @@
 
                         
                         <li>
-                            <a href="/archive/">归档</a>
+                            <a href="/about/">关于</a>
                         </li>
                         
                     
@@ -177,12 +177,15 @@
                     
 
                         
+                        <li>
+                            <a href="/archive/">归档</a>
+                        </li>
+                        
                     
 
                         
-                        <li>
-                            <a href="/about/">关于</a>
-                        </li>
+                    
+
                         
                     
 
@@ -290,15 +293,12 @@
                     
 
                         
-                    
-
-                        
-                    
-
-                        
                         <li>
                             <a href="/tags/">标签</a>
                         </li>
+                        
+                    
+
                         
                     
 
@@ -474,8 +474,13 @@
                 </h3>
                 <div class="post-content-preview">
                     系列目录
-Linux Perf 介绍 —— Perf 命令行工具Linux Perf 介绍-—— Perf 工具调用分析Linux Perf 介绍 —— Perf 内核及驱动支持Linux Perf 介绍 —— Perf opensbi 支持Linux Perf 介绍 —— Perf 总结
-Perf 命令执行流程是怎样的？应用层发起 Perf 命令执行，通过调用系统函数 perf_event......
+
+
+
+
+
+
+Perf 命令执行流程是怎样的？应用层发起 Perf 命令执行，通过调用系统函数 perf_event_open 创建文件描述符来记录性能事件。通过系统调用 write 来执行命令。在执行命令前，发起了 cycles 和 instructions 硬件事件的 ecall 调用，从而获取可用计数器索引，并配置 mhpmevent、mcountinhibit 和 mhpmc......
                 </div>
             </a>
             
@@ -1039,11 +1044,11 @@ GDB远程连接
             
         
             
+        
+            
+        
+            
             <a href="/tags/#Linux" title="Linux" rel="13">Linux</a>
-            
-        
-            
-        
             
         
             
@@ -1202,7 +1207,11 @@ GDB远程连接
     <div class="widget">
       <ul>
         
+          <a href="categories/#算法"><li>算法</li></a>
+        
           <a href="categories/#hexo"><li>hexo</li></a>
+        
+          <a href="categories/#Math"><li>Math</li></a>
         
           <a href="categories/#路由器"><li>路由器</li></a>
         
@@ -1210,11 +1219,9 @@ GDB远程连接
         
           <a href="categories/#vscode-plug"><li>vscode-plug</li></a>
         
-          <a href="categories/#Debug"><li>Debug</li></a>
-        
           <a href="categories/#problem"><li>problem</li></a>
         
-          <a href="categories/#算法"><li>算法</li></a>
+          <a href="categories/#Debug"><li>Debug</li></a>
         
           <a href="categories/#wsl"><li>wsl</li></a>
         
@@ -1222,37 +1229,37 @@ GDB远程连接
         
           <a href="categories/#devicetree"><li>devicetree</li></a>
         
-          <a href="categories/#学习笔记"><li>学习笔记</li></a>
+          <a href="categories/#opensbi"><li>opensbi</li></a>
         
           <a href="categories/#RISC-V"><li>RISC-V</li></a>
         
-          <a href="categories/#opensbi"><li>opensbi</li></a>
-        
-          <a href="categories/#Math"><li>Math</li></a>
+          <a href="categories/#学习笔记"><li>学习笔记</li></a>
         
           <a href="categories/#翻译"><li>翻译</li></a>
         
           <a href="categories/#riscv-gnu-toolchain"><li>riscv-gnu-toolchain</li></a>
         
-          <a href="categories/#docker"><li>docker</li></a>
-        
           <a href="categories/#RVWMO"><li>RVWMO</li></a>
         
-          <a href="categories/#Perf"><li>Perf</li></a>
+          <a href="categories/#docker"><li>docker</li></a>
         
           <a href="categories/#Performance"><li>Performance</li></a>
         
-          <a href="categories/#rootfs"><li>rootfs</li></a>
+          <a href="categories/#Perf"><li>Perf</li></a>
         
-          <a href="categories/#x86"><li>x86</li></a>
+          <a href="categories/#rootfs"><li>rootfs</li></a>
         
           <a href="categories/#kprobe"><li>kprobe</li></a>
         
-          <a href="categories/#uprobe"><li>uprobe</li></a>
+          <a href="categories/#kernel"><li>kernel</li></a>
         
           <a href="categories/#Extension"><li>Extension</li></a>
         
-          <a href="categories/#kernel"><li>kernel</li></a>
+          <a href="categories/#Trace"><li>Trace</li></a>
+        
+          <a href="categories/#x86"><li>x86</li></a>
+        
+          <a href="categories/#uprobe"><li>uprobe</li></a>
         
           <a href="categories/#trace"><li>trace</li></a>
         
@@ -1260,15 +1267,13 @@ GDB远程连接
         
           <a href="categories/#counter"><li>counter</li></a>
         
-          <a href="categories/#riscv"><li>riscv</li></a>
-        
           <a href="categories/#INSN"><li>INSN</li></a>
         
           <a href="categories/#Debug"><li>Debug</li></a>
         
-          <a href="categories/#RISC-V"><li>RISC-V</li></a>
+          <a href="categories/#riscv"><li>riscv</li></a>
         
-          <a href="categories/#Trace"><li>Trace</li></a>
+          <a href="categories/#RISC-V"><li>RISC-V</li></a>
         
       </ul>
     </div>
