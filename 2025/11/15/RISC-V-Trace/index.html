@@ -434,14 +434,12 @@
 <blockquote>
 <ul>
 <li><code>SRAM Sink</code>: Trace Encoder 将跟踪消息打包到固定宽度的跟踪字（通常为字节）中。这些跟踪字随后以循环缓冲区的方式存储在专用 RAM 中，该 RAM 通常位于<code>片上</code>。当 RAM 填满时，可以选择停止或回绕并覆盖先前的跟踪数据。</li>
-</ul>
-</blockquote>
-<ul>
 <li><code>System Memory Sink</code>: 跟踪编码器将跟踪消息打包成固定宽度的跟踪字（通常为字节）。随后，这些数据通过 DMA 型总线控制器以环形缓冲区的方式存储在为跟踪预留的系统内存范围内。当内存范围被填满时，可选择停止或循环覆盖先前的跟踪数据。这种类型的接收器也可用于通过例如 PCIe 或 USB 端口将跟踪数据传输到芯片外。</li>
 <li><code>PIB Sink</code>: 引脚接口块（Pin Interface Block），一种并行或串行的芯片外追踪端口，用于向追踪探针提供信号。跟踪编码器将跟踪消息发送至 PIB 接收器。每条消息通过特定协议以字节序列的形式片外传输。</li>
 <li><code>ATB Bridge</code>: ATB 桥接器允许将 RISC-V 跟踪数据发送至 Arm CoreSight 基础设施（而非本文件中定义的符合 RISC-V 规范的接收端），作为 ATB 发起方。对于仅使用 RISC-V 系统的环境，并不需要 ATB 桥接器。</li>
 <li><code>Trace Funnel</code>: 跟踪编码器可能将跟踪消息发送至跟踪集线器。集线器汇集来自每个输入（无论是 RISC-V 跟踪编码器还是另一个跟踪集线器）的跟踪数据，并将合并后的跟踪流发送至其指定的跟踪接收器或 ATB 桥接器，即上述一种或多种接收器类型。</li>
 </ul>
+</blockquote>
 <h3 id="Trace-Funnel"><a href="#Trace-Funnel" class="headerlink" title="Trace Funnel"></a>Trace Funnel</h3><p>追踪汇流模块(追踪排, 集线器) - 硬件模块，用于将来自多个追踪源（追踪编码器和&#x2F;或其他追踪汇流模块）的追踪数据流合并为单一的追踪消息&#x2F;数据包输出流。</p>
 <h3 id="跟踪控制"><a href="#跟踪控制" class="headerlink" title="跟踪控制"></a>跟踪控制</h3><img src="/2025/11/15/RISC-V-Trace/trace_com.png" class="" title="trace component">
 
@@ -453,7 +451,7 @@
 <p><a href="https://github.com/riscv-non-isa/riscv-trace-spec.git">E-Trace编解码示例</a></p>
 <h2 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h2><hr>
 <p><a href="https://www.lauterbach.com/products/trace-extensions/powertrace-system/powertrace-iii">Trace32</a></p>
-<br>
+<img src="/2025/11/15/RISC-V-Trace/mictor_trace32.jpg" class="" title="mictor_trace32"><br>
 
 <p>Trace 是一种非侵入式、记录式的执行行为捕获机制。通过硬件模块实时记录处理器的指令流、数据访问或事件流，形成时序完整的执行日志（trace stream），供事后分析使用。从应用的角度看，trace 已经不仅仅供系统调试，更能作为应用使用。</p>
 <ul>
@@ -845,7 +843,7 @@
         
 
         
-            <script type="text/javascript" src="/js/mouse-click.js" content='[&#34;🌱&#34;,&#34;just do it&#34;,&#34;🍀&#34;]' color='[&#34;rgb(121,93,179)&#34; ,&#34;rgb(76,180,231)&#34; ,&#34;rgb(184,90,154)&#34;]'></script>
+            <script type="text/javascript" src="/js/mouse-click.js" content='[&quot;🌱&quot;,&quot;just do it&quot;,&quot;🍀&quot;]' color='[&quot;rgb(121,93,179)&quot; ,&quot;rgb(76,180,231)&quot; ,&quot;rgb(184,90,154)&quot;]'></script>
         
 
         <!-- background effects end -->
@@ -855,6 +853,21 @@
     
         <script src="/js/ribbonDynamic.js"></script>
     
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 </body>
 
 </html>
