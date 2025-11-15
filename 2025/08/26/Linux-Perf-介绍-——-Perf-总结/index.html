@@ -187,12 +187,19 @@
                     
 
                         
+                    
+
+                        
                         <li>
                             <a href="/about/">关于</a>
                         </li>
                         
                     
 
+                        
+                        <li>
+                            <a href="/archive/">归档</a>
+                        </li>
                         
                     
 
@@ -207,9 +214,11 @@
                     
 
                         
-                        <li>
-                            <a href="/archive/">归档</a>
-                        </li>
+                    
+
+                        
+                    
+
                         
                     
 
@@ -311,18 +320,9 @@
                     
 
                         
-                    
-
-                        
                         <li>
                             <a href="/tags/">标签</a>
                         </li>
-                        
-                    
-
-                        
-                    
-
                         
                     
 
@@ -399,11 +399,16 @@
                 post-container">
 
                 <h1 id="系列目录"><a href="#系列目录" class="headerlink" title="系列目录"></a>系列目录</h1><hr>
-<p><a href="/2025/08/21/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7/">Linux Perf 介绍 —— Perf 命令行工具</a><br><a href="/2025/08/21/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-%E5%B7%A5%E5%85%B7%E8%B0%83%E7%94%A8%E5%88%86%E6%9E%90/">Linux Perf 介绍-—— Perf 工具调用分析</a><br><a href="/2025/08/26/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-%E5%86%85%E6%A0%B8%E5%8F%8A%E9%A9%B1%E5%8A%A8%E6%94%AF%E6%8C%81/">Linux Perf 介绍 —— Perf 内核及驱动支持</a><br><a href="/2025/08/26/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-opensbi-%E6%94%AF%E6%8C%81/">Linux Perf 介绍 —— Perf opensbi 支持</a><br><a href="/2025/08/26/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-%E6%80%BB%E7%BB%93/">Linux Perf 介绍 —— Perf 总结</a></p>
+<a href="/2025/08/21/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7/" title="Linux Perf 介绍 —— Perf 命令行工具">Linux Perf 介绍 —— Perf 命令行工具</a>
+<a href="/2025/08/21/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-%E5%B7%A5%E5%85%B7%E8%B0%83%E7%94%A8%E5%88%86%E6%9E%90/" title="Linux Perf 介绍 —— Perf 工具调用分析">Linux Perf 介绍-—— Perf 工具调用分析</a>
+<a href="/2025/08/26/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-%E5%86%85%E6%A0%B8%E5%8F%8A%E9%A9%B1%E5%8A%A8%E6%94%AF%E6%8C%81/" title="Linux Perf 介绍 —— Perf 内核及驱动支持">Linux Perf 介绍 —— Perf 内核及驱动支持</a>
+<a href="/2025/08/26/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-opensbi-%E6%94%AF%E6%8C%81/" title="Linux Perf 介绍 —— Perf OpenSBI 支持">Linux Perf 介绍 —— Perf opensbi 支持</a>
+<a href="/2025/08/26/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-%E6%80%BB%E7%BB%93/" title="Linux Perf 介绍 —— Perf 总结">Linux Perf 介绍 —— Perf 总结</a>
+
 <h1 id="Perf-命令执行流程是怎样的？"><a href="#Perf-命令执行流程是怎样的？" class="headerlink" title="Perf 命令执行流程是怎样的？"></a>Perf 命令执行流程是怎样的？</h1><p>应用层发起 Perf 命令执行，通过调用系统函数 perf_event_open 创建文件描述符来记录性能事件。通过系统调用 write 来执行命令。在执行命令前，发起了 cycles 和 instructions 硬件事件的 ecall 调用，从而获取可用计数器索引，并配置 mhpmevent、mcountinhibit 和 mhpmcounter，启动计数器。当结束命令时，通过 ecall 发起 stop 命令设置 mcountinhibit 从而停止计数，并通过在 s 模式读取 hpmcounter 来获取计数值。</p>
 <p>Perf 执行过程中获取索引是先检查特殊计数器 mcycle 和 minstret，但是必须在不支持 sscofpmf 的条件下才会使用，因为这个扩展给 HPM 提供了溢出和过滤控制，当扩展被实现时会有限使用 HPM 计数器。</p>
 <h1 id="是如何通过-event-idx-获取-mhpmevent-值的？"><a href="#是如何通过-event-idx-获取-mhpmevent-值的？" class="headerlink" title="是如何通过 event_idx 获取 mhpmevent 值的？"></a>是如何通过 event_idx 获取 mhpmevent 值的？</h1><p>event_idx 格式由 SBI PMU Ext. 定义，具体编码由设备树和JSON文件共同定义。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">pmu &#123;</span><br><span class="line">compatible = <span class="string">&quot;riscv,pmu&quot;</span>;</span><br><span class="line">riscv,event-to-mhpmevent =</span><br><span class="line"><span class="comment">/* PMU_HW_BRANCH_INSTRUCTIONS -&gt; inst_branch */</span></span><br><span class="line">&lt;<span class="number">0x00005</span> <span class="number">0x00000000</span> <span class="number">0x00000036</span>&gt;,</span><br><span class="line"><span class="comment">/* 0x00005 是 SBI PMU Ext 定义的 event_idx, type=0,表示 HW 事件类型，code=5,表示 branch 事件。 第二列和第三列合并为64位数据，这个数据将会配置到 mhpmevent 中，表示硬件实现上对应的 branch 事件选择器编码。</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="comment">/* PMU_HW_BRANCH_MISSES -&gt; inst_branch_mispredict */</span></span><br><span class="line">&lt;<span class="number">0x00006</span> <span class="number">0x00000000</span> <span class="number">0x00000038</span>&gt;,</span><br><span class="line">...</span><br><span class="line"><span class="comment">/* L1D_READ_ACCESS -&gt; l1_dcache_read_access */</span></span><br><span class="line">&lt;<span class="number">0x10000</span> <span class="number">0x00000000</span> <span class="number">0x0000000c</span>&gt;,</span><br><span class="line"><span class="comment">/* 0x10000, bit[19:16] = 1, type=1, CACHE 事件类型，code=0, L1D Cache event 对应 xuantie 事件 0xC, L1 DCache load access */</span></span><br><span class="line"><span class="comment">/* L1D_READ_MISS -&gt; l1_dcache_read_miss */</span></span><br><span class="line">&lt;<span class="number">0x10001</span> <span class="number">0x00000000</span> <span class="number">0x0000000d</span>&gt;,</span><br><span class="line">...</span><br><span class="line">&lt;<span class="number">0x10029</span> <span class="number">0x00000000</span> <span class="number">0x00000001b</span>&gt;;</span><br><span class="line">riscv,event-to-mhpmcounters =</span><br><span class="line"><span class="comment">/* The Xuantie processor only implements 18 mhpmcounters, so the bitmap is</span></span><br><span class="line"><span class="comment">0x7fff8 */</span></span><br><span class="line">&lt;<span class="number">0x00005</span> <span class="number">0x00005</span> <span class="number">0x7fff8</span>&gt;,</span><br><span class="line"><span class="comment">/* 第一列表示 event_idx 开始，第二列表示 event_idx 结束，合起来表示一个事件范围， 第三列表示支持该事件范围的计数器，每个计数器一个比特位表示，共32个计数器。 */</span></span><br><span class="line">&lt;<span class="number">0x00006</span> <span class="number">0x00006</span> <span class="number">0x7fff8</span>&gt;,</span><br><span class="line">...</span><br><span class="line">&lt;<span class="number">0x10029</span> <span class="number">0x10029</span> <span class="number">0x7fff8</span>&gt;;</span><br><span class="line">riscv,raw-event-to-mhpmcounters =</span><br><span class="line"><span class="comment">/* For raw event ID 0x0 0xff */</span></span><br><span class="line">&lt;<span class="number">0x0</span> <span class="number">0x0</span> <span class="number">0xffffffff</span> <span class="number">0xffffff00</span> <span class="number">0x7fff8</span>&gt;;</span><br><span class="line"><span class="comment">/* 第一列和第二列构成64位 事件选择器值，第三/四列构成mask，第五列是计数器位图，事件选择器值与上mask之后直接配置到 mhpmevent */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">pmu &#123;</span><br><span class="line">compatible = <span class="string">&quot;riscv,pmu&quot;</span>;</span><br><span class="line">riscv,event-to-mhpmevent =</span><br><span class="line"><span class="comment">/* PMU_HW_BRANCH_INSTRUCTIONS -&gt; inst_branch */</span></span><br><span class="line">&lt;<span class="number">0x00005</span> <span class="number">0x00000000</span> <span class="number">0x00000036</span>&gt;,</span><br><span class="line"><span class="comment">/* 0x00005 是 SBI PMU Ext 定义的 event_idx, type=0,表示 HW 事件类型，code=5,表示 branch 事件。 第二列和第三列合并为64位数据，这个数据将会配置到 mhpmevent 中，表示硬件实现上对应的 branch 事件选择器编码。</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="comment">/* PMU_HW_BRANCH_MISSES -&gt; inst_branch_mispredict */</span></span><br><span class="line">&lt;<span class="number">0x00006</span> <span class="number">0x00000000</span> <span class="number">0x00000038</span>&gt;,</span><br><span class="line">...</span><br><span class="line"><span class="comment">/* L1D_READ_ACCESS -&gt; l1_dcache_read_access */</span></span><br><span class="line">&lt;<span class="number">0x10000</span> <span class="number">0x00000000</span> <span class="number">0x0000000c</span>&gt;,</span><br><span class="line"><span class="comment">/* 0x10000, bit[19:16] = 1, type=1, CACHE 事件类型，code=0, L1D Cache event 对应 xuantie 事件 0xC, L1 DCache load access */</span></span><br><span class="line"><span class="comment">/* L1D_READ_MISS -&gt; l1_dcache_read_miss */</span></span><br><span class="line">&lt;<span class="number">0x10001</span> <span class="number">0x00000000</span> <span class="number">0x0000000d</span>&gt;,</span><br><span class="line">...</span><br><span class="line">&lt;<span class="number">0x10029</span> <span class="number">0x00000000</span> <span class="number">0x00000001b</span>&gt;;</span><br><span class="line">riscv,event-to-mhpmcounters =</span><br><span class="line"><span class="comment">/* The Xuantie processor only implements 18 mhpmcounters, so the bitmap is</span></span><br><span class="line"><span class="comment">0x7fff8 */</span></span><br><span class="line">&lt;<span class="number">0x00005</span> <span class="number">0x00005</span> <span class="number">0x7fff8</span>&gt;,</span><br><span class="line"><span class="comment">/* 第一列表示 event_idx 开始，第二列表示 event_idx 结束，合起来表示一个事件范围， 第三列表示支持该事件范围的计数器，每个计数器一个比特位表示，共32个计数器。 */</span></span><br><span class="line">&lt;<span class="number">0x00006</span> <span class="number">0x00006</span> <span class="number">0x7fff8</span>&gt;,</span><br><span class="line">...</span><br><span class="line">&lt;<span class="number">0x10029</span> <span class="number">0x00029</span> <span class="number">0x7fff8</span>&gt;;</span><br><span class="line">riscv,raw-event-to-mhpmcounters =</span><br><span class="line"><span class="comment">/* For raw event ID 0x0 0xff */</span></span><br><span class="line">&lt;<span class="number">0x0</span> <span class="number">0x0</span> <span class="number">0xffffffff</span> <span class="number">0xffffff00</span> <span class="number">0x7fff8</span>&gt;;</span><br><span class="line"><span class="comment">/* 第一列和第二列构成64位 事件选择器值，第三/四列构成mask，第五列是计数器位图，事件选择器值与上mask之后直接配置到 mhpmevent */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <p>转换过程：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">sbi_pmu_ctr_cfg_match</span><br><span class="line">  -&gt; pmu_ctr_find_hw</span><br><span class="line">    -&gt; pmu_update_hw_mhpmevent</span><br><span class="line">      -&gt; sbi_platform_pmu_xlate_to_mhpmevent</span><br><span class="line">        -&gt; pmu_xlate_to_mhpmevent</span><br><span class="line">          -&gt; generic_pmu_xlate_to_mhpmevent</span><br><span class="line">            -&gt; evt_val = data; <span class="comment">// data 由 perf 传下来的，是JSON文件中的code, 这个值经过与设备树 raw-event-to-mhpmcounters 的值比较后配置到 mhpmevent</span></span><br><span class="line">            -&gt; fdt_pmu_get_select_value</span><br><span class="line">              -&gt; <span class="keyword">if</span> event-&gt;eidx==event_idx then <span class="keyword">return</span> select <span class="comment">// 针对标准事件，从设备树 event-to-mhpmevent 获取</span></span><br></pre></td></tr></table></figure>
 
