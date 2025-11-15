@@ -187,19 +187,12 @@
                     
 
                         
-                    
-
-                        
                         <li>
                             <a href="/about/">关于</a>
                         </li>
                         
                     
 
-                        
-                        <li>
-                            <a href="/archive/">归档</a>
-                        </li>
                         
                     
 
@@ -214,8 +207,9 @@
                     
 
                         
-                    
-
+                        <li>
+                            <a href="/archive/">归档</a>
+                        </li>
                         
                     
 
@@ -300,6 +294,19 @@
                         
                     
 
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/photography/">摄影</a>
+                        </li>
                         
                     
 
@@ -309,13 +316,6 @@
                         
                         <li>
                             <a href="/tags/">标签</a>
-                        </li>
-                        
-                    
-
-                        
-                        <li>
-                            <a href="/photography/">摄影</a>
                         </li>
                         
                     
@@ -399,7 +399,7 @@
                 post-container">
 
                 <h1 id="系列目录"><a href="#系列目录" class="headerlink" title="系列目录"></a>系列目录</h1><hr>
-<p><a href="2025-08-21-Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7.md">Linux Perf 介绍 —— Perf 命令行工具</a><br><a href="2025-08-21-Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-%E5%B7%A5%E5%85%B7%E8%B0%83%E7%94%A8%E5%88%86%E6%9E%90.md">Linux Perf 介绍-—— Perf 工具调用分析</a><br><a href="2025-08-26-Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-%E5%86%85%E6%A0%B8%E5%8F%8A%E9%A9%B1%E5%8A%A8%E6%94%AF%E6%8C%81.md">Linux Perf 介绍 —— Perf 内核及驱动支持</a><br><a href="2025-08-26-Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-opensbi-%E6%94%AF%E6%8C%81.md">Linux Perf 介绍 —— Perf opensbi 支持</a><br><a href="2025-08-26-Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-%E6%80%BB%E7%BB%93.md">Linux Perf 介绍 —— Perf 总结</a></p>
+<p><a href="/2025/08/21/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7/">Linux Perf 介绍 —— Perf 命令行工具</a><br><a href="/2025/08/21/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-%E5%B7%A5%E5%85%B7%E8%B0%83%E7%94%A8%E5%88%86%E6%9E%90/">Linux Perf 介绍-—— Perf 工具调用分析</a><br><a href="/2025/08/26/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-%E5%86%85%E6%A0%B8%E5%8F%8A%E9%A9%B1%E5%8A%A8%E6%94%AF%E6%8C%81/">Linux Perf 介绍 —— Perf 内核及驱动支持</a><br><a href="/2025/08/26/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-opensbi-%E6%94%AF%E6%8C%81/">Linux Perf 介绍 —— Perf opensbi 支持</a><br><a href="/2025/08/26/Linux-Perf-%E4%BB%8B%E7%BB%8D-%E2%80%94%E2%80%94-Perf-%E6%80%BB%E7%BB%93/">Linux Perf 介绍 —— Perf 总结</a></p>
 <h1 id="Perf-命令执行流程是怎样的？"><a href="#Perf-命令执行流程是怎样的？" class="headerlink" title="Perf 命令执行流程是怎样的？"></a>Perf 命令执行流程是怎样的？</h1><p>应用层发起 Perf 命令执行，通过调用系统函数 perf_event_open 创建文件描述符来记录性能事件。通过系统调用 write 来执行命令。在执行命令前，发起了 cycles 和 instructions 硬件事件的 ecall 调用，从而获取可用计数器索引，并配置 mhpmevent、mcountinhibit 和 mhpmcounter，启动计数器。当结束命令时，通过 ecall 发起 stop 命令设置 mcountinhibit 从而停止计数，并通过在 s 模式读取 hpmcounter 来获取计数值。</p>
 <p>Perf 执行过程中获取索引是先检查特殊计数器 mcycle 和 minstret，但是必须在不支持 sscofpmf 的条件下才会使用，因为这个扩展给 HPM 提供了溢出和过滤控制，当扩展被实现时会有限使用 HPM 计数器。</p>
 <h1 id="是如何通过-event-idx-获取-mhpmevent-值的？"><a href="#是如何通过-event-idx-获取-mhpmevent-值的？" class="headerlink" title="是如何通过 event_idx 获取 mhpmevent 值的？"></a>是如何通过 event_idx 获取 mhpmevent 值的？</h1><p>event_idx 格式由 SBI PMU Ext. 定义，具体编码由设备树和JSON文件共同定义。</p>
