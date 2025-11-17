@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="baidu-site-verification" content="093lY4ziMu" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="记录点滴">
+    <meta name="keyword"  content="加油, 个人博客">
+    <link rel="shortcut icon" href="/img/ironman-draw.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <!--<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
+    <title>
+        
+          RISC-V RVWMO - Sven-Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://allenzf.github.io/2025/11/17/RISC-V-RVWMO/">
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+
+    <!-- Custom CSS --> 
+    
+        
+<link rel="stylesheet" href="/css/dusign-light.css">
+
+        
+<link rel="stylesheet" href="/css/dusign-common-light.css">
+
+        
+<link rel="stylesheet" href="/css/font-awesome.css">
+
+        
+<link rel="stylesheet" href="/css/toc.css">
+
+        <!-- background effects end -->
+    
+    
+    <!-- Pygments Highlight CSS -->
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+
+    
+<link rel="stylesheet" href="/css/widget.css">
+
+
+    
+<link rel="stylesheet" href="/css/rocket.css">
+
+
+    
+<link rel="stylesheet" href="/css/signature.css">
+
+
+    
+<link rel="stylesheet" href="/css/fonts.googleapis.css">
+
+
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+    <!-- photography -->
+    
+<link rel="stylesheet" href="/css/photography.css">
+
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+<meta name="generator" content="Hexo 8.1.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- background effects start -->
+    
+    <!-- background effects end -->
+
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            
+                background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('../../../../img/header_img/Iron-Man-3.jpg')
+                /*post*/
+            
+        
+    }
+    
+    #signature{
+        background-image: url('/img/signature/Just-do-it-white.png');
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#RISC-V" title="RISC-V">RISC-V</a>
+                            
+                              <a class="tag" href="/tags/#RVWMO" title="RVWMO">RVWMO</a>
+                            
+                        </div>
+                        <h1>RISC-V RVWMO</h1>
+                        <h2 class="subheading">RV 内存一致性模型</h2>
+                        <span class="meta">
+                            Posted by 周郎借风 on
+                            2025-11-17
+                        </span>
+
+                        
+                            <div class="blank_box"></div>
+                            <span class="meta">
+                                Words <span class="post-count">4k</span> and
+                                Reading Time <span class="post-count">15</span> Minutes
+                            </span>
+                            <div class="blank_box"></div>
+                            <!-- 不蒜子统计 start -->
+                            <span class="meta">
+                                Viewed <span id="busuanzi_value_page_pv"><i class="fa fa-spinner fa-spin"></i></span> Times
+                            </span>
+                            <!-- 不蒜子统计 end -->
+                        
+
+                    </div>
+                
+
+                </div>
+            </div>
+        </div>      
+    </div>
+
+    
+    <div class="waveWrapper">
+        <div class="wave wave_before" style="background-image: url('/img/wave-light.png')"></div>
+        <div class="wave wave_after" style="background-image: url('/img/wave-light.png')"></div>
+    </div>
+    
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">周郎借风</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">主页</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">归档</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">关于</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/categories/">分类</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/photography/">摄影</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">标签</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+                    
+                    
+                    <li>
+                        <a href="https://allenzf.github.io" target="_blank">中文博客</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h2 id="为什么选择RVWMO内存一致性模型"><a href="#为什么选择RVWMO内存一致性模型" class="headerlink" title="为什么选择RVWMO内存一致性模型"></a>为什么选择RVWMO内存一致性模型</h2><hr>
+<p><code>内存一致性模型</code>（Memory Consistency Models）从弱到强呈现出一个连续的谱系。<code>弱内存模型</code>（Weak Memory Models）通过牺牲编程模型的复杂性，为硬件实现提供了更大的灵活性，并显著提升了性能、能效比（performance per watt）、功耗控制、可扩展性以及硬件验证效率。而<code>强内存模型</code>（Strong Models）虽然简化了编程模型，但代价是限制了流水线和内存系统中可进行的（非推测性）硬件优化，进而增加了功耗、面积开销和验证负担。</p>
+<p>RISC-V 选择了 <code>RVWMO</code>（RISC-V Weak Memory Ordering）内存模型，它是释放一致性（Release Consistency）的一种变体，介于强弱模型之间的中间地带。RVWMO 允许架构师实现从简单到高度激进的各类设计，无论是作为独立核心还是复杂系统中的嵌入式单元，均能支持高性能的编程语言内存模型。</p>
+<p>为便于从其他架构（如x86）移植代码，部分硬件实现可选择支持 <code>Ztso</code> 扩展，默认提供更严格的 RVTSO（RISC-V Total Store Ordering）语义。基于 RVWMO 编写的代码天然兼容 RVTSO，但依赖 RVTSO 的代码无法保证在 RVWMO 实现上正确运行——事实上，大多数RVWMO实现会（且应当）直接拒绝执行仅支持RVTSO的二进制文件。因此，实现者需权衡优先兼容 RVTSO 代码（例如简化x86迁移）还是其他 RVWMO 核心。关于代码迁移部分参考规范的附录部分。</p>
+<p>在RVTSO实现中，为RVWMO编写的代码中的部分内存屏障（如FENCE R,RW和FENCE RW,W）可能成为冗余操作，但若需保持与非Ztso实现的兼容性，这些指令仍需保留 。</p>
+<p>一致内存并不要求硬件<strong>缓存一致性</strong>。<strong>内存一致性</strong>（Memory Consistency）：定义多核间共享内存操作的全局顺序规则，关注不同处理器视角的一致性。</p>
+<p><code>缓存一致性</code>：解决同一数据在<strong>缓存与内存间、多核缓存间</strong>的副本同步问题，是内存一致性的实现基础。缓存一致性通过MESI协议（总线嗅探，通过检测总线读写，消息实现状态转换）来实现。<code>MOESI</code>：在MESI基础上增加Owned（O）状态，允许一个核心持有脏数据副本并共享（多缓存的同步）。<code>MSI</code>：简化的三态协议（Modified&#x2F;Shared&#x2F;Invalid），适用于低复杂度场景。</p>
+<h2 id="RVWMO内存一致性模型定义"><a href="#RVWMO内存一致性模型定义" class="headerlink" title="RVWMO内存一致性模型定义"></a>RVWMO内存一致性模型定义</h2><hr>
+<p><strong>RVWMO 和 RVTSO 内存模型仅规定了软件可观察到的行为，不约束任何微架构实现</strong>，因此，即使微架构在实现上违反了RVWMO模型，但只要不暴露非法行为使软件观测到就行。RVWMO和RVTSO 均为<code>多拷贝原子性</code> （multi-copy atomic）模型：若某个存储的值对发起该操作的hart以外的其他hart可见，则该值必须在概念上对系统中所有其他hart可见。</p>
+<p>一致性模型（Memory Consistency Model)是一组指定<strong>内存加载的返回值</strong>的规则。对于多线程而言，需要显示同步来保证Hart的内存指令之间顺序，<strong>为此，基本RISC-V ISA提供了 “FENCE” 指令，还通过”A”扩展提供了LR&#x2F;SC和AMO原子指令</strong>。</p>
+<h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><ul>
+<li>Memory Model Axioms&lt;内存模型公理&gt;</li>
+</ul>
+<blockquote>
+<p>仅当存在符合<code>保留程序顺序</code>（Preserved Program Order， <code>PPO</code>）并满足<code>加载值公理</code>（Load Value Axiom）、<code>原子性公理</code>（Atomicity Axiom）和<code>进展性公理</code>（Progress Axiom）的<strong>全局内存顺序</strong>（Global Memory Order）时，RISC-V 程序的执行才遵循 RVWMO 内存一致性模型。</p>
+</blockquote>
+<ul>
+<li>Global Memory Order&lt;全局内存顺序&gt;</li>
+</ul>
+<p>RVWMO 内存模型是根据全局内存顺序定义的，<strong>全局内存顺序是所有 hart 生成的内存操作交织成的所有hart一致认可的单一的全局总顺序</strong>。通常，多线程程序有许多不同的可能执行，每个执行都有自己相应的全局内存顺序。全局内存顺序（Global Memory Order）基于内存指令生成的基本加载（load）和存储（store）操作来定义。</p>
+<ul>
+<li>Program Order&lt;程序顺序&gt;</li>
+</ul>
+<p>内存操作的<code>程序顺序</code>（program order）反映了生成的load&#x2F;store指令在hart动态指令流中的逻辑布局顺序，即，顺序（<code>in-order</code>）处理器的执行顺序。</p>
+<p>加载操作（或存储操作）由代理（如 <code>CPU</code> 或设备）执行，以消费（或修改）特定内存位置的数据。加载和存储操作由对该内存位置的显式内存访问触发。内存的<code>读传输</code>（<code>read transfer</code>）从内存位置获取数据，而<code>写传输</code>（<code>write transfer</code>）则更新该位置的数据。加载操作的<strong>完成</strong>以返回值确定为标志；存储操作的<strong>完成</strong>并非指其在流水线中执行完毕，而是当其值已传播到<strong>全局可见内存时</strong>才算完成。在此意义上，全局内存顺序也体现了一致性协议和内存系统的协作，将各hart发出的（可能被重排序的）内存访问交织成所有hart共同认可的单一总顺序。</p>
+<p>内存访问指令产生内存操作。内存操作可以是 <code>load</code> <strong>和</strong>&#x2F;<strong>或</strong> <code>store</code> 操作。所有对齐的 <code>load</code> &#x2F; <code>store</code> 内存操作都是<code>单拷贝原子性</code>（single-copy atomic）的。<code>单拷贝原子性</code>：关注单个操作的完整性。<strong>单个内存操作（load&#x2F;store）在执行时不可被分割或中断，其效果要么完全生效，要么完全不生效</strong>；<code>多拷贝原子性</code>：关注多个副本的一致性，要求所有线程观察到相同的内存操作顺序（如 RVWMO 中的全局内存序）。</p>
+<p>在 RV32GC 和 RV64GC 中的指令中，每个对齐的内存指令只产生一个内存作，但有两个例外。首先，不成功的 SC 指令不会引起任何内存作。其次，如果 XLEN&lt;64，FLD 和 FSD 指令可能各自引起多个内存作。</p>
+<ul>
+<li>Syntactic Dependencies&lt;语法依赖&gt;</li>
+</ul>
+<p>语法依赖（Syntactic dependencies）的定义基于指令的源寄存器、目标寄存器，以及指令如何将依赖关系从源寄存器传递到目标寄存器。若指令b的源寄存器依赖于指令a的目标寄存器，则a和b之间存在语法依赖，禁止重排序。这种依赖关系确保指令执行的因果关系不被破坏，是RVWMO内存模型中保留程序顺序（PPO）的重要组成部分。</p>
+<ul>
+<li>Preserved Program Order&lt;保留程序顺序&gt;</li>
+</ul>
+<p>在任何程序的执行过程中，全局内存顺序（Global Memory Order）会遵循每个硬件线程（hart）的部分<strong>程序顺序</strong>，而非全部。这些必须被遵循的程序顺序子集，称为<strong>保留程序顺序</strong>（<code>Preserved Program Order</code>）。</p>
+<p>完整的定义，<strong>保留程序顺序：若满足以下所有条件，则 <code>内存操作a</code> 在保留程序顺序（全局内存属性）中<code>优先</code>于 <code>内存操作b</code></strong>:</p>
+<ol>
+<li><p><strong>程序顺序</strong>：a在程序顺序中先于b;</p>
+</li>
+<li><p><strong>内存类型</strong>：a和b均访问常规<strong>主内存（main memory）</strong>，而不是I&#x2F;O区域；</p>
+</li>
+<li><p><strong>还需满足如下任意一个条件</strong>；     </p>
+<ul>
+<li>Overlapping-Address Orderings &lt;重叠地址顺序&gt;:<blockquote>
+<p>1   <strong>b is a store, and a and b access overlapping memory addresses</strong><br> 加载或存储操作不能与后续对重叠内存位置的存储操作进行重排序<br>2   <strong>a and b are loads, x is a byte read by both a and b, there is no store to x between a and b in program order, and a and b return values for x written by different memory operations</strong><br>  a,b都为load操作，地址重叠，a和b在程序顺序上没有中间store操作，a和b 加载返回的值来自于不同的内存写入。同一hart中后续的<strong>加载操作</strong>不得返回比先前<strong>加载同一地址所获取值</strong>更早的值.这通常被称为“<strong>CoRR</strong>”（读-读对的内存一致性），属于单地址一致性的核心要求。<br>3   <strong>a is generated by an AMO or SC instruction, b is a load, and b returns a value written by a</strong><br>  如果load的返回值是<strong>AMO</strong>和<strong>SC</strong>指令写入的，则必须保序。如果是<strong>store</strong>指令，则可以重新排序（load可能在store之前），微架构上会使用store buffer保证load的值是store操作的值（RVWMO模型必须保证软件观察到的行为，不约束架构），store buffer是微架构的优化技术，RVWMO不影响微架构层面的优化。</p>
+</blockquote>
+</li>
+<li>Explicit Synchronization &lt;显式同步&gt;：<blockquote>
+<p>4   <strong>There is a FENCE instruction that orders a before b</strong><br>  内存操作a和b之间，有显式的内存屏障指令<strong>FENCE</strong><br>5 <strong>a has an acquire annotation</strong>      <br>  保护后续操作，确保当前操作后的内存更新对外可见。<br>6 <strong>b has a release annotation</strong><br>  保护前置操作，确保当前操作前的内存更新全局生效。<br>7 <strong>a and b both have RCsc annotations</strong>      <br>  通过强顺序标记实现跨线程同步，适用于关键临界区。RCsc（Release Consistency with sequentially consistent）要求原子操作本身具有全局顺序，且其前后操作不可重排。RCsc标记的指令（如LR&#x2F;SC）通过硬件屏障实现强顺序，适用于需要严格一致性的场景（如锁的实现）。<br>8 <strong>a is paired with b</strong><br>  内存操作a和b构成匹配对。LR&#x2F;SC一起才具有原子性，也就是LR必须出现在SC之前。</p>
+</blockquote>
+</li>
+<li>Syntactic Dependencies &lt;语法依赖&gt;：<blockquote>
+<p>9 <strong>b has a syntactic address dependency on a</strong><br>     指令b的内存地址依赖于指令a的目标寄存器值。<br>10 <strong>b has a syntactic data dependency on a</strong><br>  指令b的操作数（数据）直接依赖于指令a的目标寄存器值。<br>11 <strong>b is a store, and b has a syntactic control dependency on a</strong><br>  若b是存储操作，且其执行依赖于指令a的控制流结果（如条件分支），则b对a存在语法控制依赖 。禁止将b重排序到控制流指令a之前，确保控制流的正确性，禁止存储操作跨越分支指令。</p>
+</blockquote>
+</li>
+<li>Pipeline Dependencies &lt;流水线依赖&gt;<blockquote>
+<p>12 <strong>b is a load, and there exists some store m between a and b in program order such that m has an address or data dependency on a, and b returns a value written by m</strong><br>  <strong>store操作m</strong>对a存在数据&#x2F;地址依赖，b为加载操作，返回m写入的值。<br>13 <strong>b is a store, and there exists some instruction m between a and b in program order such that m has an address dependency on a</strong><br>  若b是存储操作,<strong>指令m</strong>对a存在地址依赖，则保序。存储操作b必须等待<strong>所有可能访问同一地址的前序加载</strong>完成，避免覆盖未读取的旧值。如，m是load指令，操作地址依赖a，而b操作的地址和m操作的地址有可能相同，为了防止m读取到b存储的新值，需要保序。</p>
+</blockquote>
+</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li>Load Value Axiom &lt;加载值公理&gt;</li>
+</ul>
+<p>每个加载的值必须来自GMO或程序顺序中对该地址的最新写入</p>
+<ul>
+<li>Atomicity Axiom &lt;原子性公理&gt;</li>
+</ul>
+<p>原子性公理（atomicity axiom）禁止其他硬件线程（harts）的store操作在全局内存顺序（global memory order）中插入到配对的LR（load-reserved）和SC指令之间。公理不限制load操作和同一hart的store。RISC-V 架构将原子性概念与排序概念解耦。与 TSO 等架构不同，RVWMO 下的 RISC-V 原子默认不施加任何排序要求。排序语义仅由其他适用的 PPO 规则保证。</p>
+<ul>
+<li>Progress Axiom &lt;进展性公理&gt;</li>
+</ul>
+<p>在全局内存顺序（global memory order）中，任何内存操作的前方不允许存在无限序列的其他内存操作。每个内存操作最终必须被提交到内存，不能被无限延迟，避免因无限延迟导致程序停滞。</p>
+<h2 id="Main-Memory-Ordering"><a href="#Main-Memory-Ordering" class="headerlink" title="Main Memory Ordering"></a>Main Memory Ordering</h2><hr>
+<p>主内存序遵循RVWMO一致性规范。Spec针对缓存指令添加了部分约束，已满足RVWMO规范，具体见”CMO”扩展章节的”Memory Ordering”部分。</p>
+<p>RISC-V base ISA提供了FENCE指令来实现内存屏障。默认情况下，FENCE指令确保程序顺序中先于栅栏的所有内存访问（称为“前驱集”）在全局内存顺序中早于后于栅栏的所有内存访问（称为“后继集”）。为了性能优化，指令提供了可配置的前驱集和后继集。</p>
+<ul>
+<li><strong>PR</strong>（前驱读） ：若设置该位，前驱集包含加载操作；</li>
+<li><strong>PW</strong>（前驱写）：若设置该位，前驱集包含存储操作；</li>
+<li><strong>SR</strong>（后继读） ：若设置该位，后继集包含加载操作；</li>
+<li><strong>SW</strong>（后继写）：若设置该位，后继集包含存储操作；</li>
+</ul>
+<p>据此，Spec推荐6种使用方式：</p>
+<ul>
+<li>FENCE RW,RW </li>
+<li>FENCE.TSO </li>
+<li>FENCE RW,W </li>
+<li>FENCE R,RW </li>
+<li>FENCE R,R </li>
+<li>FENCE W,W</li>
+</ul>
+<p>其他前驱和后继组合的行为可能会发生意外。</p>
+<h2 id="I-O-Ordering"><a href="#I-O-Ordering" class="headerlink" title="I&#x2F;O Ordering"></a>I&#x2F;O Ordering</h2><hr>
+<p>RVWMO只适用于主内存模型，不适用于I&#x2F;O 排序。内存模型基于各内存区域支持的底层操作原语（如原子指令）构建。例如，若某区域不支持原子操作，则相关原子性约束不适用。</p>
+<p><strong>可缓存性属性通常不影响内存模型的行为</strong>。非缓存区域（non-cacheable）可能表现出比缓存区域更严格的顺序约束，但内存模型允许的行为范围不变。一致内存（coherent）并不要求硬件缓存一致性。</p>
+<p><strong>幂等性</strong> <code>PMAs</code> 用于标识内存区域中的加载&#x2F;存储操作是否具有副作用（如设备寄存器访问）。微架构可能利用此属性判断预取等优化的合法性，但这不影响内存模型的规则。</p>
+<p>对于IO而言，加载值公理和原子性公理不再适用，但 <code>PPO</code> 仍然适用：</p>
+<p>完整的定义，<strong>保留程序顺序：若满足以下所有条件，则 <em>内存操作a</em> 在保留程序顺序（全局内存属性）中优先于 <em>内存操作b</em></strong>:</p>
+<ol>
+<li><p><strong>程序顺序</strong>：a在程序顺序中先于b;</p>
+</li>
+<li><p><strong>内存类型</strong>：a和b均访问I&#x2F;O Memory；</p>
+</li>
+<li><p><strong>还需满足如下任意一个条件</strong>；     </p>
+<blockquote>
+<p>1 <strong>a precedes b in preserved program order, with the exception that acquire and release ordering annotations apply only from one memory operation to another memory operation and from one I&#x2F;O operation to another I&#x2F;O operation, but not from a memory operation to an I&#x2F;O nor vice versa</strong><br> a在程序顺序中先于b，但获取（acquire）和释放（release）顺序注解仅在同一类型操作间生效（即主存操作到主存操作、I&#x2F;O操作到I&#x2F;O操作，主存与I&#x2F;O操作间不适用）。<br>2 <strong>a and b are accesses to overlapping addresses in an I&#x2F;O region</strong><br> a和b访问同一I&#x2F;O区域的重叠地址。<br>3 <strong>a and b are accesses to the same strongly ordered I&#x2F;O region</strong><br> a和b访问同一强顺序（strongly ordered）I&#x2F;O区域。<br>4 <strong>a and b are accesses to I&#x2F;O regions, and the channel associated with the I&#x2F;O region accessed by either a or b is channel 1</strong><br> a或b关联的I&#x2F;O区域属于通道1.<br>5 <strong>a and b are accesses to I&#x2F;O regions associated with the same channel (except for channel 0)</strong><br> a和b关联的I&#x2F;O区域属于同一通道（通道0除外）。</p>
+</blockquote>
+</li>
+</ol>
+<p>为了对I&#x2F;O Ordering的支持，FENCE指令添加了IO的前驱和后继：</p>
+<ul>
+<li><strong>PI</strong>（Predecessor Input）     ：前驱集中的I&#x2F;O读操作；</li>
+<li><strong>PO</strong>（Predecessor Output）：前驱集中的I&#x2F;O写操作；</li>
+<li><strong>SI</strong>（Successor Input）         ：后继集中的I&#x2F;O读操作；</li>
+<li><strong>SO</strong>（Successor Output）    ：后继集中的I&#x2F;O写操作；</li>
+</ul>
+
+                
+                <hr>
+                <!-- Pager -->
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2025/11/17/OpenSBI-TLB服务实现/" data-toggle="tooltip" data-placement="top" title="OpenSBI TLB服务实现">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2025/11/15/RISC-V-Trace/" data-toggle="tooltip" data-placement="top" title="RISC-V Trace">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- tip start -->
+                
+
+                
+                <!-- tip end -->
+
+                <!-- Music start-->
+                
+                <!-- Music end -->
+
+                <!-- Sharing -->
+                
+                <!-- Sharing -->
+
+                <!-- gitment start -->
+                
+                <!-- gitment end -->
+
+                <!-- 来必力City版安装代码 -->
+                
+                <!-- City版安装代码已完成 -->
+
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+    
+      
+        <aside id="sidebar">
+          <div id="toc" class="toc-article">
+          <strong class="toc-title">Contents</strong>
+          
+            
+              <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%80%89%E6%8B%A9RVWMO%E5%86%85%E5%AD%98%E4%B8%80%E8%87%B4%E6%80%A7%E6%A8%A1%E5%9E%8B"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">为什么选择RVWMO内存一致性模型</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#RVWMO%E5%86%85%E5%AD%98%E4%B8%80%E8%87%B4%E6%80%A7%E6%A8%A1%E5%9E%8B%E5%AE%9A%E4%B9%89"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">RVWMO内存一致性模型定义</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%AE%9A%E4%B9%89"><span class="toc-nav-number">3.</span> <span class="toc-nav-text">定义</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Main-Memory-Ordering"><span class="toc-nav-number">4.</span> <span class="toc-nav-text">Main Memory Ordering</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#I-O-Ordering"><span class="toc-nav-number">5.</span> <span class="toc-nav-text">I&#x2F;O Ordering</span></a></li></ol>
+            
+          
+          </div>
+        </aside>
+      
+    
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <!-- <h5><a href="/tags/">FEATURED TAGS</a></h5> -->
+                    <h5><a href="/tags/"></a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#RISC-V" title="RISC-V">RISC-V</a>
+                        
+                          <a class="tag" href="/tags/#RVWMO" title="RVWMO">RVWMO</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                
+                <script src="https://giscus.app/client.js"
+                    data-repo="AllenZF/allenzf.github.io"
+                    data-repo-id="R_kgDOQMASLQ"
+                    data-category="General"
+                    data-category-id="DIC_kwDOQMASLc4CxR4Q"
+                    data-mapping="pathname"
+                    data-strict="0"
+                    data-reactions-enabled="1"
+                    data-emit-metadata="0"
+                    data-input-position="bottom"
+                    data-theme="preferred_color_scheme"
+                    data-lang="en"
+                    crossorigin="anonymous"
+                    async>
+                </script>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: 'ℬ'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+
+
+<style  type="text/css">
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/AllenZF">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://gitee.com/Sven">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-stack-1x fa-inverse">码</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/people/zhou-lang-jie-feng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; 周郎借风 2025 
+                    <br>
+                    Powered by 
+                    <a href="https://github.com/dusign/hexo-theme-snail">
+                        <i>hexo-theme-snail</i>
+                    </a> | 
+                    <iframe name="star" style="margin-left: 2px; margin-bottom:-5px;" frameborder="0" scrolling="0"
+                        width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=dusign&repo=hexo-theme-snail&type=star&count=true">
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+
+</footer>
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- Search -->
+
+<script src="/js/search.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://allenzf.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-XXXXXXXX-X';
+    var _gaDomain = 'yoursite';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+<!-- Search -->
+
+    <script type="text/javascript">      
+        var search_path = "search.xml";
+        if (search_path.length == 0) {
+            search_path = "search.xml";
+        }
+    var path = "/" + search_path;
+    searchFunc(path, 'local-search-input', 'local-search-result');
+    </script>
+
+
+<!-- busuanzi -->
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+
+    
+        <!-- background effects line -->
+        
+
+        
+            <script type="text/javascript" src="/js/mouse-click.js" content='[&#34;🌱&#34;,&#34;just do it&#34;,&#34;🍀&#34;]' color='[&#34;rgb(121,93,179)&#34; ,&#34;rgb(76,180,231)&#34; ,&#34;rgb(184,90,154)&#34;]'></script>
+        
+
+        <!-- background effects end -->
+    
+
+    <!--<script size="50" alpha='0.3' zIndex="-999" src="/js/ribbonStatic.js"></script>-->
+    
+        <script src="/js/ribbonDynamic.js"></script>
+    
+</body>
+
+</html>

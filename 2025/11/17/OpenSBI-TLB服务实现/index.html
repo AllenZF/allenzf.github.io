@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="baidu-site-verification" content="093lY4ziMu" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="记录点滴">
+    <meta name="keyword"  content="加油, 个人博客">
+    <link rel="shortcut icon" href="/img/ironman-draw.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <!--<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
+    <title>
+        
+          OpenSBI TLB服务实现 - Sven-Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://allenzf.github.io/2025/11/17/OpenSBI-TLB服务实现/">
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+
+    <!-- Custom CSS --> 
+    
+        
+<link rel="stylesheet" href="/css/dusign-light.css">
+
+        
+<link rel="stylesheet" href="/css/dusign-common-light.css">
+
+        
+<link rel="stylesheet" href="/css/font-awesome.css">
+
+        
+<link rel="stylesheet" href="/css/toc.css">
+
+        <!-- background effects end -->
+    
+    
+    <!-- Pygments Highlight CSS -->
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+
+    
+<link rel="stylesheet" href="/css/widget.css">
+
+
+    
+<link rel="stylesheet" href="/css/rocket.css">
+
+
+    
+<link rel="stylesheet" href="/css/signature.css">
+
+
+    
+<link rel="stylesheet" href="/css/fonts.googleapis.css">
+
+
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+    <!-- photography -->
+    
+<link rel="stylesheet" href="/css/photography.css">
+
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+<meta name="generator" content="Hexo 8.1.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- background effects start -->
+    
+    <!-- background effects end -->
+
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            
+                background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('../../../../img/header_img/Iron-Man-3.jpg')
+                /*post*/
+            
+        
+    }
+    
+    #signature{
+        background-image: url('/img/signature/Just-do-it-white.png');
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#OpenSBI" title="OpenSBI">OpenSBI</a>
+                            
+                              <a class="tag" href="/tags/#TLB" title="TLB">TLB</a>
+                            
+                        </div>
+                        <h1>OpenSBI TLB服务实现</h1>
+                        <h2 class="subheading">OpenSBI TLB源码学习笔记</h2>
+                        <span class="meta">
+                            Posted by 周郎借风 on
+                            2025-11-17
+                        </span>
+
+                        
+                            <div class="blank_box"></div>
+                            <span class="meta">
+                                Words <span class="post-count">3.6k</span> and
+                                Reading Time <span class="post-count">17</span> Minutes
+                            </span>
+                            <div class="blank_box"></div>
+                            <!-- 不蒜子统计 start -->
+                            <span class="meta">
+                                Viewed <span id="busuanzi_value_page_pv"><i class="fa fa-spinner fa-spin"></i></span> Times
+                            </span>
+                            <!-- 不蒜子统计 end -->
+                        
+
+                    </div>
+                
+
+                </div>
+            </div>
+        </div>      
+    </div>
+
+    
+    <div class="waveWrapper">
+        <div class="wave wave_before" style="background-image: url('/img/wave-light.png')"></div>
+        <div class="wave wave_after" style="background-image: url('/img/wave-light.png')"></div>
+    </div>
+    
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">周郎借风</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">主页</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">归档</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">关于</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/categories/">分类</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/photography/">摄影</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">标签</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+                    
+                    
+                    <li>
+                        <a href="https://allenzf.github.io" target="_blank">中文博客</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h2 id="软件环境"><a href="#软件环境" class="headerlink" title="软件环境"></a>软件环境</h2><hr>
+<ul>
+<li>linux 6.13.0 commit 9b2ffa6148b1e4468d08f7e0e7e371c43cac9ffe</li>
+<li>opensbi 1.6.1 commit c45e9c2f58d8dc956f3573b08d3dd523b44aa44d</li>
+</ul>
+<h2 id="CPU运行状态"><a href="#CPU运行状态" class="headerlink" title="CPU运行状态"></a>CPU运行状态</h2><hr>
+<p>Hart状态机更改详见 SBI Spec 的 Hart State Management Extension (EID #0x48534D “HSM”)。</p>
+<p>CPU包含7个状态，如下，</p>
+<img src="/2025/11/17/OpenSBI-TLB%E6%9C%8D%E5%8A%A1%E5%AE%9E%E7%8E%B0/cpu_state.png" class="" title="CPU状态">
+
+<p>在OpenSBI软件中，harts(cpus)会执行以下流程</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// boot hart</span></span><br><span class="line">sbi_init</span><br><span class="line">	init_coldboot</span><br><span class="line">		sbi_hsm_init</span><br><span class="line">	 	wake_coldboot_harts</span><br><span class="line">	 	sbi_tlb_init</span><br><span class="line"></span><br><span class="line"><span class="comment">// nonboot hart</span></span><br><span class="line">sbi_init</span><br><span class="line">	init_warmboot</span><br><span class="line">		wait_for_coldboot</span><br><span class="line">		init_warm_startup</span><br><span class="line">			sbi_hsm_init</span><br><span class="line">			sbi_tlb_init</span><br></pre></td></tr></table></figure>
+<p><code>sbi_hsm_init</code> 源码解析：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">sbi_hsm_init</span><span class="params">(<span class="keyword">struct</span> sbi_scratch *scratch, <span class="type">bool</span> cold_boot)</span></span><br><span class="line">&#123;</span><br><span class="line">	u32 i;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">sbi_scratch</span> *<span class="title">rscratch</span>;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">sbi_hsm_data</span> *<span class="title">hdata</span>;</span></span><br><span class="line">	sbi_printf(<span class="string">&quot;%s cold_boot=%d\n&quot;</span>,__func__, cold_boot);</span><br><span class="line">	<span class="keyword">if</span> (cold_boot) &#123; <span class="comment">// boot hart分支</span></span><br><span class="line">		hart_data_offset = sbi_scratch_alloc_offset(<span class="keyword">sizeof</span>(*hdata));</span><br><span class="line">		<span class="keyword">if</span> (!hart_data_offset)</span><br><span class="line">			<span class="keyword">return</span> SBI_ENOMEM;</span><br><span class="line"></span><br><span class="line">		<span class="comment">/* Initialize hart state data for every hart */</span></span><br><span class="line">		<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt;= sbi_scratch_last_hartindex(); i++) &#123;</span><br><span class="line">			rscratch = sbi_hartindex_to_scratch(i);</span><br><span class="line">			<span class="keyword">if</span> (!rscratch)</span><br><span class="line">				<span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">			hdata = sbi_scratch_offset_ptr(rscratch,</span><br><span class="line">						       hart_data_offset);</span><br><span class="line">			ATOMIC_INIT(&amp;hdata-&gt;state,</span><br><span class="line">				    (i == current_hartindex()) ?</span><br><span class="line">				    SBI_HSM_STATE_START_PENDING :      <span class="comment">// boot hart CPU状态设置为start_pending</span></span><br><span class="line">				    SBI_HSM_STATE_STOPPED);            <span class="comment">// 其他hart CPU状态设置为stoped</span></span><br><span class="line">			sbi_printf(<span class="string">&quot;hartid=%ld %s %d, hdata-&gt;state:%ld\n&quot;</span>,current_hartindex(), __func__, __LINE__, hdata-&gt;state.counter);</span><br><span class="line">			ATOMIC_INIT(&amp;hdata-&gt;start_ticket, <span class="number">0</span>);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;  <span class="comment">// nonboot hart 分支</span></span><br><span class="line">		sbi_hsm_hart_wait(scratch);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 <code>sbi_hsm_init</code> 中，第7行会判断是否为 <code>boot hart</code>（<code>cold boot</code>），如果是 boot hart 则20行对每一个 hart 都会设置 cpu state 状态（hdata→state），boot hart 设置为 <strong>START_PENDING</strong> 状态，其他 hart 设置为 <strong>STOPPED</strong> 状态。</p>
+<p>第28行为<strong>nonboot hart</strong> 分支，所有<strong>nonboot hart</strong> 都会执行 <code>sbi_hsm_hart_wait</code>()。该函数中会根据 state 状态来执行 WFI，具体如下代码，所有 <strong>非START_PENDING</strong> 状态都会执行 WFI。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Wait for state transition requested by sbi_hsm_hart_start() */</span></span><br><span class="line">	<span class="keyword">while</span> (<span class="type">atomic_read</span>(&amp;hdata-&gt;state) != SBI_HSM_STATE_START_PENDING) &#123;</span><br><span class="line">		wfi();</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<p>从 <code>sbi_hsm_init</code> 返回后，boot hart 执行了 <code>wake_coldboot_harts</code>(). 该函数设置了 <strong>coldboot_done</strong> 状态。使用该状态的函数是 <code>wait_for_coldboot</code> 函数。该函数是每个 nonboot hart 都执行的。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">wait_for_coldboot</span><span class="params">(<span class="keyword">struct</span> sbi_scratch *scratch)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="comment">/* Wait for coldboot to finish */</span></span><br><span class="line">	<span class="keyword">while</span> (!__smp_load_acquire(&amp;coldboot_done))</span><br><span class="line">		cpu_relax();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">wake_coldboot_harts</span><span class="params">(<span class="keyword">struct</span> sbi_scratch *scratch)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="comment">/* Mark coldboot done */</span></span><br><span class="line">	__smp_store_release(&amp;coldboot_done, <span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>从上面的分析可知：</p>
+<ol>
+<li>boot hart 会一致保持执行，CPU 状态会设置为 START_PENDING，然后 boot hart 会设置 coldboot_done 信号，告诉 nonboot hart 可以执行了，然后 boot hart 会向后继续执行，最终会执行 <code>sbi_tlb_init</code>, 对 tlb 进行初始化。</li>
+<li>nonboot hart 最初会等待 coldboot_done 信号，当信号等到后，判断 CPU hsm 状态，由于状态被 boot hart 设置为 STOPED 状态，所以会 WFI；当 nonboot hart 被唤醒后会继续向后执行，最终也会调用 <code>sbi_tlb_init</code>，对 tlb 进行初始化。</li>
+</ol>
+<p>通过 trace linux 的代码，nonboot hart 是 linux boot hart 在 <code>start_kernel</code> 函数的末尾唤醒的，具体过程：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">start_kernel</span><br><span class="line">  -&gt;rest_init</span><br><span class="line">   -&gt;kernel_init</span><br><span class="line">    -&gt;kernel_init_freeable</span><br><span class="line">     -&gt;smp_init</span><br><span class="line">      -&gt;bringup_nonboot_cpus</span><br><span class="line">       -&gt;cpuhp_bringup_mask</span><br><span class="line">        -&gt;cpuhp_invoke_callback_range</span><br><span class="line">         -&gt;cpuhp_next_state</span><br><span class="line">          -&gt;cpuhp_invoke_callback</span><br><span class="line">           -&gt;bringup_cpu</span><br><span class="line">            -&gt;__cpu_up</span><br><span class="line">             -&gt;start_secondary_cpu</span><br><span class="line">              -&gt;sbi_cpu_start</span><br><span class="line">               -&gt;sbi_hsm_hart_start</span><br><span class="line">                -&gt;sbi_ecall</span><br></pre></td></tr></table></figure>
+
+<h2 id="TLB初始化"><a href="#TLB初始化" class="headerlink" title="TLB初始化"></a>TLB初始化</h2><hr>
+<p>通过对 CPU 状态的跟踪可知，boot hart TLB 初始化是在刚启动时就初始化完成的，而 nonboot hart 的 TLB 初始化是 boot hart 执行 linux 的启动代码后通过 ecall 唤醒 nonboot hart 之后执行的。boot hart 初始化 TLB 时，nonboot hart 还在 opensbi 软件代码阶段。</p>
+<p>boot hart 和 nonboot hart 执行的 TLB 初始化代码函数入口相同，都是 sbi_tlb_init. 代码解析如下，</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">sbi_tlb_init</span><span class="params">(<span class="keyword">struct</span> sbi_scratch *scratch, <span class="type">bool</span> cold_boot)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> ret;</span><br><span class="line">	<span class="type">void</span> *tlb_mem;</span><br><span class="line">	<span class="type">atomic_t</span> *tlb_sync;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">sbi_fifo</span> *<span class="title">tlb_q</span>;</span></span><br><span class="line">	<span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">sbi_platform</span> *<span class="title">plat</span> =</span> sbi_platform_ptr(scratch);</span><br><span class="line">	sbi_printf(<span class="string">&quot;%s cold_boot=%d\n&quot;</span>,__func__, cold_boot);</span><br><span class="line">	<span class="keyword">if</span> (cold_boot) &#123; <span class="comment">// boot hart 分支</span></span><br><span class="line">		<span class="comment">// 在scratch空间分配大小为sizeof(*tlb_sync)=8B的空间，在scratch上的偏移为tlb_sync_off</span></span><br><span class="line">		tlb_sync_off = sbi_scratch_alloc_offset(<span class="keyword">sizeof</span>(*tlb_sync));</span><br><span class="line">		<span class="keyword">if</span> (!tlb_sync_off)</span><br><span class="line">			<span class="keyword">return</span> SBI_ENOMEM;</span><br><span class="line">		<span class="comment">// 在scratch空间分配大小为sizeof(*tlb_q)=24B的空间，在scratch上的偏移为tlb_fifo_off</span></span><br><span class="line">		tlb_fifo_off = sbi_scratch_alloc_offset(<span class="keyword">sizeof</span>(*tlb_q));</span><br><span class="line">		<span class="keyword">if</span> (!tlb_fifo_off) &#123;</span><br><span class="line">			sbi_scratch_free_offset(tlb_sync_off);</span><br><span class="line">			<span class="keyword">return</span> SBI_ENOMEM;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// 在scratch空间分配大小为sizeof(tlb_mem)=8B的空间，在scratch上的偏移为tlb_fifo_mem_off</span></span><br><span class="line">		tlb_fifo_mem_off = sbi_scratch_alloc_offset(<span class="keyword">sizeof</span>(tlb_mem));</span><br><span class="line">		<span class="keyword">if</span> (!tlb_fifo_mem_off) &#123;</span><br><span class="line">			sbi_scratch_free_offset(tlb_fifo_off);</span><br><span class="line">			sbi_scratch_free_offset(tlb_sync_off);</span><br><span class="line">			<span class="keyword">return</span> SBI_ENOMEM;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// IPI架构支持64个（软件可配）IPI事件，用数组管理，这里将事件tlb_ops注册到数组。ret为数组index</span></span><br><span class="line">		ret = sbi_ipi_event_create(&amp;tlb_ops);</span><br><span class="line">		<span class="keyword">if</span> (ret &lt; <span class="number">0</span>) &#123;</span><br><span class="line">			sbi_scratch_free_offset(tlb_fifo_mem_off);</span><br><span class="line">			sbi_scratch_free_offset(tlb_fifo_off);</span><br><span class="line">			sbi_scratch_free_offset(tlb_sync_off);</span><br><span class="line">			<span class="keyword">return</span> ret;</span><br><span class="line">		&#125;</span><br><span class="line">		tlb_event = ret; <span class="comment">// tlb_ops的index，在后续对tlb进行操作时，需要使用tlb_event找到操作</span></span><br><span class="line">		<span class="comment">// 设置TLB刷新时一次刷新的最大TLB条目数量。一次刷新过多的TLB条目可能对性能有影响。</span></span><br><span class="line">		tlb_range_flush_limit = sbi_platform_tlbr_flush_limit(plat);</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;   <span class="comment">// nonboot hart 分支，只对是否分配了对应tlb事件内存空间进行检查</span></span><br><span class="line">		<span class="keyword">if</span> (!tlb_sync_off ||</span><br><span class="line">		    !tlb_fifo_off ||</span><br><span class="line">		    !tlb_fifo_mem_off)</span><br><span class="line">			<span class="keyword">return</span> SBI_ENOMEM;</span><br><span class="line">		<span class="keyword">if</span> (SBI_IPI_EVENT_MAX &lt;= tlb_event)</span><br><span class="line">			<span class="keyword">return</span> SBI_ENOSPC;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// all hart</span></span><br><span class="line">	<span class="comment">// 所有hart都使用同一个tlb_sync_off，但是tlb_sync地址不同</span></span><br><span class="line">	tlb_sync = sbi_scratch_offset_ptr(scratch, tlb_sync_off);</span><br><span class="line">	<span class="comment">// 所有hart都使用同一个tlb_fifo_off，但是tlb_q地址不同，具体使用时使用fifo变量，和tlb_q等同</span></span><br><span class="line">	tlb_q = sbi_scratch_offset_ptr(scratch, tlb_fifo_off);</span><br><span class="line">	<span class="comment">// tlb_mem是scratch上的空间，保存了一个heap上的地址，该地址指向大小等于（num_entries*entry_size）的空间起始地址</span></span><br><span class="line">	tlb_mem = sbi_scratch_read_type(scratch, <span class="type">void</span> *, tlb_fifo_mem_off); <span class="comment">// 从tlb_fifo_mem_off处读取一个值，这个值作为(void*)类型指针</span></span><br><span class="line">	sbi_printf(<span class="string">&quot;%s: scratch=0x%lx,tlb_fifo_mem_off=0x%lx,tlb_mem=0x%lx\n&quot;</span>, __func__, (<span class="type">uint64_t</span>)scratch, tlb_fifo_mem_off, (<span class="type">uint64_t</span>)tlb_mem);</span><br><span class="line">	<span class="keyword">if</span> (!tlb_mem) &#123;</span><br><span class="line">		<span class="comment">// 初始时，tlb_mem=0，需要从head上分配空间</span></span><br><span class="line">		tlb_mem = sbi_malloc(</span><br><span class="line">				sbi_platform_tlb_fifo_num_entries(plat) * SBI_TLB_INFO_SIZE);</span><br><span class="line">		<span class="keyword">if</span> (!tlb_mem)</span><br><span class="line">			<span class="keyword">return</span> SBI_ENOMEM;</span><br><span class="line">		<span class="comment">// 将地址tlb_mem写入tlb_fifo_mem_off处，并设置为（void *)类型</span></span><br><span class="line">		sbi_scratch_write_type(scratch, <span class="type">void</span> *, tlb_fifo_mem_off, tlb_mem);</span><br><span class="line">	&#125;</span><br><span class="line">	sbi_printf(<span class="string">&quot;%s: scratch=0x%lx,tlb_fifo_mem_off=0x%lx,tlb_mem=0x%lx\n&quot;</span>, __func__, (<span class="type">uint64_t</span>)scratch, tlb_fifo_mem_off, (<span class="type">uint64_t</span>)tlb_mem);</span><br><span class="line">	ATOMIC_INIT(tlb_sync, <span class="number">0</span>); <span class="comment">// 初始化同步器，tlb_sync-&gt;counter = 0;</span></span><br><span class="line"></span><br><span class="line">	sbi_printf(<span class="string">&quot;%s: scratch=0x%lx,tlb_sync_off=0x%lx,tlb_sync=0x%lx\n&quot;</span>, __func__, (<span class="type">uint64_t</span>)scratch, tlb_sync_off, (<span class="type">uint64_t</span>)tlb_sync);</span><br><span class="line">	sbi_printf(<span class="string">&quot;%s: scratch=0x%lx,tlb_fifo_off=0x%lx,tlb_q=0x%lx, size=%ld\n&quot;</span>, __func__, (<span class="type">uint64_t</span>)scratch, tlb_fifo_off, (<span class="type">uint64_t</span>)tlb_q,SBI_TLB_INFO_SIZE);</span><br><span class="line">	<span class="comment">// 对tlb_q进行初始化</span></span><br><span class="line">	sbi_fifo_init(tlb_q, tlb_mem,</span><br><span class="line">		      sbi_platform_tlb_fifo_num_entries(plat), SBI_TLB_INFO_SIZE);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">sbi_ipi_event_ops</span> <span class="title">tlb_ops</span> =</span> &#123;</span><br><span class="line">	.name = <span class="string">&quot;IPI_TLB&quot;</span>,</span><br><span class="line">	.update = tlb_update, <span class="comment">// 通过sbi_ipi_send调用</span></span><br><span class="line">	.sync = tlb_sync,		<span class="comment">// 通过sbi_ipi_sync调用</span></span><br><span class="line">	.process = tlb_process,  <span class="comment">// 通过sbi_ipi_process中断调用</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>执行如下配置时，tlb 初始化 scratch 空间如下，</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-system-riscv64 -smp 2 -cpu max -M virt -m 256M -nographic -kernel linux/arch/riscv/boot/Image -bios opensbi/build/platform/generic/firmware/fw_jump.bin -drive file=rootfs.img,format=raw,<span class="built_in">id</span>=hd0,<span class="keyword">if</span>=none -device virtio-blk-device,drive=hd0 -append <span class="string">&quot;root=/dev/vda rw console=ttyS0&quot;</span></span><br></pre></td></tr></table></figure>
+<img src="/2025/11/17/OpenSBI-TLB%E6%9C%8D%E5%8A%A1%E5%AE%9E%E7%8E%B0/scratch.png" class="" title="scratch空间">
+
+<p>其中，红框部分为 <code>tlb_q</code>, 在 opensbi tlb 操作的函数中使用 fifo 变量来代替。queue 指向 tlb_mem，是队列入口地址。tlb_mem 指向第一个 entry 入口地址, 一个 entry 就代表一个线程，上述命令 smp&#x3D;2，也就是2个 hart（线程），所以 entry&#x3D;2, entry_size 定义如下，包含了 tlb 操作的所有信息，大小为40B。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sbi_tlb_info</span> &#123;</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> start; <span class="comment">//虚拟地址，刷新的起始位置</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> size;  </span><br><span class="line">	<span class="type">uint16_t</span> asid;</span><br><span class="line">	<span class="type">uint16_t</span> vmid;</span><br><span class="line">	<span class="class"><span class="keyword">enum</span> <span class="title">sbi_tlb_type</span> <span class="title">type</span>;</span> <span class="comment">// 操作的类型，根据type，调用不同指令进行刷新</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">sbi_hartmask</span> <span class="title">smask</span>;</span> <span class="comment">// source hart mask,opensbi支持128个harts, 每个bit表示一个hart，表示IPI是由那些hart发起的</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// TLB支持7种操作，对应fence.i, sfence, hfence指令，以及不同的rs1,rs2操作数，具体参考spec.</span></span><br><span class="line"><span class="class"><span class="keyword">enum</span> <span class="title">sbi_tlb_type</span> &#123;</span></span><br><span class="line">	SBI_TLB_FENCE_I = <span class="number">0</span>,</span><br><span class="line">	SBI_TLB_SFENCE_VMA,</span><br><span class="line">	SBI_TLB_SFENCE_VMA_ASID,</span><br><span class="line">	SBI_TLB_HFENCE_GVMA_VMID,</span><br><span class="line">	SBI_TLB_HFENCE_GVMA,</span><br><span class="line">	SBI_TLB_HFENCE_VVMA_ASID,</span><br><span class="line">	SBI_TLB_HFENCE_VVMA,</span><br><span class="line">	SBI_TLB_TYPE_MAX,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h2 id="TLB处理"><a href="#TLB处理" class="headerlink" title="TLB处理"></a>TLB处理</h2><hr>
+<h3 id="OpenSBI执行流程"><a href="#OpenSBI执行流程" class="headerlink" title="OpenSBI执行流程"></a>OpenSBI执行流程</h3><p>OpenSBI有2种方式处理tlb的操作(上述7种tlb刷新)。</p>
+<ul>
+<li>通过ecall调用ecall提供的rfence扩展服务</li>
+<li>通过中断</li>
+</ul>
+<h4 id="通过ecall提供的rfence扩展服务"><a href="#通过ecall提供的rfence扩展服务" class="headerlink" title="通过ecall提供的rfence扩展服务"></a>通过ecall提供的rfence扩展服务</h4><p>Ecall rfence 的扩展 id 为 SBI_EXT_RFENCE，函数入口 <code>sbi_ecall_rfence_handler</code>，</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sbi_ecall_extension</span> <span class="title">ecall_rfence</span> =</span> &#123;</span><br><span class="line">	.name			= <span class="string">&quot;rfnc&quot;</span>,</span><br><span class="line">	.extid_start		= SBI_EXT_RFENCE,</span><br><span class="line">	.extid_end		= SBI_EXT_RFENCE,</span><br><span class="line">	.register_extensions	= sbi_ecall_rfence_register_extensions,</span><br><span class="line">	.handle			= sbi_ecall_rfence_handler,</span><br><span class="line">&#125;;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">sbi_ecall_rfence_handler</span><span class="params">(<span class="type">unsigned</span> <span class="type">long</span> extid, <span class="type">unsigned</span> <span class="type">long</span> funcid,</span></span><br><span class="line"><span class="params">				    <span class="keyword">struct</span> sbi_trap_regs *regs,</span></span><br><span class="line"><span class="params">				    <span class="keyword">struct</span> sbi_ecall_return *out)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> ret = <span class="number">0</span>;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> vmid;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">sbi_tlb_info</span> <span class="title">tlb_info</span>;</span></span><br><span class="line">	u32 source_hart = current_hartid();</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (funcid &gt;= SBI_EXT_RFENCE_REMOTE_HFENCE_GVMA_VMID &amp;&amp;</span><br><span class="line">	    funcid &lt;= SBI_EXT_RFENCE_REMOTE_HFENCE_VVMA)</span><br><span class="line">		<span class="keyword">if</span> (!misa_extension(<span class="string">&#x27;H&#x27;</span>))</span><br><span class="line">			<span class="keyword">return</span> SBI_ENOTSUPP;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">switch</span> (funcid) &#123;</span><br><span class="line">	<span class="keyword">case</span> SBI_EXT_RFENCE_REMOTE_FENCE_I:</span><br><span class="line">		<span class="comment">// 对tlb_info进行初始化</span></span><br><span class="line">		SBI_TLB_INFO_INIT(&amp;tlb_info, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,</span><br><span class="line">				  SBI_TLB_FENCE_I, source_hart);</span><br><span class="line">		<span class="comment">// 调用tlb服务</span></span><br><span class="line">		ret = sbi_tlb_request(regs-&gt;a0, regs-&gt;a1, &amp;tlb_info);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> SBI_EXT_RFENCE_REMOTE_HFENCE_GVMA:</span><br><span class="line">		SBI_TLB_INFO_INIT(&amp;tlb_info, regs-&gt;a2, regs-&gt;a3, <span class="number">0</span>, <span class="number">0</span>,</span><br><span class="line">				  SBI_TLB_HFENCE_GVMA, source_hart);</span><br><span class="line">		ret = sbi_tlb_request(regs-&gt;a0, regs-&gt;a1, &amp;tlb_info);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> SBI_EXT_RFENCE_REMOTE_HFENCE_GVMA_VMID:</span><br><span class="line">		SBI_TLB_INFO_INIT(&amp;tlb_info, regs-&gt;a2, regs-&gt;a3, <span class="number">0</span>, regs-&gt;a4,</span><br><span class="line">				  SBI_TLB_HFENCE_GVMA_VMID, source_hart);</span><br><span class="line">		ret = sbi_tlb_request(regs-&gt;a0, regs-&gt;a1, &amp;tlb_info);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> SBI_EXT_RFENCE_REMOTE_HFENCE_VVMA:</span><br><span class="line">		vmid = (csr_read(CSR_HGATP) &amp; HGATP_VMID_MASK);</span><br><span class="line">		vmid = vmid &gt;&gt; HGATP_VMID_SHIFT;</span><br><span class="line">		SBI_TLB_INFO_INIT(&amp;tlb_info, regs-&gt;a2, regs-&gt;a3, <span class="number">0</span>, vmid,</span><br><span class="line">				  SBI_TLB_HFENCE_VVMA, source_hart);</span><br><span class="line">		ret = sbi_tlb_request(regs-&gt;a0, regs-&gt;a1, &amp;tlb_info);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> SBI_EXT_RFENCE_REMOTE_HFENCE_VVMA_ASID:</span><br><span class="line">		vmid = (csr_read(CSR_HGATP) &amp; HGATP_VMID_MASK);</span><br><span class="line">		vmid = vmid &gt;&gt; HGATP_VMID_SHIFT;</span><br><span class="line">		SBI_TLB_INFO_INIT(&amp;tlb_info, regs-&gt;a2, regs-&gt;a3, regs-&gt;a4,</span><br><span class="line">				  vmid, SBI_TLB_HFENCE_VVMA_ASID, source_hart);</span><br><span class="line">		ret = sbi_tlb_request(regs-&gt;a0, regs-&gt;a1, &amp;tlb_info);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> SBI_EXT_RFENCE_REMOTE_SFENCE_VMA:</span><br><span class="line">		SBI_TLB_INFO_INIT(&amp;tlb_info, regs-&gt;a2, regs-&gt;a3, <span class="number">0</span>, <span class="number">0</span>,</span><br><span class="line">				  SBI_TLB_SFENCE_VMA, source_hart);</span><br><span class="line">		ret = sbi_tlb_request(regs-&gt;a0, regs-&gt;a1, &amp;tlb_info);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> SBI_EXT_RFENCE_REMOTE_SFENCE_VMA_ASID:</span><br><span class="line">		SBI_TLB_INFO_INIT(&amp;tlb_info, regs-&gt;a2, regs-&gt;a3, regs-&gt;a4, <span class="number">0</span>,</span><br><span class="line">				  SBI_TLB_SFENCE_VMA_ASID, source_hart);</span><br><span class="line">		ret = sbi_tlb_request(regs-&gt;a0, regs-&gt;a1, &amp;tlb_info);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">		ret = SBI_ENOTSUPP;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> ret;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>具体的操作在如下的函数里面</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">sbi_tlb_request</span><span class="params">(ulong hmask, ulong hbase, <span class="keyword">struct</span> sbi_tlb_info *tinfo)</span></span><br><span class="line">&#123;</span><br><span class="line">...</span><br><span class="line"><span class="comment">// 这里使用tlb_event作为索引，调出tlb_ops</span></span><br><span class="line"><span class="keyword">return</span> sbi_ipi_send_many(hmask, hbase, tlb_event, tinfo);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">sbi_ipi_send_many</span><span class="params">(ulong hmask, ulong hbase, u32 event, <span class="type">void</span> *data)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="comment">// hmask是linux 通过a0传递过来的参数，表示需要进行IPI操作的所有hartmask</span></span><br><span class="line">	<span class="comment">// hbase是linux 通过a1传递过来的参数, 表示第一个需要进行IPI的hartid</span></span><br><span class="line">	<span class="comment">// linux中，hmask |= BIT(hartid - hbase)</span></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Send IPIs */</span></span><br><span class="line">	<span class="keyword">do</span> &#123;</span><br><span class="line">		retry_needed = <span class="literal">false</span>;</span><br><span class="line">		sbi_hartmask_for_each_hartindex(i, &amp;target_mask) &#123;</span><br><span class="line">			<span class="comment">// 针对i指定的远程hart，执行sbi_ipi_send函数，实际是通过event索引tlb_ops的update操作，然后发送IPI中断</span></span><br><span class="line">			rc = sbi_ipi_send(scratch, i, event, data);</span><br><span class="line">			<span class="keyword">if</span> (rc &lt; <span class="number">0</span>)</span><br><span class="line">				<span class="keyword">goto</span> done;</span><br><span class="line">			<span class="keyword">if</span> (rc == SBI_IPI_UPDATE_RETRY)</span><br><span class="line">				retry_needed = <span class="literal">true</span>;</span><br><span class="line">			<span class="keyword">else</span></span><br><span class="line">				sbi_hartmask_clear_hartindex(i, &amp;target_mask);</span><br><span class="line">			rc = <span class="number">0</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125; <span class="keyword">while</span> (retry_needed);</span><br><span class="line"></span><br><span class="line">done:</span><br><span class="line">	<span class="comment">/* Sync IPIs */</span></span><br><span class="line">	<span class="comment">// 实际是调用tlb_ops的sync操作</span></span><br><span class="line">	sbi_ipi_sync(scratch, event);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> rc;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">sbi_ipi_send</span><span class="params">(<span class="keyword">struct</span> sbi_scratch *scratch, u32 remote_hartindex,</span></span><br><span class="line"><span class="params">			u32 event, <span class="type">void</span> *data)</span></span><br><span class="line">&#123;</span><br><span class="line">	...</span><br><span class="line">	<span class="keyword">if</span> (ipi_ops-&gt;update) &#123;</span><br><span class="line">		ret = ipi_ops-&gt;update(scratch, remote_scratch,</span><br><span class="line">				      remote_hartindex, data);</span><br><span class="line">		<span class="keyword">if</span> (ret != SBI_IPI_UPDATE_SUCCESS)</span><br><span class="line">			<span class="keyword">return</span> ret;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	...</span><br><span class="line">	<span class="comment">// 将ipi_type的event对应位置位，发送IPI后，远程hart通过检查ipi_type取出tlb_ops操作</span></span><br><span class="line">	<span class="keyword">if</span> (!__atomic_fetch_or(&amp;ipi_data-&gt;ipi_type,</span><br><span class="line">				BIT(event), __ATOMIC_RELAXED))</span><br><span class="line">		ret = sbi_ipi_raw_send(remote_hartindex);</span><br><span class="line"></span><br><span class="line">	...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">sbi_ipi_sync</span><span class="params">(<span class="keyword">struct</span> sbi_scratch *scratch, u32 event)</span></span><br><span class="line">&#123;</span><br><span class="line">	...</span><br><span class="line">	ipi_ops = ipi_ops_array[event];</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (ipi_ops-&gt;sync)</span><br><span class="line">		ipi_ops-&gt;sync(scratch);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="通过中断提供服务"><a href="#通过中断提供服务" class="headerlink" title="通过中断提供服务"></a>通过中断提供服务</h4><p>Opensbi 提供了多种中断服务来处理，具体为通过 AIA&#x2F;nonAIA MSI 提供服务，或通过 IMSIC MEI 提供服务. 虽然使用不同的服务入口，但最终都使用 <code>sbi_ipi_process</code> 作为底层服务函数。只提供给 OpenSBI 自己使用。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">sbi_ipi_process</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">	...</span><br><span class="line">	<span class="keyword">while</span> (ipi_type) &#123;</span><br><span class="line">		<span class="keyword">if</span> (ipi_type &amp; <span class="number">1UL</span>) &#123;</span><br><span class="line">			ipi_ops = ipi_ops_array[ipi_event];</span><br><span class="line">			<span class="keyword">if</span> (ipi_ops)</span><br><span class="line">				ipi_ops-&gt;process(scratch);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// 通过查询ipi_type的每个bit位是否置位来获取tlb_ops</span></span><br><span class="line">		ipi_type = ipi_type &gt;&gt; <span class="number">1</span>;</span><br><span class="line">		ipi_event++;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>综上，OpenSBI提供的执行流程如下：</p>
+<img src="/2025/11/17/OpenSBI-TLB%E6%9C%8D%E5%8A%A1%E5%AE%9E%E7%8E%B0/tlb.png" class="">
+
+<ul>
+<li>虚线框是local hart向远程hart更新fifo的主要流程，linux会传入mask，当mask指向的所有远程hart都填充了fifo并触发 trigger 后，local hart 会监测同步信号，并检查是否有回复的信息需要处理。</li>
+</ul>
+<h3 id="OpenSBI提供的TLB操作"><a href="#OpenSBI提供的TLB操作" class="headerlink" title="OpenSBI提供的TLB操作"></a>OpenSBI提供的TLB操作</h3><h4 id="3个TLB服务入口函数"><a href="#3个TLB服务入口函数" class="headerlink" title="3个TLB服务入口函数"></a>3个TLB服务入口函数</h4><p>根据定义，提供了3个TLB操作入口，如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">sbi_ipi_event_ops</span> <span class="title">tlb_ops</span> =</span> &#123;</span><br><span class="line">	.name = <span class="string">&quot;IPI_TLB&quot;</span>,</span><br><span class="line">	.update = tlb_update, <span class="comment">// 通过sbi_ipi_send调用</span></span><br><span class="line">	.sync = tlb_sync,		<span class="comment">// 通过sbi_ipi_sync调用</span></span><br><span class="line">	.process = tlb_process,  <span class="comment">// 通过sbi_ipi_process中断调用,只供opensbi内部使用，不提供给linux</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>OpenSBI对外只提供ecall提供的<code>rfence</code>服务，至于linux本地TLB服务s模式下可以实现。</p>
+<p><code>tlb_update</code>分析如下, 在<code>sbi_ipi_send</code>中，update处理后紧跟着是ipi触发远程hart响应。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">tlb_update</span><span class="params">(<span class="keyword">struct</span> sbi_scratch *scratch,</span></span><br><span class="line"><span class="params">			  <span class="keyword">struct</span> sbi_scratch *remote_scratch,</span></span><br><span class="line"><span class="params">			  u32 remote_hartindex, <span class="type">void</span> *data)</span></span><br><span class="line">&#123;</span><br><span class="line">	sbi_printf(<span class="string">&quot;hart %d %s: line %d\n&quot;</span>, current_hartid(), __func__, __LINE__);</span><br><span class="line">	<span class="type">int</span> ret;</span><br><span class="line">	<span class="type">atomic_t</span> *tlb_sync;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">sbi_fifo</span> *<span class="title">tlb_fifo_r</span>;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">sbi_tlb_info</span> *<span class="title">tinfo</span> =</span> data;</span><br><span class="line">	u32 curr_hartid = current_hartid();</span><br><span class="line"></span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	 * If the request is to queue a tlb flush entry for itself</span></span><br><span class="line"><span class="comment">	 * then just do a local flush and return;</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="keyword">if</span> (sbi_hartindex_to_hartid(remote_hartindex) == curr_hartid) &#123;</span><br><span class="line">		<span class="comment">// 如果远程hart就是当前hart,则直接进行处理</span></span><br><span class="line">		tlb_entry_local_process(tinfo);</span><br><span class="line">		<span class="keyword">return</span> SBI_IPI_UPDATE_BREAK;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	tlb_fifo_r = sbi_scratch_offset_ptr(remote_scratch, tlb_fifo_off);</span><br><span class="line"></span><br><span class="line">	ret = sbi_fifo_inplace_update(tlb_fifo_r, data, tlb_update_cb);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (ret == SBI_FIFO_UNCHANGED &amp;&amp;</span><br><span class="line">	    sbi_fifo_enqueue(tlb_fifo_r, data, <span class="literal">false</span>) &lt; <span class="number">0</span>) &#123; <span class="comment">// 将linux要操作的虚拟地址，ASID, VMID等信息填充到远程hart的fifo中</span></span><br><span class="line">		<span class="comment">/**</span></span><br><span class="line"><span class="comment">		 * For now, Busy loop until there is space in the fifo.</span></span><br><span class="line"><span class="comment">		 * There may be case where target hart is also</span></span><br><span class="line"><span class="comment">		 * enqueue in source hart&#x27;s fifo. Both hart may busy</span></span><br><span class="line"><span class="comment">		 * loop leading to a deadlock.</span></span><br><span class="line"><span class="comment">		 * <span class="doctag">TODO:</span> Introduce a wait/wakeup event mechanism to handle</span></span><br><span class="line"><span class="comment">		 * this properly.</span></span><br><span class="line"><span class="comment">		 */</span></span><br><span class="line">		tlb_process_once(scratch); <span class="comment">// 如果填充失败则处理一次，通常是fifo满了</span></span><br><span class="line">		sbi_dprintf(<span class="string">&quot;hart%d: hart%d tlb fifo full\n&quot;</span>, curr_hartid,</span><br><span class="line">			    sbi_hartindex_to_hartid(remote_hartindex));</span><br><span class="line">		<span class="keyword">return</span> SBI_IPI_UPDATE_RETRY;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	tlb_sync = sbi_scratch_offset_ptr(scratch, tlb_sync_off);</span><br><span class="line">	<span class="comment">// 将当前hart的同步码加1，表示有需要处理的fifo数据	</span></span><br><span class="line">	atomic_add_return(tlb_sync, <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> SBI_IPI_UPDATE_SUCCESS;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>远程 hart 通过<code>tlb_process</code>响应如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">tlb_process</span><span class="params">(<span class="keyword">struct</span> sbi_scratch *scratch)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">while</span> (tlb_process_once(scratch));</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">bool</span> <span class="title function_">tlb_process_once</span><span class="params">(<span class="keyword">struct</span> sbi_scratch *scratch)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">sbi_tlb_info</span> <span class="title">tinfo</span>;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">sbi_fifo</span> *<span class="title">tlb_fifo</span> =</span></span><br><span class="line">			sbi_scratch_offset_ptr(scratch, tlb_fifo_off);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (!sbi_fifo_dequeue(tlb_fifo, &amp;tinfo)) &#123; <span class="comment">// 从fifo中获取tlb数据，如果有数据就处理</span></span><br><span class="line">		tlb_entry_process(&amp;tinfo);</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">tlb_entry_process</span><span class="params">(<span class="keyword">struct</span> sbi_tlb_info *tinfo)</span></span><br><span class="line">&#123;</span><br><span class="line">	...	</span><br><span class="line">	<span class="comment">// 此时，远程hart就是当前hart，通过以下函数响应</span></span><br><span class="line">	tlb_entry_local_process(tinfo);</span><br><span class="line"></span><br><span class="line">	sbi_hartmask_for_each_hartindex(rindex, &amp;tinfo-&gt;smask) &#123;</span><br><span class="line">		rscratch = sbi_hartindex_to_scratch(rindex);</span><br><span class="line">		<span class="keyword">if</span> (!rscratch)</span><br><span class="line">			<span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">		rtlb_sync = sbi_scratch_offset_ptr(rscratch, tlb_sync_off);</span><br><span class="line">		<span class="comment">// 将发起IPI的hart的sync同步码减一，与发起IPI的hart形成响应闭环</span></span><br><span class="line">		atomic_sub_return(rtlb_sync, <span class="number">1</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>本地 hart 通过<code>tlb_sync</code>读取远程 hart 响应信息</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">tlb_sync</span><span class="params">(<span class="keyword">struct</span> sbi_scratch *scratch)</span></span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">	<span class="type">atomic_t</span> *tlb_sync =</span><br><span class="line">			sbi_scratch_offset_ptr(scratch, tlb_sync_off);</span><br><span class="line">	<span class="comment">// 当同步码大于0时，说明远程hart还未处理，或正在处理</span></span><br><span class="line">	<span class="keyword">while</span> (<span class="type">atomic_read</span>(tlb_sync) &gt; <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="comment">/*</span></span><br><span class="line"><span class="comment">		 * While we are waiting for remote hart to set the sync,</span></span><br><span class="line"><span class="comment">		 * consume fifo requests to avoid deadlock.</span></span><br><span class="line"><span class="comment">		 */</span></span><br><span class="line">		<span class="comment">// 远程hart可能有回复信息，处理同步信息</span></span><br><span class="line">		tlb_process_once(scratch); <span class="comment">// 在此处往往没有需要处理的响应数据，fifo往往为空</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="7个TLB刷新操作"><a href="#7个TLB刷新操作" class="headerlink" title="7个TLB刷新操作"></a>7个TLB刷新操作</h4><p>TLB 操作由<code>sbi_tlb_type</code>定义，前面提到的处理入口，<code>tlb_update</code>, <code>tlb_sync</code>, <code>tlb_process</code>最终都是使用如下<code>tlb_entry_local_process</code>处理。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">enum</span> <span class="title">sbi_tlb_type</span> &#123;</span></span><br><span class="line">	SBI_TLB_FENCE_I = <span class="number">0</span>,</span><br><span class="line">	SBI_TLB_SFENCE_VMA,</span><br><span class="line">	SBI_TLB_SFENCE_VMA_ASID,</span><br><span class="line">	SBI_TLB_HFENCE_GVMA_VMID,</span><br><span class="line">	SBI_TLB_HFENCE_GVMA,</span><br><span class="line">	SBI_TLB_HFENCE_VVMA_ASID,</span><br><span class="line">	SBI_TLB_HFENCE_VVMA,</span><br><span class="line">	SBI_TLB_TYPE_MAX,</span><br><span class="line">&#125;;</span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">tlb_entry_local_process</span><span class="params">(<span class="keyword">struct</span> sbi_tlb_info *data)</span></span><br><span class="line">&#123;</span><br><span class="line">	sbi_printf(<span class="string">&quot;hart %d %s: line %d\n&quot;</span>, current_hartid(), __func__, __LINE__);</span><br><span class="line">	<span class="keyword">if</span> (unlikely(!data))</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">switch</span> (data-&gt;type) &#123;</span><br><span class="line">	<span class="keyword">case</span> SBI_TLB_FENCE_I:</span><br><span class="line">		sbi_tlb_local_fence_i(data);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> SBI_TLB_SFENCE_VMA:</span><br><span class="line">		sbi_tlb_local_sfence_vma(data);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> SBI_TLB_SFENCE_VMA_ASID:</span><br><span class="line">		sbi_tlb_local_sfence_vma_asid(data);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> SBI_TLB_HFENCE_GVMA_VMID:</span><br><span class="line">		sbi_tlb_local_hfence_gvma_vmid(data);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> SBI_TLB_HFENCE_GVMA:</span><br><span class="line">		sbi_tlb_local_hfence_gvma(data);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> SBI_TLB_HFENCE_VVMA_ASID:</span><br><span class="line">		sbi_tlb_local_hfence_vvma_asid(data);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> SBI_TLB_HFENCE_VVMA:</span><br><span class="line">		sbi_tlb_local_hfence_vvma(data);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	&#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上述处理函数的输入数据由<code>sbi_ecall_rfence_handler</code>根据 linux 传入参数配置</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">sbi_ecall_rfence_handler</span><span class="params">(<span class="type">unsigned</span> <span class="type">long</span> extid, <span class="type">unsigned</span> <span class="type">long</span> funcid,</span></span><br><span class="line"><span class="params">				    <span class="keyword">struct</span> sbi_trap_regs *regs,</span></span><br><span class="line"><span class="params">				    <span class="keyword">struct</span> sbi_ecall_return *out)</span></span><br><span class="line">&#123;</span><br><span class="line">...</span><br><span class="line"><span class="keyword">case</span> SBI_EXT_RFENCE_REMOTE_HFENCE_GVMA_VMID:</span><br><span class="line">		<span class="comment">// 配置tlb_info,具体为tlb_info-&gt;start=regs-&gt;a2, tlb_info-&gt;size=regs-&gt;a3, tlb_info-&gt;asid=0, tlb_info-&gt;vmid=regs-&gt;a4</span></span><br><span class="line">		<span class="comment">// tlb_info-&gt;type=SBI_TLB_HFENCE_GVMA_VMID, tlb_info-&gt;smask[bitmap[source_hart]]=1,（source_hart对应的bit为1）</span></span><br><span class="line">		SBI_TLB_INFO_INIT(&amp;tlb_info, regs-&gt;a2, regs-&gt;a3, <span class="number">0</span>, regs-&gt;a4,</span><br><span class="line">				  SBI_TLB_HFENCE_GVMA_VMID, source_hart);</span><br><span class="line">		ret = sbi_tlb_request(regs-&gt;a0, regs-&gt;a1, &amp;tlb_info);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SBI_TLB_INFO_INIT(__p, __start, __size, __asid, __vmid, __type, __src) \</span></span><br><span class="line"><span class="meta">do &#123; \</span></span><br><span class="line"><span class="meta">	(__p)-&gt;start = (__start); \</span></span><br><span class="line"><span class="meta">	(__p)-&gt;size = (__size); \</span></span><br><span class="line"><span class="meta">	(__p)-&gt;asid = (__asid); \</span></span><br><span class="line"><span class="meta">	(__p)-&gt;vmid = (__vmid); \</span></span><br><span class="line"><span class="meta">	(__p)-&gt;type = (__type); \</span></span><br><span class="line"><span class="meta">	SBI_HARTMASK_INIT_EXCEPT(&amp;(__p)-&gt;smask, (__src)); \</span></span><br><span class="line"><span class="meta">&#125; while (0)</span></span><br></pre></td></tr></table></figure>
+
+<p>linux 传入的数据请查看<code>arch/riscv/kernel/sbi.c</code>中<code>__sbi_rfence_v02_call</code>和<code>__sbi_rfence</code></p>
+<p>上述7条服务操作，实际上使用的是<code>fence.i</code>, <code>sfence.vma</code>, <code>hfence.gvma</code>, <code>hfence.vvma</code>指令，通过修改<code>rs1</code>, <code>rs2</code>来满足对特定虚拟地址和 ASID, VMID 的更新需求。OpenSBI 未实现 Sinval 扩展。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><hr>
+<p>OpenSBI 在初始化阶段，针对 TLB 进行的初始化主要有，</p>
+<ol>
+<li>注册tlb的操作入口（<code>tlb_update</code>, <code>tlb_sync</code>, <code>tlb_process</code>）, <code>tlb_event</code> 作为 index；</li>
+<li>在 scratch 上开辟 sync 信号的空间，开辟 fifo 空间，开辟 mem 地址信息记录空间，并在 heap 上开辟 fifo 条目空间，然后对所有空间初始化。</li>
+</ol>
+<p>OpenSBI 通过 ecall rfence 扩展提供了7种 TLB 操作，实际上由 fence.i, sfence, hfence 指令具体实现，linux 刷新本地 TLB 是通过 s-mode 下的 sfence 等刷新的，刷新远程 TLB 是通过 ecall rfence 扩展实现的。OpenSBI 提供了3种 tlb 操作入口，分别是 tlb_update, tlb_sync 和 tlb_process, 前2种通过 ecall 调用，最后一种是 OpenSBI 内部 IPI 中断实现，是在 m-mode 下刷新远程 hart tlb 的入口，所有远程 TLB 刷新都是通过此处进入的。</p>
+
+                
+                <hr>
+                <!-- Pager -->
+                <ul class="pager">
+                    
+                    
+                    <li class="next">
+                        <a href="/2025/11/17/RISC-V-RVWMO/" data-toggle="tooltip" data-placement="top" title="RISC-V RVWMO">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- tip start -->
+                
+
+                
+                <!-- tip end -->
+
+                <!-- Music start-->
+                
+                <!-- Music end -->
+
+                <!-- Sharing -->
+                
+                <!-- Sharing -->
+
+                <!-- gitment start -->
+                
+                <!-- gitment end -->
+
+                <!-- 来必力City版安装代码 -->
+                
+                <!-- City版安装代码已完成 -->
+
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+    
+      
+        <aside id="sidebar">
+          <div id="toc" class="toc-article">
+          <strong class="toc-title">Contents</strong>
+          
+            
+              <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E8%BD%AF%E4%BB%B6%E7%8E%AF%E5%A2%83"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">软件环境</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#CPU%E8%BF%90%E8%A1%8C%E7%8A%B6%E6%80%81"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">CPU运行状态</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#TLB%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-nav-number">3.</span> <span class="toc-nav-text">TLB初始化</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#TLB%E5%A4%84%E7%90%86"><span class="toc-nav-number">4.</span> <span class="toc-nav-text">TLB处理</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#OpenSBI%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="toc-nav-number">4.1.</span> <span class="toc-nav-text">OpenSBI执行流程</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E9%80%9A%E8%BF%87ecall%E6%8F%90%E4%BE%9B%E7%9A%84rfence%E6%89%A9%E5%B1%95%E6%9C%8D%E5%8A%A1"><span class="toc-nav-number">4.1.1.</span> <span class="toc-nav-text">通过ecall提供的rfence扩展服务</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E9%80%9A%E8%BF%87%E4%B8%AD%E6%96%AD%E6%8F%90%E4%BE%9B%E6%9C%8D%E5%8A%A1"><span class="toc-nav-number">4.1.2.</span> <span class="toc-nav-text">通过中断提供服务</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#OpenSBI%E6%8F%90%E4%BE%9B%E7%9A%84TLB%E6%93%8D%E4%BD%9C"><span class="toc-nav-number">4.2.</span> <span class="toc-nav-text">OpenSBI提供的TLB操作</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#3%E4%B8%AATLB%E6%9C%8D%E5%8A%A1%E5%85%A5%E5%8F%A3%E5%87%BD%E6%95%B0"><span class="toc-nav-number">4.2.1.</span> <span class="toc-nav-text">3个TLB服务入口函数</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#7%E4%B8%AATLB%E5%88%B7%E6%96%B0%E6%93%8D%E4%BD%9C"><span class="toc-nav-number">4.2.2.</span> <span class="toc-nav-text">7个TLB刷新操作</span></a></li></ol></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-nav-number">5.</span> <span class="toc-nav-text">总结</span></a></li></ol>
+            
+          
+          </div>
+        </aside>
+      
+    
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <!-- <h5><a href="/tags/">FEATURED TAGS</a></h5> -->
+                    <h5><a href="/tags/"></a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#OpenSBI" title="OpenSBI">OpenSBI</a>
+                        
+                          <a class="tag" href="/tags/#TLB" title="TLB">TLB</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                
+                <script src="https://giscus.app/client.js"
+                    data-repo="AllenZF/allenzf.github.io"
+                    data-repo-id="R_kgDOQMASLQ"
+                    data-category="General"
+                    data-category-id="DIC_kwDOQMASLc4CxR4Q"
+                    data-mapping="pathname"
+                    data-strict="0"
+                    data-reactions-enabled="1"
+                    data-emit-metadata="0"
+                    data-input-position="bottom"
+                    data-theme="preferred_color_scheme"
+                    data-lang="en"
+                    crossorigin="anonymous"
+                    async>
+                </script>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: 'ℬ'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+
+
+<style  type="text/css">
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/AllenZF">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://gitee.com/Sven">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-stack-1x fa-inverse">码</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/people/zhou-lang-jie-feng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; 周郎借风 2025 
+                    <br>
+                    Powered by 
+                    <a href="https://github.com/dusign/hexo-theme-snail">
+                        <i>hexo-theme-snail</i>
+                    </a> | 
+                    <iframe name="star" style="margin-left: 2px; margin-bottom:-5px;" frameborder="0" scrolling="0"
+                        width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=dusign&repo=hexo-theme-snail&type=star&count=true">
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+
+</footer>
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- Search -->
+
+<script src="/js/search.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://allenzf.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-XXXXXXXX-X';
+    var _gaDomain = 'yoursite';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+<!-- Search -->
+
+    <script type="text/javascript">      
+        var search_path = "search.xml";
+        if (search_path.length == 0) {
+            search_path = "search.xml";
+        }
+    var path = "/" + search_path;
+    searchFunc(path, 'local-search-input', 'local-search-result');
+    </script>
+
+
+<!-- busuanzi -->
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+
+    
+        <!-- background effects line -->
+        
+
+        
+            <script type="text/javascript" src="/js/mouse-click.js" content='[&#34;🌱&#34;,&#34;just do it&#34;,&#34;🍀&#34;]' color='[&#34;rgb(121,93,179)&#34; ,&#34;rgb(76,180,231)&#34; ,&#34;rgb(184,90,154)&#34;]'></script>
+        
+
+        <!-- background effects end -->
+    
+
+    <!--<script size="50" alpha='0.3' zIndex="-999" src="/js/ribbonStatic.js"></script>-->
+    
+        <script src="/js/ribbonDynamic.js"></script>
+    
+</body>
+
+</html>

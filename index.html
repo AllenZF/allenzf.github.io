@@ -164,14 +164,14 @@
 
                         
                         <li>
-                            <a href="/about/">关于</a>
+                            <a href="/archive/">归档</a>
                         </li>
                         
                     
 
                         
                         <li>
-                            <a href="/archive/">归档</a>
+                            <a href="/about/">关于</a>
                         </li>
                         
                     
@@ -280,10 +280,6 @@
                     
 
                         
-                        <li>
-                            <a href="/tags/">标签</a>
-                        </li>
-                        
                     
 
                         
@@ -296,6 +292,10 @@
                         
                     
 
+                        
+                        <li>
+                            <a href="/tags/">标签</a>
+                        </li>
                         
                     
 
@@ -457,9 +457,88 @@
 
     
 
+    
+
+    
+
 
 
 <!-- Main Content -->
+
+    
+
+        <div class="post-preview">
+
+            <a href="/2025/11/17/OpenSBI-TLB服务实现/">
+                <h2 class="post-title">
+                    OpenSBI TLB服务实现
+                </h2>
+                <h3 class="post-subtitle">
+                    OpenSBI TLB源码学习笔记
+                </h3>
+                <div class="post-content-preview">
+                    软件环境
+
+linux 6.13.0 commit 9b2ffa6148b1e4468d08f7e0e7e371c43cac9ffe
+opensbi 1.6.1 commit c45e9c2f58d8dc956f3573b08d3dd523b44aa44d
+
+CPU运行状态
+Hart状态机更改详见 SBI Spec 的 Hart State Management Extension (EID......
+                </div>
+            </a>
+            
+                <p class="post-meta" style="margin: 10px 0;">
+                    Posted by 周郎借风 on
+                    2025-11-17
+                </p>
+                <div class="tags">
+                    
+                      <a href="/tags/#OpenSBI" title="OpenSBI">OpenSBI</a>
+                    
+                      <a href="/tags/#TLB" title="TLB">TLB</a>
+                    
+                </div>
+            
+
+        </div>
+        <hr>
+
+    
+
+    
+
+        <div class="post-preview">
+
+            <a href="/2025/11/17/RISC-V-RVWMO/">
+                <h2 class="post-title">
+                    RISC-V RVWMO
+                </h2>
+                <h3 class="post-subtitle">
+                    RV 内存一致性模型
+                </h3>
+                <div class="post-content-preview">
+                    为什么选择RVWMO内存一致性模型
+内存一致性模型（Memory Consistency Models）从弱到强呈现出一个连续的谱系。弱内存模型（Weak Memory Models）通过牺牲编程模型的复杂性，为硬件实现提供了更大的灵活性，并显著提升了性能、能效比（performance per watt）、功耗控制、可扩展性以及硬件验证效率。而强内存模型（Strong Models）虽然简......
+                </div>
+            </a>
+            
+                <p class="post-meta" style="margin: 10px 0;">
+                    Posted by 周郎借风 on
+                    2025-11-17
+                </p>
+                <div class="tags">
+                    
+                      <a href="/tags/#RISC-V" title="RISC-V">RISC-V</a>
+                    
+                      <a href="/tags/#RVWMO" title="RVWMO">RVWMO</a>
+                    
+                </div>
+            
+
+        </div>
+        <hr>
+
+    
 
     
 
@@ -780,85 +859,6 @@ kprobes 是对内核的动态跟踪，之前介绍了内核模块加载方式的
 
     
 
-    
-
-        <div class="post-preview">
-
-            <a href="/2025/09/05/制作-ubuntu-base-文件系统/">
-                <h2 class="post-title">
-                    制作 ubuntu-base 文件系统
-                </h2>
-                <h3 class="post-subtitle">
-                    可访问网络的文件系统
-                </h3>
-                <div class="post-content-preview">
-                    参考
-https://www.cnblogs.com/phoebus-ma/p/17436089.htmlhttps://cloud.tencent.com/developer/article/2565632https://blog.csdn.net/jingyu_1/article/details/135822574
-背景
-为了学习 Linux kernel，在 qemu 模拟时通过加载源......
-                </div>
-            </a>
-            
-                <p class="post-meta" style="margin: 10px 0;">
-                    Posted by 周郎借风 on
-                    2025-09-05
-                </p>
-                <div class="tags">
-                    
-                      <a href="/tags/#Linux" title="Linux">Linux</a>
-                    
-                      <a href="/tags/#rootfs" title="rootfs">rootfs</a>
-                    
-                      <a href="/tags/#ubuntu" title="ubuntu">ubuntu</a>
-                    
-                </div>
-            
-
-        </div>
-        <hr>
-
-    
-
-    
-
-        <div class="post-preview">
-
-            <a href="/2025/08/28/Linux-Perf-介绍-——-Perf-示例/">
-                <h2 class="post-title">
-                    Linux Perf 介绍 —— Perf 示例
-                </h2>
-                <h3 class="post-subtitle">
-                    
-                </h3>
-                <div class="post-content-preview">
-                    示例说明
-后续示例完全按照perf 示例执行一遍。
-Perf Linux 性能分析器也被称作 Performance Counters for Linux (PCL)、Linux perf events (LPE) 或 perf_events。后续用 perf_events 描述。
-Perf_events 功能
-perf_events 是一个事件导向的可观测性工具，可以帮助你解决高级性能和故......
-                </div>
-            </a>
-            
-                <p class="post-meta" style="margin: 10px 0;">
-                    Posted by 周郎借风 on
-                    2025-08-28
-                </p>
-                <div class="tags">
-                    
-                      <a href="/tags/#RISC-V" title="RISC-V">RISC-V</a>
-                    
-                      <a href="/tags/#Perf" title="Perf">Perf</a>
-                    
-                      <a href="/tags/#Linux" title="Linux">Linux</a>
-                    
-                </div>
-            
-
-        </div>
-        <hr>
-
-    
-
 
 
 <!-- Pager -->
@@ -972,7 +972,11 @@ perf_events 是一个事件导向的可观测性工具，可以帮助你解决�
             
         
             
-            <a href="/tags/#RISC-V" title="RISC-V" rel="12">RISC-V</a>
+        
+            
+            <a href="/tags/#RISC-V" title="RISC-V" rel="13">RISC-V</a>
+            
+        
             
         
             
@@ -1130,6 +1134,14 @@ perf_events 是一个事件导向的可观测性工具，可以帮助你解决�
     <ul>
       
         <li>
+          <a href="/2025/11/17/OpenSBI-TLB%E6%9C%8D%E5%8A%A1%E5%AE%9E%E7%8E%B0/">OpenSBI TLB服务实现</a>
+        </li>
+      
+        <li>
+          <a href="/2025/11/17/RISC-V-RVWMO/">RISC-V RVWMO</a>
+        </li>
+      
+        <li>
           <a href="/2025/11/15/RISC-V-Trace/">RISC-V Trace</a>
         </li>
       
@@ -1139,14 +1151,6 @@ perf_events 是一个事件导向的可观测性工具，可以帮助你解决�
       
         <li>
           <a href="/2025/09/30/RISC-V-MTE-Spec-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">RISC-V MTE 内存标签</a>
-        </li>
-      
-        <li>
-          <a href="/2025/09/19/Linux%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB-OpenAI-%EF%BC%9A%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%87%E6%8D%A2/">Linux源码解读(OpenAI)：上下文切换</a>
-        </li>
-      
-        <li>
-          <a href="/2025/09/19/Linux%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB%EF%BC%9A%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%87%E6%8D%A2/">Linux源码解读(灵码)：上下文切换</a>
         </li>
       
     </ul>
@@ -1161,7 +1165,7 @@ perf_events 是一个事件导向的可观测性工具，可以帮助你解决�
         
     <h5>归档</h5>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/11/">十一月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/10/">十月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/09/">九月 2025</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/08/">八月 2025</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/07/">七月 2025</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/06/">六月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/05/">五月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/04/">四月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/03/">三月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">六月 2024</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/01/">一月 2023</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">四月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">1</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/11/">十一月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/10/">十月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/09/">九月 2025</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/08/">八月 2025</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/07/">七月 2025</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/06/">六月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/05/">五月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/04/">四月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/03/">三月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">六月 2024</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/01/">一月 2023</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">四月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">1</span></li></ul>
     </div>
 
         <hr>
@@ -1177,15 +1181,15 @@ perf_events 是一个事件导向的可观测性工具，可以帮助你解决�
         
           <a href="categories/#hexo"><li>hexo</li></a>
         
+          <a href="categories/#Math"><li>Math</li></a>
+        
           <a href="categories/#路由器"><li>路由器</li></a>
         
           <a href="categories/#git"><li>git</li></a>
         
-          <a href="categories/#Math"><li>Math</li></a>
+          <a href="categories/#vscode-plug"><li>vscode-plug</li></a>
         
           <a href="categories/#problem"><li>problem</li></a>
-        
-          <a href="categories/#vscode-plug"><li>vscode-plug</li></a>
         
           <a href="categories/#Debug"><li>Debug</li></a>
         
@@ -1195,23 +1199,23 @@ perf_events 是一个事件导向的可观测性工具，可以帮助你解决�
         
           <a href="categories/#devicetree"><li>devicetree</li></a>
         
+          <a href="categories/#opensbi"><li>opensbi</li></a>
+        
           <a href="categories/#RISC-V"><li>RISC-V</li></a>
         
-          <a href="categories/#翻译"><li>翻译</li></a>
+          <a href="categories/#学习笔记"><li>学习笔记</li></a>
         
-          <a href="categories/#opensbi"><li>opensbi</li></a>
+          <a href="categories/#翻译"><li>翻译</li></a>
         
           <a href="categories/#riscv-gnu-toolchain"><li>riscv-gnu-toolchain</li></a>
         
           <a href="categories/#RVWMO"><li>RVWMO</li></a>
         
-          <a href="categories/#学习笔记"><li>学习笔记</li></a>
-        
           <a href="categories/#docker"><li>docker</li></a>
         
-          <a href="categories/#Perf"><li>Perf</li></a>
-        
           <a href="categories/#Performance"><li>Performance</li></a>
+        
+          <a href="categories/#Perf"><li>Perf</li></a>
         
           <a href="categories/#rootfs"><li>rootfs</li></a>
         
@@ -1223,17 +1227,19 @@ perf_events 是一个事件导向的可观测性工具，可以帮助你解决�
         
           <a href="categories/#Extension"><li>Extension</li></a>
         
-          <a href="categories/#Spec"><li>Spec</li></a>
-        
           <a href="categories/#trace"><li>trace</li></a>
         
-          <a href="categories/#counter"><li>counter</li></a>
+          <a href="categories/#x86"><li>x86</li></a>
         
           <a href="categories/#Trace"><li>Trace</li></a>
         
-          <a href="categories/#INSN"><li>INSN</li></a>
+          <a href="categories/#Spec"><li>Spec</li></a>
         
-          <a href="categories/#x86"><li>x86</li></a>
+          <a href="categories/#TLB"><li>TLB</li></a>
+        
+          <a href="categories/#counter"><li>counter</li></a>
+        
+          <a href="categories/#INSN"><li>INSN</li></a>
         
           <a href="categories/#Debug"><li>Debug</li></a>
         
@@ -1430,7 +1436,7 @@ perf_events 是一个事件导向的可观测性工具，可以帮助你解决�
         
 
         
-            <script type="text/javascript" src="/js/mouse-click.js" content='[&quot;🌱&quot;,&quot;just do it&quot;,&quot;🍀&quot;]' color='[&quot;rgb(121,93,179)&quot; ,&quot;rgb(76,180,231)&quot; ,&quot;rgb(184,90,154)&quot;]'></script>
+            <script type="text/javascript" src="/js/mouse-click.js" content='[&#34;🌱&#34;,&#34;just do it&#34;,&#34;🍀&#34;]' color='[&#34;rgb(121,93,179)&#34; ,&#34;rgb(76,180,231)&#34; ,&#34;rgb(184,90,154)&#34;]'></script>
         
 
         <!-- background effects end -->
@@ -1440,21 +1446,6 @@ perf_events 是一个事件导向的可观测性工具，可以帮助你解决�
     
         <script src="/js/ribbonDynamic.js"></script>
     
-<script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-        tex2jax: {
-            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
-            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
-            processEscapes: true
-        }
-    });
-    MathJax.Hub.Queue(function() {
-        var all = MathJax.Hub.getAllJax();
-        for (var i = 0; i < all.length; ++i)
-            all[i].SourceElement().parentNode.className += ' has-jax';
-    });
-</script>
-<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 </body>
 
 </html>
