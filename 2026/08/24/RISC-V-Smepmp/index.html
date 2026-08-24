@@ -127,7 +127,7 @@
                         
                             <div class="blank_box"></div>
                             <span class="meta">
-                                Words <span class="post-count">3.2k</span> and
+                                Words <span class="post-count">3.3k</span> and
                                 Reading Time <span class="post-count">12</span> Minutes
                             </span>
                             <div class="blank_box"></div>
@@ -400,8 +400,8 @@
 <p><code>PMP</code>提供了这样的规则：所有模式都遵循全局统一的规则；非机器模式遵循，机器模式<strong>忽略</strong>的规则。当前的规则模型不能提供：非机器模式遵循，机器模式拒绝的规则。</p>
 <p>机器模式访问地址<strong>默认被视为物理地址</strong>。它绕过了 MMU 的地址转换。另外一种方式是<code>mstatus.MPRV</code>位允许 M 模式在访问内存时，“模拟”成S&#x2F;U模式。当 MPRV&#x3D;1 时，M 模式的访存会使用<code>mstatus.MPP</code>字段指定的特权级进行 MMU 地址转换的权限检查。</p>
 <p>上述的规则存在明显的漏洞，攻击者可以通过修改用户代码，诱使机器模式运行低特权等级的代码。</p>
-<h2 id="Smepmp"><a href="#Smepmp" class="headerlink" title="Smepmp"></a>Smepmp</h2><hr>
-<h3 id="RLB"><a href="#RLB" class="headerlink" title="RLB"></a>RLB</h3><p>Smepmp 扩展在 <code>mseccfg</code> 中添加了 <code>RLB</code> 、 <code>MMWP</code> 和 <code>MML</code> 这三个字段。</p>
+<h2 id="Smepmp"><a href="#Smepmp" class="headerlink" title="Smepmp"></a>Smepmp</h2><h3 id="RLB"><a href="#RLB" class="headerlink" title="RLB"></a>RLB</h3><hr>
+<p>Smepmp 扩展在 <code>mseccfg</code> 中添加了 <code>RLB</code> 、 <code>MMWP</code> 和 <code>MML</code> 这三个字段。</p>
 <h4 id="1-RLB-的核心作用（RLB-1）"><a href="#1-RLB-的核心作用（RLB-1）" class="headerlink" title="1. RLB 的核心作用（RLB = 1）"></a>1. RLB 的核心作用（<code>RLB = 1</code>）</h4><p>当 <code>mseccfg.RLB</code> 被置为 1 时，硬件会暂时冻结“锁定”检查机制。</p>
 <ul>
 <li>所有之前被标记为 <code>L=1</code>（锁定）的 PMP 条目，变得<strong>可写、可删除、可修改</strong>。</li>
@@ -451,11 +451,13 @@
 <li><strong>不能</strong>通过尝试写 <code>RLB</code> 来探测 Smepmp 是否存在，因为当存在 <code>L=1</code> 规则时，<code>RLB</code> 会被硬件强制钳制在 0，写入操作完全被忽略。</li>
 <li><strong>正确方法</strong>：依赖 BootROM 在早期设置的 <code>mseccfg.MML</code>&#x2F;<code>MMWP</code> 静态值来识别。</li>
 </ul>
-<h3 id="MMWP"><a href="#MMWP" class="headerlink" title="MMWP"></a>MMWP</h3><p><code>mseccfg.MMWP</code>（Machine-Mode Allowlist Policy）是 Smepmp 扩展中最为核心的安全开关之一。它彻底颠覆了 RISC-V 传统架构中“M 模式拥有无限物理访问权”的默认假设。</p>
+<h3 id="MMWP"><a href="#MMWP" class="headerlink" title="MMWP"></a>MMWP</h3><hr>
+<p><code>mseccfg.MMWP</code>（Machine-Mode Allowlist Policy）是 Smepmp 扩展中最为核心的安全开关之一。它彻底颠覆了 RISC-V 传统架构中“M 模式拥有无限物理访问权”的默认假设。</p>
 <p>在标准的 RISC-V PMP 规范中，如果 M 模式发起的内存访问<strong>没有匹配</strong>到任何一条 PMP 规则，硬件默认行为是 <strong>“忽略（Ignore）”</strong>，即<strong>允许访问</strong>。</p>
 <p>当 <code>mseccfg.MMWP</code> 被置为 1 时，这个默认行为被彻底反转：<br><strong>对于未匹配到 PMP 规则的物理内存访问，M 模式的默认策略由“允许”变为“拒绝（Denied）”。</strong></p>
 <p>**一旦该位被置 1，便无法再清除为 0，直到发生 PMP 复位（硬复位）为止。**无法通过关闭 <code>MMWP</code> 来“自我授权”访问未定义的内存区域。如果固件需要某些特定内存的访问权，必须在设置 <code>MMWP=1</code> <strong>之前</strong>，提前在 PMP 中配置好对应的允许规则。</p>
-<h3 id="MML-PMP-规则重定义"><a href="#MML-PMP-规则重定义" class="headerlink" title="MML: PMP 规则重定义"></a>MML: PMP 规则重定义</h3><p><code>mseccfg.MML</code>（Machine-Mode Lockdown）是 Smepmp 扩展中另一个核心安全开关。与 <code>MMWP</code> 管理“未命中规则”不同，<code>MML</code> 彻底重新定义了 PMP 规则中 <code>L</code> 位的语义，并引入了全新的规则类型（M 模式专属、S&#x2F;U 模式专属、共享区域）。</p>
+<h3 id="MML-PMP-规则重定义"><a href="#MML-PMP-规则重定义" class="headerlink" title="MML: PMP 规则重定义"></a>MML: PMP 规则重定义</h3><hr>
+<p><code>mseccfg.MML</code>（Machine-Mode Lockdown）是 Smepmp 扩展中另一个核心安全开关。与 <code>MMWP</code> 管理“未命中规则”不同，<code>MML</code> 彻底重新定义了 PMP 规则中 <code>L</code> 位的语义，并引入了全新的规则类型（M 模式专属、S&#x2F;U 模式专属、共享区域）。</p>
 <ul>
 <li><strong>WARL 字段</strong>：支持写入任意值，但读回值由硬件决定（只读回合法状态）。</li>
 <li><strong>粘性位（Sticky Bit）</strong>：一旦置 1，便无法清除为 0，直到发生 <strong>PMP 复位（硬复位）</strong>。</li>
@@ -636,7 +638,8 @@
 <p>这些规则的可视化表现如下，<br><img src="/image.png" alt="alt text"></p>
 <img src="/2026/08/24/RISC-V-Smepmp/image.png" class="">
 
-<p>必须指出，LRWX&#x3D;1001这种只有M模式拥有执行权限的配置是不被规范允许的，因为S&#x2F;U看到不到M模式代码段。</p>
+<p>必须指出，LRWX&#x3D;1001这种只有M模式拥有执行权限的配置是不被规范允许的，因为S&#x2F;U看到不到M模式代码段。另外，M模式遇到L&#x3D;0时，硬件会跳过对应条目的权限的检查继续向后比对，因为L&#x3D;0表示这一条只用于S&#x2F;U，这就导致M没有匹配项，后续应该怎么处理需要根据MMWP来判断。按照Spec描述上所说，S&#x2F;U模式，只要PMP被实现，则S&#x2F;U不匹配时的行为是无权限访问的。</p>
+<hr>
 <h2 id="Smepmp-软件发现功能"><a href="#Smepmp-软件发现功能" class="headerlink" title="Smepmp 软件发现功能"></a>Smepmp 软件发现功能</h2><p>在标准 RISC-V 硬件开发中，检测一个扩展是否存在，最常用的“土办法”是：向一个特征寄存器写入一个特定值，然后再读回来，如果值一致，就说明该扩展存在（因为不存在的寄存器位通常是只读零或保留，或异常）。</p>
 <p>但 Smepmp 彻底堵死了这条路：</p>
 <ul>
