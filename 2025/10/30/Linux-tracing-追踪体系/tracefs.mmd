@@ -1,0 +1,53 @@
+graph LR
+    A[/sys/kernel/tracing/] --> B[核心控制]
+    A --> C["静态追踪 (Tracepoints)"]
+    A --> D[动态追踪]
+    A --> E["函数追踪 (Ftrace)"]
+    A --> F[高级追踪器]
+    A --> G[用户空间追踪]
+
+    B --> B1[current_tracer]
+    B --> B2[tracing_on]
+    B --> B3[trace / trace_pipe]
+
+    C --> C1[events/]
+    C --> C2[available_events]
+    C --> C3[synthetic_events]
+
+    D --> D1[kprobe_events]
+    D --> D2[uprobe_events]
+    D --> D3[dynamic_events]
+
+    E --> E1[set_ftrace_filter]
+    E --> E2[available_filter_functions]
+    E --> E3[function_profile_enabled]
+
+    F --> F1[hwlat_detector/]
+    F --> F2[osnoise/]
+    F --> F3[instances/]
+
+    G --> G1[user_events_data]
+    G --> G2[user_events_status]
+    
+classDef moduleA fill:#FF9999,stroke:#FFFFFF
+classDef moduleB fill:#99FF99,stroke:#FFFFFF
+classDef moduleC fill:#9999FF,stroke:#FFFFFF
+classDef moduleD fill:#FF99FF,stroke:#FFFFFF
+classDef moduleE fill:#FFFF99,stroke:#FFFFFF
+classDef moduleF fill:#99FFFF,stroke:#FFFFFF
+classDef moduleG fill:#FFB366,stroke:#FFFFFF
+classDef moduleH fill:#CC99FF,stroke:#FFFFFF
+classDef moduleI fill:#99FFCC,stroke:#FFFFFF
+classDef moduleJ fill:#FF6666,stroke:#FFFFFF
+classDef moduleK fill:#66B2FF,stroke:#FFFFFF
+classDef moduleL fill:#FF99CC,stroke:#FFFFFF
+classDef moduleM fill:#B3FF66,stroke:#FFFFFF
+classDef moduleN fill:#66FFFF,stroke:#FFFFFF
+
+class A, moduleJ
+class B, moduleB
+class C, moduleC
+class E, moduleE
+class D, moduleD
+class F, moduleF
+class G, moduleG
