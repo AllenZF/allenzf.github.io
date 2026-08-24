@@ -2,6 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://allenzf.github.io/2026/08/24/RISC-V-Smepmp/</loc>
+    
+    <lastmod>2026-08-24</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://allenzf.github.io/tags/index.html</loc>
     
     <lastmod>2026-08-24</lastmod>
@@ -887,6 +896,13 @@
   
   <url>
     <loc>https://allenzf.github.io/tags/TLB/</loc>
+    <lastmod>2026-08-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://allenzf.github.io/tags/Smepmp/</loc>
     <lastmod>2026-08-24</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
