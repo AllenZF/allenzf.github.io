@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="baidu-site-verification" content="093lY4ziMu" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="description" content="记录点滴">
+    <meta name="keyword"  content="加油, 个人博客">
+    <link rel="shortcut icon" href="/img/ironman-draw.png">
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <!--<link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>-->
+    <title>
+        
+          RISC-V Debug Spec 学习笔记 二 - Sven-Blog
+        
+    </title>
+
+    <link rel="canonical" href="https://allenzf.github.io/2026/10/10/RISC-V-Debug-Spec-学习笔记-二/">
+
+    <!-- Bootstrap Core CSS -->
+    
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+
+
+    <!-- Custom CSS --> 
+    
+        
+<link rel="stylesheet" href="/css/dusign-light.css">
+
+        
+<link rel="stylesheet" href="/css/dusign-common-light.css">
+
+        
+<link rel="stylesheet" href="/css/font-awesome.css">
+
+        
+<link rel="stylesheet" href="/css/toc.css">
+
+        <!-- background effects end -->
+    
+    
+    <!-- Pygments Highlight CSS -->
+    
+<link rel="stylesheet" href="/css/highlight.css">
+
+
+    
+<link rel="stylesheet" href="/css/widget.css">
+
+
+    
+<link rel="stylesheet" href="/css/rocket.css">
+
+
+    
+<link rel="stylesheet" href="/css/signature.css">
+
+
+    
+<link rel="stylesheet" href="/css/fonts.googleapis.css">
+
+
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+    <!-- photography -->
+    
+<link rel="stylesheet" href="/css/photography.css">
+
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+<meta name="generator" content="Hexo 8.1.0"></head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- background effects start -->
+    
+    <!-- background effects end -->
+
+	<!-- Modified by Yu-Hsuan Yen -->
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        
+            
+                background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('../../../../img/header_img/Iron-Man-3.jpg')
+                /*post*/
+            
+        
+    }
+    
+    #signature{
+        background-image: url('/img/signature/Just-do-it-white.png');
+    }
+    
+</style>
+
+<header class="intro-header" >
+    <!-- Signature -->
+    <div id="signature">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                
+                    <div class="post-heading">
+                        <div class="tags">
+                            
+                              <a class="tag" href="/tags/#Debug" title="Debug">Debug</a>
+                            
+                              <a class="tag" href="/tags/#openocd" title="openocd">openocd</a>
+                            
+                        </div>
+                        <h1>RISC-V Debug Spec 学习笔记 二</h1>
+                        <h2 class="subheading">结合openocd源码深入学习调试过程</h2>
+                        <span class="meta">
+                            Posted by 周郎借风 on
+                            2026-10-10
+                        </span>
+
+                        
+                            <div class="blank_box"></div>
+                            <span class="meta">
+                                Words <span class="post-count">574</span> and
+                                Reading Time <span class="post-count">2</span> Minutes
+                            </span>
+                            <div class="blank_box"></div>
+                            <!-- 不蒜子统计 start -->
+                            <span class="meta">
+                                Viewed <span id="busuanzi_value_page_pv"><i class="fa fa-spinner fa-spin"></i></span> Times
+                            </span>
+                            <!-- 不蒜子统计 end -->
+                        
+
+                    </div>
+                
+
+                </div>
+            </div>
+        </div>      
+    </div>
+
+    
+    <div class="waveWrapper">
+        <div class="wave wave_before" style="background-image: url('/img/wave-light.png')"></div>
+        <div class="wave wave_after" style="background-image: url('/img/wave-light.png')"></div>
+    </div>
+    
+</header>
+
+	
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">周郎借风</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">主页</a>
+                    </li>
+
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/about/">关于</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/archive/">归档</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/categories/">分类</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/photography/">摄影</a>
+                        </li>
+                        
+                    
+
+                        
+                        <li>
+                            <a href="/tags/">标签</a>
+                        </li>
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+
+                        
+                    
+                    
+                    
+                    <li>
+                        <a href="https://allenzf.github.io" target="_blank">中文博客</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Main Content -->
+    <!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+            <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <h1 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h1><hr>
+<ul>
+<li><a href="/2026/10/10/RISC-V-Debug-Spec-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-%E4%B8%80/" title="RISC-V Debug Spec 学习笔记 一">RISC-V Debug Spec 学习笔记 一</a><br></li>
+<li><a href="/2026/09/01/RISC-V-OPENOCD-GDB-TELNET/" title="RISC-V OPENOCD + GDB&#x2F;TELNET">RISC-V OPENOCD + GDB&#x2F;TELNET</a><br></li>
+<li>openocd源码和调试记录<a href="openocd_debug_singal.log">openocd-1hart.log</a>,<a href="openocd_debug_4core.log">openocd-4harts.log</a></li>
+</ul>
+<h1 id="openocd调试记录生成"><a href="#openocd调试记录生成" class="headerlink" title="openocd调试记录生成"></a>openocd调试记录生成</h1><hr>
+<p>终端一</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">spike --halted --pc=0x31503000 -m0x31503000:0x10000000000 --isa=rv64gcv_zicsr_zifencei_smrnmi --priv=msu --rbb-port=9824 -p4 demo.elf</span><br></pre></td></tr></table></figure>
+
+<p>终端二</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">spike.cfg已经由参考文档提供</span></span><br><span class="line">openocd -f spike.cfg -d &gt; openocd_xxx.log 2&gt;&amp;1</span><br></pre></td></tr></table></figure>
+
+<p>终端三</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">telnet localhost 4444</span><br><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash">bp 0x31503008 2 hw</span></span><br><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash">resume</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">最后切换回终端二，通过ctrl+c中断调试</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="日志分析"><a href="#日志分析" class="headerlink" title="日志分析"></a>日志分析</h1><hr>
+<h2 id="1-remote-bitbang"><a href="#1-remote-bitbang" class="headerlink" title="1. remote_bitbang"></a>1. remote_bitbang</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Debug: 82 3 target.c:1603 handle_target_init_command(): Initializing targets...</span><br><span class="line">Debug: 83 3 riscv.c:666 riscv_init_target(): [riscv.cpu] riscv_init_target()</span><br><span class="line">Debug: 84 3 semihosting_common.c:109 semihosting_common_init():  </span><br><span class="line">Info : 85 4 remote_bitbang.c:378 remote_bitbang_init(): Initializing remote_bitbang driver</span><br><span class="line">Info : 86 4 remote_bitbang.c:300 remote_bitbang_init_tcp(): Connecting to localhost:9824</span><br><span class="line">Info : 87 6 remote_bitbang.c:389 remote_bitbang_init(): remote_bitbang driver initialized</span><br><span class="line">Info : 88 6 adapter.c:157 adapter_init(): Note: The adapter &quot;remote_bitbang&quot; doesn&#x27;t support configurable speed</span><br><span class="line">Debug: 89 6 openocd.c:133 handle_init_command(): Debug Adapter init complete</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>handle_target_init_command / riscv_init_target</code>: OpenOCD 开始初始化目标架构（RISC-V），分配内部数据结构并注册回调。</li>
+<li><code>remote_bitbang_init</code>: 初始化 remote_bitbang 适配器驱动，并通过 TCP 连接到本地端口 9824（通常对应 Spike 或 QEMU 模拟器的 JTAG 端口）。</li>
+<li><code>adapter_init</code>: 提示该虚拟适配器不支持动态配置时钟频率（JTAG TCK 速度）。</li>
+</ul>
+<h2 id="2-JTAG-链路扫描与-TAP-发现"><a href="#2-JTAG-链路扫描与-TAP-发现" class="headerlink" title="2. JTAG 链路扫描与 TAP 发现"></a>2. JTAG 链路扫描与 TAP 发现</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Debug: 90 6 command.c:86 script_debug(): command - transport init</span><br><span class="line">Debug: 91 6 transport.c:274 handle_transport_init(): handle_transport_init</span><br><span class="line">Debug: 92 6 core.c:843 jtag_add_reset(): SRST line released</span><br><span class="line">Debug: 93 6 core.c:868 jtag_add_reset(): TRST line released</span><br><span class="line">Debug: 94 6 core.c:334 jtag_call_event_callbacks(): jtag event: TAP reset</span><br><span class="line">Debug: 95 6 command.c:86 script_debug(): command - jtag arp_init</span><br><span class="line">Debug: 96 6 core.c:1522 jtag_init_inner(): Init JTAG chain</span><br><span class="line">Debug: 97 7 core.c:334 jtag_call_event_callbacks(): jtag event: TAP reset</span><br><span class="line">Debug: 98 7 core.c:1248 jtag_examine_chain(): DR scan interrogation for IDCODE/BYPASS</span><br><span class="line">Debug: 99 7 core.c:334 jtag_call_event_callbacks(): jtag event: TAP reset</span><br><span class="line">Info : 100 8 core.c:1146 jtag_examine_chain_display(): JTAG tap: riscv.cpu tap/device found: 0xdeadbeef (mfg: 0x777 (Fabric of Truth Inc), part: 0xeadb, ver: 0xd)</span><br><span class="line">Debug: 101 8 core.c:1378 jtag_validate_ircapture(): IR capture validation scan</span><br><span class="line">Debug: 102 8 core.c:1435 jtag_validate_ircapture(): riscv.cpu: IR capture 0x01</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>jtag_add_reset</code>: 释放 SRST（系统复位）和 TRST（测试复位）信号线，准备进行 JTAG 通信。</li>
+<li><code>jtag_init_inner / jtag_examine_chain</code>: 初始化 JTAG 链路，执行 DR 扫描以拦截 IDCODE 或 BYPASS 指令，从而发现链路上的 TAP（Test Access Port）控制器。</li>
+<li><code>jtag_examine_chain_display</code>: 成功发现 TAP，读取到 IDCODE 为 0xdeadbeef。解析出制造商为 0x777 (Fabric of Truth Inc)，这是 Spike 模拟器默认的虚拟 ID。</li>
+<li><code>jtag_validate_ircapture</code>: 验证 IR（指令寄存器）捕获值（此处为 0x01,BYPASS，注意，该指令地址是0x1f, 值是0x1），确保 JTAG 状态机同步正常。</li>
+</ul>
+
+                
+                <hr>
+                <!-- Pager -->
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2026/10/10/RISC-V-Debug-Spec-学习笔记-一/" data-toggle="tooltip" data-placement="top" title="RISC-V Debug Spec 学习笔记 一">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2026/09/01/RISC-V-OPENOCD-GDB-TELNET/" data-toggle="tooltip" data-placement="top" title="RISC-V OPENOCD + GDB/TELNET">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+                <!-- tip start -->
+                
+
+                
+                <!-- tip end -->
+
+                <!-- Music start-->
+                
+                <!-- Music end -->
+
+                <!-- Sharing -->
+                
+                <!-- Sharing -->
+
+                <!-- gitment start -->
+                
+                <!-- gitment end -->
+
+                <!-- 来必力City版安装代码 -->
+                
+                <!-- City版安装代码已完成 -->
+
+                <!-- disqus comment start -->
+                
+                <!-- disqus comment end -->
+            </div>
+            
+            <!-- Tabe of Content -->
+            <!-- Table of Contents -->
+
+    
+      
+        <aside id="sidebar">
+          <div id="toc" class="toc-article">
+          <strong class="toc-title">Contents</strong>
+          
+            
+              <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="toc-nav-number">1.</span> <span class="toc-nav-text">参考文档</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#openocd%E8%B0%83%E8%AF%95%E8%AE%B0%E5%BD%95%E7%94%9F%E6%88%90"><span class="toc-nav-number">2.</span> <span class="toc-nav-text">openocd调试记录生成</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E6%97%A5%E5%BF%97%E5%88%86%E6%9E%90"><span class="toc-nav-number">3.</span> <span class="toc-nav-text">日志分析</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#1-remote-bitbang"><span class="toc-nav-number">3.1.</span> <span class="toc-nav-text">1. remote_bitbang</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#2-JTAG-%E9%93%BE%E8%B7%AF%E6%89%AB%E6%8F%8F%E4%B8%8E-TAP-%E5%8F%91%E7%8E%B0"><span class="toc-nav-number">3.2.</span> <span class="toc-nav-text">2. JTAG 链路扫描与 TAP 发现</span></a></li></ol></li></ol>
+            
+          
+          </div>
+        </aside>
+      
+    
+
+                
+            <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- no hr -->
+                    <!-- <h5><a href="/tags/">FEATURED TAGS</a></h5> -->
+                    <h5><a href="/tags/"></a></h5>
+                    <div class="tags">
+                       
+                          <a class="tag" href="/tags/#Debug" title="Debug">Debug</a>
+                        
+                          <a class="tag" href="/tags/#openocd" title="openocd">openocd</a>
+                        
+                    </div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                
+                <script src="https://giscus.app/client.js"
+                    data-repo="AllenZF/allenzf.github.io"
+                    data-repo-id="R_kgDOQMASLQ"
+                    data-category="General"
+                    data-category-id="DIC_kwDOQMASLc4CxR4Q"
+                    data-mapping="pathname"
+                    data-strict="0"
+                    data-reactions-enabled="1"
+                    data-emit-metadata="0"
+                    data-input-position="bottom"
+                    data-theme="preferred_color_scheme"
+                    data-lang="en"
+                    crossorigin="anonymous"
+                    async>
+                </script>
+
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("https://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'hover',
+          placement: 'left',
+          icon: 'ℬ'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+
+
+<style  type="text/css">
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+
+                
+                    <li>
+                        <a target="_blank"  href="https://github.com/AllenZF">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://gitee.com/Sven">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-stack-1x fa-inverse">码</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/people/zhou-lang-jie-feng">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                
+
+                
+
+                
+
+                
+
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; 周郎借风 2026 
+                    <br>
+                    Powered by 
+                    <a href="https://github.com/dusign/hexo-theme-snail">
+                        <i>hexo-theme-snail</i>
+                    </a> | 
+                    <iframe name="star" style="margin-left: 2px; margin-bottom:-5px;" frameborder="0" scrolling="0"
+                        width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=dusign&repo=hexo-theme-snail&type=star&count=true">
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+
+</footer>
+
+<!-- jQuery -->
+
+<script src="/js/jquery.min.js"></script>
+
+
+<!-- Bootstrap Core JavaScript -->
+
+<script src="/js/bootstrap.min.js"></script>
+
+
+<!-- Custom Theme JavaScript -->
+
+<script src="/js/hux-blog.min.js"></script>
+
+
+<!-- Search -->
+
+<script src="/js/search.js"></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("https://allenzf.github.io/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("https://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-XXXXXXXX-X';
+    var _gaDomain = 'yoursite';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+
+<!-- Baidu Tongji -->
+
+
+<!-- Search -->
+
+    <script type="text/javascript">      
+        var search_path = "search.xml";
+        if (search_path.length == 0) {
+            search_path = "search.xml";
+        }
+    var path = "/" + search_path;
+    searchFunc(path, 'local-search-input', 'local-search-result');
+    </script>
+
+
+<!-- busuanzi -->
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+	<a id="rocket" href="#top" class=""></a>
+	<script type="text/javascript" src="/js/totop.js?v=1.0.0" async=""></script>
+    <script type="text/javascript" src="/js/toc.js?v=1.0.0" async=""></script>
+
+    
+        <!-- background effects line -->
+        
+
+        
+            <script type="text/javascript" src="/js/mouse-click.js" content='[&quot;🌱&quot;,&quot;just do it&quot;,&quot;🍀&quot;]' color='[&quot;rgb(121,93,179)&quot; ,&quot;rgb(76,180,231)&quot; ,&quot;rgb(184,90,154)&quot;]'></script>
+        
+
+        <!-- background effects end -->
+    
+
+    <!--<script size="50" alpha='0.3' zIndex="-999" src="/js/ribbonStatic.js"></script>-->
+    
+        <script src="/js/ribbonDynamic.js"></script>
+    
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+            processEscapes: true
+        }
+    });
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax();
+        for (var i = 0; i < all.length; ++i)
+            all[i].SourceElement().parentNode.className += ' has-jax';
+    });
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+
+</html>
