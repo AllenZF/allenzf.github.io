@@ -460,7 +460,8 @@
 </blockquote>
 <p>Qemu 对模拟的 RISC-V 平台的调试，完全不依赖 RISC-V 内部的调试模块和触发器模块，而是 Qemu 本身提供的动态翻译器（TCG）模拟实现（断点设置、单步执行、寄存器读写等）。</p>
 <h2 id="RISC-V-调试系统"><a href="#RISC-V-调试系统" class="headerlink" title="RISC-V 调试系统"></a>RISC-V 调试系统</h2><h3 id="RISC-V-调试系统简介"><a href="#RISC-V-调试系统简介" class="headerlink" title="RISC-V 调试系统简介"></a>RISC-V 调试系统简介</h3><p>基于外部调试的平台框图如下：</p>
-<p><img src="/overview.png" alt="overview.png"></p>
+<img src="/2026/10/10/RISC-V-Debug-Spec-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-%E4%B8%80/overview.png" class="">
+
 <p>外部调试器 GDB，将命令下发给命令翻译器 OpenOCD，OpenOCD 将命令翻译成<strong>抽象命令</strong>（Abstract Commands），OpenOCD 与调试传输硬件（JLINK）进行通信，调试传输硬件与 RISC-V 平台上的调试接口（debug port，mipi-10）相连，调试接口将收下来的串行序列输入<strong>调试传输模块</strong>（Debug Transport Module），调试传输模块 DTM 将串行数据转换成地址和数据，用于配置 DTM 中的寄存器。这些寄存器可以通过<strong>调试模块接口</strong> DMI 访问<strong>调试模块</strong> DM，从而进一步控制整个系统。</p>
 <p>DMI 可以支持 7 位到 32 位地址宽度。每个地址指向一个 <strong>32 位的寄存器</strong>。DMI 的总线管理器是 DTM，下属是 DM。DMI 可以用 TileLink 或 AMBA 高级外围总线 APB 来实现。DTM 有自己的寄存器用于复位 DTM 模块本身和发起 DMI 事务。</p>
 <p><em>通常</em>一个 core 中的所有 Hart 都由同一个调试模块控制。大多数 RISC-V 硬件平台上只包含一个调试模块。hart 是异构的也可以被同一个调试模块控制。规范不限制一个平台的 DM 数量，也不限制控制方式，但一个 Hart 只由一个调试模块控制，一个 DM 可控制 2^20 个 hart。</p>
@@ -469,7 +470,8 @@
 <p>可选地，DM 提供了 bus access 功能，直接和 System Bus 相连，绕过 hart 直接访问 Memory 空间。</p>
 <p><strong>触发器模块</strong>（Trigger Module）是 Hart 内部的一部分，可用于 <strong>Native Debug</strong>，或 <strong>External Debug</strong>，Spec 提供了多种触发器：mcontrol，icount，itrigger，etrigger，tmexttrigger (tm ext trigger)。</p>
 <h3 id="Rocket-Chip-调试系统实现"><a href="#Rocket-Chip-调试系统实现" class="headerlink" title="Rocket-Chip 调试系统实现"></a>Rocket-Chip 调试系统实现</h3><p>下图是 Rocket-Chip 的调试系统结构。JTAG Interface 负责接收数据，与 DTM 一起将串行数据转换成寄存器地址和数据，从而发起 DMI 事务。图中 “External” 部分实现了 Spec 中的 “JTAG DTM” 模块（6.1章节）。</p>
-<p><img src="/Rocket-Chip.png" alt="Rocket-Chip.png"></p>
+<img src="/2026/10/10/RISC-V-Debug-Spec-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-%E4%B8%80/Rocket-Chip.png" class="">
+
 <p>DM 模块分 <strong>Outer</strong> 部分和 <strong>Inner</strong> 部分。</p>
 <p><strong>Outer</strong> 处理 DMI 与内部调试模块之间的接口。它维护即使主系统复位时也需要访问的寄存器：</p>
 <ul>
@@ -504,7 +506,8 @@
 <p><strong>Program buffer</strong> 是一个最大 64 字节的 RAM 空间，调试器可以将任意 Hart 支持的指令写入该区域，然后通过抽象命令使 Hart 执行 program buffer 中的指令。</p>
 <p><strong>System Bus Access</strong> SBA 是 Rocket-Chip DM 模块提供的一种用于访问内存和外设的机制。模块直接与系统总线相连，可绕过 hart。</p>
 <h3 id="OpenOCD-调试模型"><a href="#OpenOCD-调试模型" class="headerlink" title="OpenOCD 调试模型"></a>OpenOCD 调试模型</h3><p>OpenOCD 支持 RISC-V Debug Specification v1.0, 针对规范实现模型如下：</p>
-<p><img src="/OpenOCD_debug.png" alt="OpenOCD_debug.png"></p>
+<img src="/2026/10/10/RISC-V-Debug-Spec-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-%E4%B8%80/OpenOCD_debug.png" class="">
+
 <p>OpenOCD 实现了规范要求的和可选的 <strong>3 种抽象命令</strong>，包括寄存器访问、内存访问、程序缓存区，以及非抽象访问的系统总线访问。hart 控制部分未在图中体现。</p>
 <h4 id="①-寄存器访问实现"><a href="#①-寄存器访问实现" class="headerlink" title="① 寄存器访问实现"></a>① 寄存器访问实现</h4><p>寄存器访问是命令类型 <strong>cmdtype &#x3D; 0</strong> 的抽象命令。OpenOCD 实现的访问流程如下：</p>
 <ol>
@@ -515,7 +518,8 @@
 <li>命令执行完成，没有错误时，从 DM_DATA 寄存器中回读数据；</li>
 <li>若命令执行错误，则处理错误；</li>
 </ol>
-<p><img src="/Register_access.png" alt="Register_access.png"></p>
+<img src="/2026/10/10/RISC-V-Debug-Spec-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-%E4%B8%80/Register_access.png" class="">
+
 <h4 id="②-内存访问实现"><a href="#②-内存访问实现" class="headerlink" title="② 内存访问实现"></a>② 内存访问实现</h4><p>内存访问是命令类型 <strong>cmdetype &#x3D; 2</strong> 的抽象命令。OpenOCD 实现的访问流程如下：</p>
 <ol>
 <li>先对总线状态进行检查，若总线可用，没有错误需要处理，则可发起内存访问；</li>
@@ -523,7 +527,8 @@
 <li>检查命令是否执行完成，若完成，则检查执行结果，是否有报错；</li>
 <li>根据错误情况进行相应处理；</li>
 </ol>
-<p><img src="/Memory_access.png" alt="Memory_access.png"></p>
+<img src="/2026/10/10/RISC-V-Debug-Spec-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-%E4%B8%80/Memory_access.png" class="">
+
 <h3 id="调试数据链路"><a href="#调试数据链路" class="headerlink" title="调试数据链路"></a>调试数据链路</h3><p>以下是平台侧的数据链路示意图：</p>
 <ul>
 <li>JTAG DTM 转换 JTAG Port 上的数据，主要实现 DMI 事务的生成工作；</li>
@@ -531,7 +536,8 @@
 <li>寄存器访问抽象命令中使用 regno 字段来映射要访问的 GPRs 或 CSRs；</li>
 <li>Hart 内部实现了 RISC-V Debug Spec 定义的 Sdext 和 Sdtrig ISA 扩展。</li>
 </ul>
-<p><img src="/data_chain.png" alt="data_chain.png"></p>
+<img src="/2026/10/10/RISC-V-Debug-Spec-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-%E4%B8%80/data_chain.png" class="">
+
 <h2 id="RISC-V-Debug-Spec"><a href="#RISC-V-Debug-Spec" class="headerlink" title="RISC-V Debug Spec"></a>RISC-V Debug Spec</h2><h3 id="RISC-V-Debug-Spec-组织形式"><a href="#RISC-V-Debug-Spec-组织形式" class="headerlink" title="RISC-V Debug Spec 组织形式"></a>RISC-V Debug Spec 组织形式</h3><ol>
 <li>第一章简要介绍了调试的必要性、术语、规范适用于哪些标准的指令集扩展、历史版本、寄存器定义、<strong>ISA 与 non-ISA</strong>、调试定义、<strong>常用调试场景</strong>、<strong>规范中描述的调试接口支持的特性</strong>。</li>
 <li>第二章简要介绍了 RISC-V 调试平台。</li>
@@ -594,8 +600,10 @@
 <p>数据组装采用 LSB 方式。</p>
 <h4 id="⑦-程序缓存区"><a href="#⑦-程序缓存区" class="headerlink" title="⑦ 程序缓存区"></a>⑦ 程序缓存区</h4><p>程序缓存区最大支持 64 字节，最小支持 4 字节。程序缓存区的代码必须以 ebreak 指令结束。ebreak 可以是程序缓存区内的代码，也可以是硬件实现的代码，在程序缓存区代码执行后紧接着执行。当 Halted 时，可以直接将指令填充到流水中执行而不是地址 RAM 空间，这在程序缓存区只有 4 字节时适用。而大于 4 字节时，程序缓存区可能实现为 RAM。Hart 像执行 M 模式的程序代码那样执行程序缓存区的代码。</p>
 <h4 id="⑧-Hart-调试状态（Debug-States）"><a href="#⑧-Hart-调试状态（Debug-States）" class="headerlink" title="⑧ Hart 调试状态（Debug States）"></a>⑧ Hart 调试状态（Debug States）</h4><p>下图是 Spec 提供的<strong>单 Hart 运行&#x2F;暂停过程中经过的状态的概念视图</strong>，这些状态和转换受到 dmcontrol、abstractcs、abstractauto 和 command 中不同字段的影响。</p>
-<p><img src="/abstract_commands.png" alt="abstract_commands.png"></p>
-<p><img src="/abstract_commands_v0.13.2.png" alt="abstract_commands_v0.13.2.png"></p>
+<img src="/2026/10/10/RISC-V-Debug-Spec-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-%E4%B8%80/abstract_commands.png" class="">
+
+<img src="/2026/10/10/RISC-V-Debug-Spec-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-%E4%B8%80/abstract_commands_v0.13.2.png" class="">
+
 <p>寄存器&#x2F;内存访问抽象命令可以在 Hart 暂停&#x2F;运行时被发起，快速访问只能在 Hart 运行的状态下发起。否则，将发生错误。在发起抽象命令而执行程序缓存区代码时，Hart 保持在调试模式。是否处于调试模式可以通过 dcsr 寄存器判断。</p>
 <h4 id="⑨-系统总线访问-SBA"><a href="#⑨-系统总线访问-SBA" class="headerlink" title="⑨ 系统总线访问 SBA"></a>⑨ 系统总线访问 SBA</h4><p>DM 模块提供了 sbdata, sbaddress, sbcs 寄存器来控制对总线上的内存空间的访问，而不影响 Hart 的执行。通过读写 sbdata0 来发起对内存空间的访问。</p>
 <h4 id="⑩-最小侵入调试"><a href="#⑩-最小侵入调试" class="headerlink" title="⑩ 最小侵入调试"></a>⑩ 最小侵入调试</h4><p>最小侵入调试，对 Hart 的影响最小，有 3 种方式，</p>
@@ -607,7 +615,8 @@
 <h4 id="⑪-安全"><a href="#⑪-安全" class="headerlink" title="⑪ 安全"></a>⑪ 安全</h4><p>规范定义了 authdata 寄存器用于密钥认证方式解锁&#x2F;锁定 DM。并规范了上锁状态下调试器的访问范围。</p>
 <h4 id="⑫-Debug-Module-Registers"><a href="#⑫-Debug-Module-Registers" class="headerlink" title="⑫ Debug Module Registers"></a>⑫ Debug Module Registers</h4><h5 id="DM-寄存器的访问方式"><a href="#DM-寄存器的访问方式" class="headerlink" title="DM 寄存器的访问方式"></a>DM 寄存器的访问方式</h5><p>由于 DM 模块是 non-ISA 的，所以寄存器是以偏移的形式存在，而不是 CSRs. Spec 上描述了 DM 寄存器是通过 DMI 总线访问的，并未说明是否通过 Memory-Mapped 的方式暴露给 Hart。但是，从 Rocket-Chip 或其他实现上看，是有暴露的。</p>
 <p>以下是 <a href="https://github.com/pulp-platform/riscv-dbg/blob/master/doc/debug-system.md">Rocket-Chip 实现的系统框图</a></p>
-<p><img src="/image-2025-7-9_15-56-28.png" alt="image-2025-7-9_15-56-28.png"></p>
+<img src="/2026/10/10/RISC-V-Debug-Spec-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-%E4%B8%80/image-2025-7-9_15-56-28.png" class="">
+
 <p>这种实现：调试模块作为设备连接到系统总线，暴露调试内存（程序缓存区和调试 ROM），并作为系统总线访问（SBA）功能的主机。调试模块通过其设备总线接口暴露了 16 kB 的内存。该内存称为调试内存。它由一个包含调试 ROM 的 ROM 部分、多个内存映射的控制和状态寄存器以及一个 RAM 部分，程序缓存区组成。调试内存仅应在调试模式下由 CPU 访问。</p>
 <p>这种实现，暴露的 Memory-Mapped 映射表如下：</p>
 <table>
@@ -1317,9 +1326,11 @@
 <h4 id="②-JTAG-DTM"><a href="#②-JTAG-DTM" class="headerlink" title="② JTAG DTM"></a>② JTAG DTM</h4><p>JTAG 指的是 IEEE Std 1149.1-2013。它是一个标准, 定义了可以在集成电路中包含的测试逻辑, 用于测试集成电路之间的连接, 测试集成电路本身, 以及在组件正常操作期间观测或修改电路活动。规范使用 JTAG 来观测或修改电路活动。JTAG 标准定义了一个测试访问端口(TAP)，可以用来读取和写入几个自定义寄存器，这些寄存器可以用来与组件中的调试硬件通信。DTM 在普通的 JTAG 测试访问端口（TAP）上实现，基于 IR Chain 和 DR Chain 来实现对 DTM 寄存器的访问，从而与调试模块进行通信。</p>
 <p>在调试数据链路一节中展示了 JTAG DTM 的模块框图，主要包含 JTAG TAP 和 DTM 寄存器，JTAG TAP 包含了5个引脚：<strong>TDI</strong>, <strong>TDO</strong>, <strong>TMS</strong>, <strong>TCK</strong>, <strong>TRSTn</strong>。其中 TMS 用来控制 IR-DR Chain 的状态转移，TDI 作为输入请求，TDO 作为输出响应。</p>
 <p>如下图，在 TMS 的输入控制下，IR Chain 在 Capture-IR 状态会对 TDI 输入的指令编码（地址值）进行采集，在 Shift-IR 状态将指令（地址）移入指令寄存器，在 Updata-IR 状态完成 BYPASS&#x2F;ICODE&#x2F;DMI 等数据链路的切换，然后 <code>TMS = 1</code> 驱动数据链路。DR Chain 对选定的 DTM 寄存器，如 dmi 寄存器，进行读写访问。</p>
-<p><img src="/DR-IR-Chain.png" alt="DR-IR-Chain.png"></p>
+<img src="/2026/10/10/RISC-V-Debug-Spec-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-%E4%B8%80/DR-IR-Chain.png" class="">
+
 <p>规范要求最少5位IR，即 上述 DTM 寄存器地址最少15位，如果支持更宽位数需要进行地址扩展。JTAG DTM 复位时 IR 必须为 0x01 IDCODE 指令。BYPASS 和 IDCODE 是 JTAG 定义的常规指令，DTMCS&#x2F;DMI 是 RISC-V 自定义专用指令。上电时 IR 默认选择 IDCODE 指令，DR Chain 处于 IDCODE 链路，TMS 驱动 IR-DR Chain 状态变化。当 DTMCS 指令被 IR 选择时，自定义 dtmcs 寄存器将会被读写，从而对 DTM 模块进行控制和状态观察。当 DMI 指令被选中时，对 dmi 寄存器进行读写，从而发起 DMI 事务，访问 DM 寄存器，进一步完成对 Hart的控制&#x2F;访问。</p>
-<h4 id="③-dmi-寄存器"><a href="#③-dmi-寄存器" class="headerlink" title="③ dmi 寄存器"></a>③ dmi 寄存器</h4><p><img src="/image-2025-7-7_14-53-29.png" alt="image-2025-7-7_14-53-29.png"></p>
+<h4 id="③-dmi-寄存器"><a href="#③-dmi-寄存器" class="headerlink" title="③ dmi 寄存器"></a>③ dmi 寄存器</h4><img src="/2026/10/10/RISC-V-Debug-Spec-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-%E4%B8%80/image-2025-7-7_14-53-29.png" class="">
+
 <p>当 IR Chain 选择 DMI 指令时，DR Chain 会切换到 DMI 数据链，此时 TDI 输入 <code>abits+34</code> 位数据，如上表，DTM 采集数据后转换成 dmi 寄存器数据。在 Updata-DR 中，DTM 将执行 <strong>op</strong> 中指定的读写操作。在 Capture-DR 中，DTM 将使用 Updata-DR <strong>op</strong> 操作的结果更新 <strong>dmi.data</strong>，<strong>op</strong> 会记录成功或错误信息，最后通过 TDO 输出到调试器。</p>
 <h4 id="④-JTAG-连接器"><a href="#④-JTAG-连接器" class="headerlink" title="④ JTAG 连接器"></a>④ JTAG 连接器</h4><p>规范指出，JTAG 连接器采用 MIPI-10 实现。</p>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>规范基于 <strong>Native Debug</strong>，和 <strong>Extenal Debug</strong> 两个方面对调试进行了定义。在外部调试方向，定义了 DM, DTM, Sdext, 而本地调试方向，定义了 Sdtrig. Sdtrig 扩展除了支持本地调试，也支持外部调试器的断点调试。</p>
