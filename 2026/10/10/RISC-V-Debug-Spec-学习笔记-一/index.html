@@ -1020,19 +1020,19 @@
 <td>etrigger</td>
 </tr>
 <tr>
-<td>Highest</td>
+<td></td>
 <td>3</td>
 <td></td>
 <td>icount</td>
 </tr>
 <tr>
-<td>Highest</td>
+<td></td>
 <td>3</td>
 <td></td>
 <td>itrigger</td>
 </tr>
 <tr>
-<td>Highest</td>
+<td></td>
 <td>3</td>
 <td></td>
 <td>mcontrol&#x2F;mcontrol6 after (on previous instruction)</td>
@@ -1323,6 +1323,7 @@
 <td>Section 6.1.6</td>
 </tr>
 </tbody></table>
+<p>bypass 指令的返回值通常是 0x1.</p>
 <h4 id="②-JTAG-DTM"><a href="#②-JTAG-DTM" class="headerlink" title="② JTAG DTM"></a>② JTAG DTM</h4><p>JTAG 指的是 IEEE Std 1149.1-2013。它是一个标准, 定义了可以在集成电路中包含的测试逻辑, 用于测试集成电路之间的连接, 测试集成电路本身, 以及在组件正常操作期间观测或修改电路活动。规范使用 JTAG 来观测或修改电路活动。JTAG 标准定义了一个测试访问端口(TAP)，可以用来读取和写入几个自定义寄存器，这些寄存器可以用来与组件中的调试硬件通信。DTM 在普通的 JTAG 测试访问端口（TAP）上实现，基于 IR Chain 和 DR Chain 来实现对 DTM 寄存器的访问，从而与调试模块进行通信。</p>
 <p>在调试数据链路一节中展示了 JTAG DTM 的模块框图，主要包含 JTAG TAP 和 DTM 寄存器，JTAG TAP 包含了5个引脚：<strong>TDI</strong>, <strong>TDO</strong>, <strong>TMS</strong>, <strong>TCK</strong>, <strong>TRSTn</strong>。其中 TMS 用来控制 IR-DR Chain 的状态转移，TDI 作为输入请求，TDO 作为输出响应。</p>
 <p>如下图，在 TMS 的输入控制下，IR Chain 在 Capture-IR 状态会对 TDI 输入的指令编码（地址值）进行采集，在 Shift-IR 状态将指令（地址）移入指令寄存器，在 Updata-IR 状态完成 BYPASS&#x2F;ICODE&#x2F;DMI 等数据链路的切换，然后 <code>TMS = 1</code> 驱动数据链路。DR Chain 对选定的 DTM 寄存器，如 dmi 寄存器，进行读写访问。</p>
