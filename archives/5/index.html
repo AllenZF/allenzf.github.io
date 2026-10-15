@@ -465,81 +465,9 @@
 
     
 
-    
-
-    
-
 
 
 <!-- Main Content -->
-
-    
-
-        <div class="post-preview">
-
-            <a href="/2021/06/25/I2C挂死恢复/">
-                <h2 class="post-title">
-                    I2C挂死恢复
-                </h2>
-                <h3 class="post-subtitle">
-                    
-                </h3>
-                <div class="post-content-preview">
-                    现象：最近在做CIS SOC的FPGA原型设计验证，芯片使用I2C进行寄存器控制，不知道是不是因为总线上总是有毛刺导致I2C容易提前回复NAK，或者从设备总是在等scl信号。挂死解决方法：host挂死使用PE可以简单恢复。这里主要记录从设备挂死且在等scl情况的解决（前一个项目从设备数据没被读取本来就没有回应，排除）
-
-释放I2C外设资源（HAL_I2C_Deinit），包括RCC复位寄存器......
-                </div>
-            </a>
-            
-                <p class="post-meta" style="margin: 10px 0;">
-                    Posted by 周郎借风 on
-                    2021-06-25
-                </p>
-                <div class="tags">
-                    
-                      <a href="/tags/#I2C" title="I2C">I2C</a>
-                    
-                </div>
-            
-
-        </div>
-        <hr>
-
-    
-
-    
-
-        <div class="post-preview">
-
-            <a href="/2021/02/11/Doxygen-C/">
-                <h2 class="post-title">
-                    Doxygen-C
-                </h2>
-                <h3 class="post-subtitle">
-                    VSCODE doxygen 插件配置教程
-                </h3>
-                <div class="post-content-preview">
-                    Vs code添加自定义snippet（代码段)代码注释规范之Doxygen  
-vs code snippets由于 vs code doxygen 插件功能有限，这里用 snippets 的功能代替 doxygen 插件，功能有重叠。  
-123456789101112131415161718192021222324252627282930313233343536373839404142......
-                </div>
-            </a>
-            
-                <p class="post-meta" style="margin: 10px 0;">
-                    Posted by 周郎借风 on
-                    2021-02-11
-                </p>
-                <div class="tags">
-                    
-                      <a href="/tags/#doxygen" title="doxygen">doxygen</a>
-                    
-                </div>
-            
-
-        </div>
-        <hr>
-
-    
 
     
 
@@ -841,24 +769,6 @@ Hexo-theme-snail is a succinct hexo theme. It has two colors, light and star, th
             
         
             
-        
-            
-        
-            
-        
-            
-        
-            
-        
-            
-        
-            
-        
-            
-        
-            
-        
-            
             <a href="/tags/#RISC-V" title="RISC-V" rel="15">RISC-V</a>
             
         
@@ -1025,6 +935,10 @@ Hexo-theme-snail is a succinct hexo theme. It has two colors, light and star, th
     <ul>
       
         <li>
+          <a href="/2026/10/14/RISC-V-Jtag-%E8%B0%83%E8%AF%95%E5%8E%9F%E7%90%86/">RISC-V Jtag 调试原理</a>
+        </li>
+      
+        <li>
           <a href="/2026/10/10/RISC-V-Debug-Spec-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-%E4%B8%80/">RISC-V Debug Spec 学习笔记 一</a>
         </li>
       
@@ -1040,10 +954,6 @@ Hexo-theme-snail is a succinct hexo theme. It has two colors, light and star, th
           <a href="/2026/08/24/RISC-V-Smepmp/">RISC-V Smepmp</a>
         </li>
       
-        <li>
-          <a href="/2025/11/17/OpenSBI-TLB%E6%9C%8D%E5%8A%A1%E5%AE%9E%E7%8E%B0/">OpenSBI TLB服务实现</a>
-        </li>
-      
     </ul>
   </div>
 
@@ -1056,7 +966,7 @@ Hexo-theme-snail is a succinct hexo theme. It has two colors, light and star, th
         
     <h5>归档</h5>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/10/">十月 2026</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/09/">九月 2026</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/08/">八月 2026</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/11/">十一月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/10/">十月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/09/">九月 2025</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/08/">八月 2025</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/07/">七月 2025</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/06/">六月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/05/">五月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/04/">四月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/03/">三月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">六月 2024</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/01/">一月 2023</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">四月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">1</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/10/">十月 2026</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/09/">九月 2026</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/08/">八月 2026</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/11/">十一月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/10/">十月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/09/">九月 2025</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/08/">八月 2025</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/07/">七月 2025</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/06/">六月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/05/">五月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/04/">四月 2025</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2025/03/">三月 2025</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">六月 2024</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/01/">一月 2023</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">四月 2020</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">1</span></li></ul>
     </div>
 
         <hr>
