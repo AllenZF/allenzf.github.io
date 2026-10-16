@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="sitemap.xsl"?>
+<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+
+    <url>
+        <loc>https://allenzf.github.io/tags/openocd/</loc>
+        <lastmod>2026-10-16T08:43:42.614Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/Debug/</loc>
+        <lastmod>2026-10-16T08:43:42.614Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/telnet/</loc>
+        <lastmod>2026-10-15T02:47:16.594Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/spike/</loc>
+        <lastmod>2026-10-15T02:47:16.594Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/HPE/</loc>
+        <lastmod>2026-10-10T02:10:39.915Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/Zihpm/</loc>
+        <lastmod>2026-10-10T02:10:39.915Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/linux/</loc>
+        <lastmod>2026-10-10T02:10:12.815Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/docker/</loc>
+        <lastmod>2026-10-10T02:10:12.815Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/RISC-V/</loc>
+        <lastmod>2026-10-10T02:10:12.815Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/Smepmp/</loc>
+        <lastmod>2026-08-24T08:32:28.228Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/TLB/</loc>
+        <lastmod>2026-08-24T01:45:10.087Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/OpenSBI/</loc>
+        <lastmod>2026-08-24T01:45:10.087Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/RVWMO/</loc>
+        <lastmod>2026-08-24T01:45:10.087Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/Trace/</loc>
+        <lastmod>2026-08-24T01:45:10.023Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/tracefs/</loc>
+        <lastmod>2026-08-24T01:45:10.015Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/trace/</loc>
+        <lastmod>2026-08-24T01:45:10.015Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/memory-tagging/</loc>
+        <lastmod>2026-08-24T01:45:10.015Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/MTE/</loc>
+        <lastmod>2026-08-24T01:45:10.015Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/context-switch/</loc>
+        <lastmod>2026-08-24T01:45:10.015Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/kernel/</loc>
+        <lastmod>2026-08-24T01:45:10.015Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/perf/</loc>
+        <lastmod>2026-08-24T01:45:10.015Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/uprobe/</loc>
+        <lastmod>2026-08-24T01:45:10.015Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/kprobe/</loc>
+        <lastmod>2026-08-24T01:45:10.015Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/ubuntu/</loc>
+        <lastmod>2026-08-24T01:45:10.015Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/rootfs/</loc>
+        <lastmod>2026-08-24T01:45:10.015Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/Linux/</loc>
+        <lastmod>2026-08-24T01:45:10.015Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/Perf/</loc>
+        <lastmod>2026-08-24T01:45:10.015Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/html/</loc>
+        <lastmod>2026-08-24T01:45:09.963Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/PDF/</loc>
+        <lastmod>2026-08-24T01:45:09.963Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/%25E7%25BF%25BB%25E8%25AF%2591/</loc>
+        <lastmod>2026-08-24T01:45:09.963Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/FENCE/</loc>
+        <lastmod>2026-08-24T01:45:09.963Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/riscv-gnu-toolchain/</loc>
+        <lastmod>2026-08-24T01:45:09.963Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/counter/</loc>
+        <lastmod>2026-08-24T01:45:09.959Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/Extension/</loc>
+        <lastmod>2026-08-24T01:45:09.959Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/Svnapot/</loc>
+        <lastmod>2026-08-24T01:45:09.955Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/%25E5%25BE%25AE%25E6%259E%25B6%25E6%259E%2584/</loc>
+        <lastmod>2026-08-24T01:45:09.951Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/x86/</loc>
+        <lastmod>2026-08-24T01:45:09.951Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/boot/</loc>
+        <lastmod>2026-08-24T01:45:09.947Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/FDT/</loc>
+        <lastmod>2026-08-24T01:45:09.939Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/qemu/</loc>
+        <lastmod>2026-08-24T01:45:09.935Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/hexo/</loc>
+        <lastmod>2026-08-24T01:45:09.935Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/usb/</loc>
+        <lastmod>2026-08-24T01:45:09.935Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/ROM-Table/</loc>
+        <lastmod>2026-08-24T01:45:09.923Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/AP/</loc>
+        <lastmod>2026-08-24T01:45:09.923Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/DP/</loc>
+        <lastmod>2026-08-24T01:45:09.923Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/SWJ-DP/</loc>
+        <lastmod>2026-08-24T01:45:09.923Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/DAP/</loc>
+        <lastmod>2026-08-24T01:45:09.923Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/JTAG/</loc>
+        <lastmod>2026-08-24T01:45:09.923Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/ARM/</loc>
+        <lastmod>2026-08-24T01:45:09.923Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/I2C/</loc>
+        <lastmod>2026-08-24T01:45:09.923Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/doxygen/</loc>
+        <lastmod>2026-08-24T01:45:09.923Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/git/</loc>
+        <lastmod>2026-08-24T01:45:09.907Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/MathJax/</loc>
+        <lastmod>2026-08-24T01:45:09.907Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/RT-ACRH17/</loc>
+        <lastmod>2026-08-24T01:45:09.907Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/hexo-theme-snail/</loc>
+        <lastmod>2026-08-24T01:45:09.883Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/%25E6%259F%25A5%25E6%2589%25BE/</loc>
+        <lastmod>2026-08-24T01:45:09.875Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://allenzf.github.io/tags/%25E6%258E%2592%25E5%25BA%258F/</loc>
+        <lastmod>2026-08-24T01:45:09.875Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+</urlset>
+<!-- XML Sitemap generated by Hexo SEO Friendly Sitemap Generator -->
